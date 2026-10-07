@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  CUSTOMER
+  COLLECTOR
+  ADMIN
+}
+
+enum PickupStatus {
+  PENDING
+  ASSIGNED
+  ON_THE_WAY
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id               String          @id @default(uuid())
+  name             String
+  phone            String          @unique
+  email            String?         @unique
+  role             UserRole        @default(CUSTOMER)
+  address          String?
+  locality         String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  customerPickups  PickupRequest[] @relation("CustomerPickups")
+  collectorPickups PickupRequest[] @relation("CollectorPickups")
+}
+
+model ScrapCategory {
+  id          String      @id @default(uuid())
+  name        String      @unique
+  description String?
+  items       ScrapItem[]
+}
+
+model ScrapItem {
+  id            String        @id @default(uuid())
+  name          String
+  ratePerKg     Decimal
+  unit          String        @default("kg")
+  categoryId    String
+  category      ScrapCategory @relation(fields: [categoryId], references: [id])
+  pickupItems   PickupItem[]
+}
+
+model PickupRequest {
+  id                String        @id @default(uuid())
+  customerId        String
+  customer          User          @relation("CustomerPickups", fields: [customerId], references: [id])
+  collectorId       String?
+  collector         User?         @relation("CollectorPickups", fields: [collectorId], references: [id])
+  status            PickupStatus  @default(PENDING)
+  scheduledDate     DateTime
+  timeSlot          String
+  pickupAddress     String
+  locality          String
+  estimatedWeightKg Float
+  finalAmount       Decimal?
+  proofImageUrl     String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  items             PickupItem[]
+}
+
+model PickupItem {
+  id              String        @id @default(uuid())
+  pickupRequestId String
+  pickupRequest   PickupRequest @relation(fields: [pickupRequestId], references: [id], onDelete: Cascade)
+  scrapItemId     String
+  scrapItem       ScrapItem     @relation(fields: [scrapItemId], references: [id])
+  actualWeightKg  Float
+  rateApplied     Decimal
+  subtotal        Decimal
+}
