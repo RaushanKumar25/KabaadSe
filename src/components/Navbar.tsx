@@ -47,8 +47,8 @@ export default function Navbar({
     <header
       className={`fixed top-0 left-0 right-0 z-40 w-full transition-all duration-300 ${
         isScrolled
-          ? "bg-white/95 dark:bg-[#030712]/95 backdrop-blur-md border-b border-slate-200/90 dark:border-slate-800/80 shadow-md shadow-slate-200/40 dark:shadow-black/50"
-          : "bg-white/80 dark:bg-[#030712]/80 backdrop-blur-md border-b border-slate-200/60 dark:border-slate-800/40"
+          ? "bg-white/95 dark:bg-black/95 backdrop-blur-md border-b border-slate-200/90 dark:border-white/10 shadow-md shadow-slate-200/40 dark:shadow-black/50"
+          : "bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-slate-200/60 dark:border-white/10"
       }`}
     >
       <nav className="w-full flex items-center justify-between py-3 px-4 sm:px-8 min-h-[72px]">
@@ -226,7 +226,7 @@ export default function Navbar({
           {/* Round button 3: Theme Toggle */}
           <button
             type="button"
-            onClick={toggleTheme}
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 border border-slate-300/80 dark:border-slate-700/80 bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-800 dark:text-amber-300 transition-all duration-200 shadow-xs cursor-pointer hover:scale-105 active:scale-95"
             aria-label={
               theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
@@ -242,7 +242,7 @@ export default function Navbar({
                 <Moon className="h-4 w-4 text-slate-800 stroke-[2.2] transition-transform duration-300 -rotate-12 hover:rotate-0" />
               )
             ) : (
-              <span className="w-4 h-4 rounded-full bg-slate-300 dark:bg-slate-700 animate-pulse" />
+              <Sun className="h-4 w-4 text-amber-400 stroke-[2.2]" />
             )}
           </button>
         </div>
@@ -261,7 +261,7 @@ export default function Navbar({
           {/* Mobile Theme Toggle Button */}
           <button
             type="button"
-            onClick={toggleTheme}
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 border border-slate-200 dark:border-slate-800 bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-800 dark:text-amber-400 transition cursor-pointer active:scale-95"
             aria-label={
               theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
@@ -277,7 +277,7 @@ export default function Navbar({
                 <Moon className="h-4 w-4 text-slate-800 stroke-[2.2]" />
               )
             ) : (
-              <div className="w-4 h-4" />
+              <Sun className="h-4 w-4 text-amber-400 stroke-[2.2]" />
             )}
           </button>
 
