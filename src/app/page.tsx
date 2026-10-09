@@ -4,6 +4,9 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import CircularEconomy from "@/components/CircularEconomy";
+import ServicesSection from "@/components/ServicesSection";
+import ImpactSection from "@/components/ImpactSection";
+import ContactSection from "@/components/ContactSection";
 import BrandLogo from "@/components/BrandLogo";
 import {
   ChevronDown,
@@ -237,6 +240,12 @@ export default function Home() {
 
       {/* CIRCULAR ECONOMY & SUSTAINABILITY */}
       <CircularEconomy />
+
+      {/* OUR SERVICES */}
+      <ServicesSection onContact={() => setSellModalOpen(true)} />
+
+      {/* FARAK PADTA HAI (IMPACT METRICS) */}
+      <ImpactSection />
 
       {/* 3. TRUST & STATS BAR */}
       <section className="relative z-20 bg-white dark:bg-zinc-950 border-y border-slate-200 dark:border-white/10 py-6 sm:py-8 shadow-xs transition-colors">
@@ -532,6 +541,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* CONTACT SECTION */}
+      <ContactSection />
 
       {/* 6. MODAL: SCHEDULE DOORSTEP PICKUP */}
       {sellModalOpen && (
