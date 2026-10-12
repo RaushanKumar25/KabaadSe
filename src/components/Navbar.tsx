@@ -1,35 +1,84 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import BrandLogo from "./BrandLogo";
 import { useTheme } from "@/context/ThemeContext";
+import ServiceInquiryModal, {
+  ServiceDetail,
+  SERVICES_DATA,
+} from "./ServiceInquiryModal";
 import {
   ChevronDown,
   Menu,
   X,
   Sun,
   Moon,
-  Truck,
-  Building2,
-  Cpu,
 } from "lucide-react";
 
 interface NavbarProps {
   onOpenSellModal?: () => void;
   onOpenRateList?: () => void;
+  onOpenBusinessModal?: () => void;
 }
 
 export default function Navbar({
   onOpenSellModal,
   onOpenRateList,
+  onOpenBusinessModal,
 }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
   const [servicesDropdown, setServicesDropdown] = useState(false);
   const [companyDropdown, setCompanyDropdown] = useState(false);
+  const [selectedService, setSelectedService] = useState<ServiceDetail | null>(null);
   const [isVisible, setIsVisible] = useState(true);
 
+  const servicesMenuRef = useRef<HTMLDivElement>(null);
+  const servicesBtnRef = useRef<HTMLButtonElement>(null);
+  const companyMenuRef = useRef<HTMLDivElement>(null);
+  const companyBtnRef = useRef<HTMLButtonElement>(null);
+
   const { theme, setTheme, mounted } = useTheme();
+
+  // Close menus on outside click or escape key
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (
+        servicesDropdown &&
+        servicesMenuRef.current &&
+        !servicesMenuRef.current.contains(target) &&
+        servicesBtnRef.current &&
+        !servicesBtnRef.current.contains(target)
+      ) {
+        setServicesDropdown(false);
+      }
+      if (
+        companyDropdown &&
+        companyMenuRef.current &&
+        !companyMenuRef.current.contains(target) &&
+        companyBtnRef.current &&
+        !companyBtnRef.current.contains(target)
+      ) {
+        setCompanyDropdown(false);
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setServicesDropdown(false);
+        setCompanyDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [servicesDropdown, companyDropdown]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -37,6 +86,8 @@ export default function Navbar({
       if (window.scrollY > 50) {
         setIsVisible(false);
         setMobileMenuOpen(false);
+        setServicesDropdown(false);
+        setCompanyDropdown(false);
       } else {
         setIsVisible(true);
       }
@@ -75,123 +126,80 @@ export default function Navbar({
         </Link>
 
         {/* Center: Desktop Navigation Links */}
-        <div className="hidden md:flex items-center gap-8">
-          {/* Services Dropdown */}
-          <div
-            className="relative"
-            onMouseEnter={() => setServicesDropdown(true)}
-            onMouseLeave={() => setServicesDropdown(false)}
+        <div className="hidden md:flex items-center gap-2 lg:gap-3">
+          {/* Services Button with Active Capsule Pill Style */}
+          <button
+            ref={servicesBtnRef}
+            type="button"
+            onClick={() => {
+              setServicesDropdown((prev) => !prev);
+              setCompanyDropdown(false);
+            }}
+            className={`flex items-center gap-1.5 text-sm font-medium transition-all duration-200 cursor-pointer drop-shadow-sm ${
+              servicesDropdown
+                ? "bg-white/20 dark:bg-zinc-800/90 text-white px-4 py-1.5 rounded-full shadow-inner"
+                : "text-white/90 hover:text-white px-3.5 py-1.5 rounded-full hover:bg-white/10"
+            }`}
+            aria-expanded={servicesDropdown}
           >
-            <button
-              type="button"
-              className="flex items-center gap-1.5 text-sm font-medium text-white/90 hover:text-white transition cursor-pointer drop-shadow-sm"
-            >
-              <span>Services</span>
-              <ChevronDown
-                className={`h-4 w-4 transition-transform duration-200 ${
-                  servicesDropdown ? "rotate-180" : ""
-                }`}
-              />
-            </button>
-
-            {servicesDropdown && (
-              <div className="absolute top-full left-0 w-72 rounded-2xl bg-white/95 dark:bg-zinc-950/95 backdrop-blur-xl border border-slate-200 dark:border-white/10 p-3 shadow-xl dark:shadow-2xl animate-in fade-in slide-in-from-top-2 duration-150">
-                <div className="space-y-1">
-                  <a
-                    href="#rate-list"
-                    onClick={() => setServicesDropdown(false)}
-                    className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
-                  >
-                    <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                      <Truck className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-semibold text-slate-900 dark:text-white">
-                        Scrap Pickup
-                      </div>
-                      <div className="text-xs text-slate-500 dark:text-slate-400">
-                        Doorstep collection for homes & offices
-                      </div>
-                    </div>
-                  </a>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setServicesDropdown(false);
-                      onOpenSellModal?.();
-                    }}
-                    className="w-full text-left flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors cursor-pointer"
-                  >
-                    <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                      <Building2 className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-semibold text-slate-900 dark:text-white">
-                        Commercial / EPR
-                      </div>
-                      <div className="text-xs text-slate-500 dark:text-slate-400">
-                        Bulk recycling & compliance
-                      </div>
-                    </div>
-                  </button>
-
-                  <a
-                    href="#rate-list"
-                    onClick={() => setServicesDropdown(false)}
-                    className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
-                  >
-                    <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                      <Cpu className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-semibold text-slate-900 dark:text-white">
-                        E-Waste Disposal
-                      </div>
-                      <div className="text-xs text-slate-500 dark:text-slate-400">
-                        Safe certified electronics scrapping
-                      </div>
-                    </div>
-                  </a>
-                </div>
-              </div>
-            )}
-          </div>
+            <span>Services</span>
+            <ChevronDown
+              className={`h-4 w-4 transition-transform duration-200 ${
+                servicesDropdown ? "rotate-180 text-emerald-400" : "text-white/70"
+              }`}
+            />
+          </button>
 
           {/* Company Dropdown */}
-          <div
-            className="relative"
-            onMouseEnter={() => setCompanyDropdown(true)}
-            onMouseLeave={() => setCompanyDropdown(false)}
-          >
+          <div className="relative">
             <button
+              ref={companyBtnRef}
               type="button"
-              className="flex items-center gap-1.5 text-sm font-medium text-white/90 hover:text-white transition cursor-pointer drop-shadow-sm"
+              onClick={() => {
+                setCompanyDropdown((prev) => !prev);
+                setServicesDropdown(false);
+              }}
+              className={`flex items-center gap-1.5 text-sm font-medium transition-all duration-200 cursor-pointer drop-shadow-sm ${
+                companyDropdown
+                  ? "bg-white/20 dark:bg-zinc-800/90 text-white px-4 py-1.5 rounded-full shadow-inner"
+                  : "text-white/90 hover:text-white px-3.5 py-1.5 rounded-full hover:bg-white/10"
+              }`}
+              aria-expanded={companyDropdown}
             >
               <span>Company</span>
               <ChevronDown
                 className={`h-4 w-4 transition-transform duration-200 ${
-                  companyDropdown ? "rotate-180" : ""
+                  companyDropdown ? "rotate-180 text-emerald-400" : "text-white/70"
                 }`}
               />
             </button>
 
             {companyDropdown && (
-              <div className="absolute top-full left-0 w-60 rounded-2xl bg-white/95 dark:bg-zinc-950/95 backdrop-blur-xl border border-slate-200 dark:border-white/10 p-3 shadow-xl dark:shadow-2xl animate-in fade-in slide-in-from-top-2 duration-150">
+              <div
+                ref={companyMenuRef}
+                className="absolute top-full left-0 mt-2 w-56 rounded-2xl bg-[#0c0d0e]/95 backdrop-blur-2xl border border-white/15 p-2.5 shadow-2xl z-50 animate-in fade-in slide-in-from-top-2 duration-150"
+              >
                 <div className="space-y-1">
                   <a
                     href="#how-it-works"
                     onClick={() => setCompanyDropdown(false)}
-                    className="block p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 text-sm font-medium text-slate-900 dark:text-white transition-colors"
+                    className="block px-3 py-2 rounded-xl text-sm font-medium text-slate-200 active:text-[#5EDC1F] cursor-pointer transition-colors duration-75 select-none"
                   >
                     How It Works
                   </a>
                   <a
-                    href="#rate-list"
+                    href="#circular-economy"
                     onClick={() => setCompanyDropdown(false)}
-                    className="block p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 text-sm font-medium text-slate-900 dark:text-white transition-colors"
+                    className="block px-3 py-2 rounded-xl text-sm font-medium text-slate-200 active:text-[#5EDC1F] cursor-pointer transition-colors duration-75 select-none"
                   >
-                    Live Rates
+                    Circular Economy
+                  </a>
+                  <a
+                    href="#contact"
+                    onClick={() => setCompanyDropdown(false)}
+                    className="block px-3 py-2 rounded-xl text-sm font-medium text-slate-200 active:text-[#5EDC1F] cursor-pointer transition-colors duration-75 select-none"
+                  >
+                    Contact Us
                   </a>
                 </div>
               </div>
@@ -200,22 +208,22 @@ export default function Navbar({
 
           <a
             href="#how-it-works"
-            className="flex items-center gap-1.5 text-sm font-medium text-white/90 hover:text-white transition drop-shadow-sm"
+            className="flex items-center gap-1.5 text-sm font-medium text-white/90 hover:text-white transition drop-shadow-sm px-3.5 py-1.5 rounded-full hover:bg-white/10"
           >
-            About
+            Careers
           </a>
         </div>
 
         {/* Right: Actions (Desktop & Tablet) */}
         <div className="hidden sm:flex items-center gap-3">
           {/* Pill button 1: Check Rate List */}
-          <a
-            href="#rate-list"
+          <button
+            type="button"
             onClick={onOpenRateList}
             className="px-4 py-2 text-xs sm:text-sm font-medium rounded-full border border-white/30 text-white hover:border-white/60 hover:bg-white/10 backdrop-blur-sm transition cursor-pointer flex items-center justify-center whitespace-nowrap shadow-xs"
           >
             Check Rate List
-          </a>
+          </button>
 
           {/* Pill button 2: Sell Scrap */}
           <button
@@ -316,23 +324,379 @@ export default function Navbar({
         </div>
       </nav>
 
+      {/* Services Mega-Menu Box (Enterprise Non-AI Look Matching Reference Screenshot) */}
+      {servicesDropdown && (
+        <div
+          ref={servicesMenuRef}
+          className="hidden md:block absolute top-[calc(100%+6px)] left-1/2 -translate-x-1/2 w-[95vw] max-w-5xl rounded-2xl bg-[#0a0b0d]/98 backdrop-blur-2xl border border-white/15 p-7 lg:p-8 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.95)] z-50 animate-in fade-in slide-in-from-top-2 duration-150 text-left"
+        >
+          <div className="grid grid-cols-5 gap-8 lg:gap-10">
+            {/* Column 1: For Individuals */}
+            <div className="col-span-1">
+              <div className="border-b border-[#5EDC1F]/40 pb-2 mb-4">
+                <h4 className="text-[#5EDC1F] font-semibold text-[14px] tracking-wide">
+                  For Individuals
+                </h4>
+              </div>
+              <ul className="space-y-3.5 text-left">
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setServicesDropdown(false);
+                      setSelectedService(SERVICES_DATA["scrap-collection"]);
+                    }}
+                    className="w-full text-left text-white/80 active:text-[#5EDC1F] font-normal text-[13.5px] cursor-pointer transition-colors duration-75 select-none"
+                  >
+                    Scrap Collection
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setServicesDropdown(false);
+                      setSelectedService(SERVICES_DATA["zero-waste-society"]);
+                    }}
+                    className="w-full text-left text-white/80 active:text-[#5EDC1F] font-normal text-[13.5px] cursor-pointer transition-colors duration-75 select-none"
+                  >
+                    Zero Waste Society
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setServicesDropdown(false);
+                      setSelectedService(SERVICES_DATA["vehicle-scrapping"]);
+                    }}
+                    className="w-full text-left text-white/80 active:text-[#5EDC1F] font-normal text-[13.5px] cursor-pointer transition-colors duration-75 select-none"
+                  >
+                    Vehicle Scrapping
+                  </button>
+                </li>
+              </ul>
+            </div>
+
+            {/* Column 2: For Businesses (3 sub-columns) */}
+            <div className="col-span-3">
+              <div className="border-b border-[#5EDC1F]/40 pb-2 mb-4">
+                <h4 className="text-[#5EDC1F] font-semibold text-[14px] tracking-wide">
+                  For Businesses
+                </h4>
+              </div>
+              <div className="grid grid-cols-3 gap-6">
+                {/* Sub-col 1 */}
+                <ul className="space-y-3.5 text-left">
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setServicesDropdown(false);
+                        setSelectedService(SERVICES_DATA["commercial-scrap"]);
+                      }}
+                      className="w-full text-left text-white/80 active:text-[#5EDC1F] font-normal text-[13.5px] cursor-pointer transition-colors duration-75 select-none"
+                    >
+                      Scrap Collection
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setServicesDropdown(false);
+                        setSelectedService(SERVICES_DATA["epr-services"]);
+                      }}
+                      className="w-full text-left text-white/80 active:text-[#5EDC1F] font-normal text-[13.5px] cursor-pointer transition-colors duration-75 select-none"
+                    >
+                      EPR services
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setServicesDropdown(false);
+                        setSelectedService(SERVICES_DATA["dismantling"]);
+                      }}
+                      className="w-full text-left text-white/80 active:text-[#5EDC1F] font-normal text-[13.5px] cursor-pointer transition-colors duration-75 select-none"
+                    >
+                      Dismantling
+                    </button>
+                  </li>
+                </ul>
+
+                {/* Sub-col 2 */}
+                <ul className="space-y-3.5 text-left">
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setServicesDropdown(false);
+                        setSelectedService(SERVICES_DATA["circular-economy"]);
+                      }}
+                      className="w-full text-left text-white/80 active:text-[#5EDC1F] font-normal text-[13.5px] cursor-pointer transition-colors duration-75 select-none"
+                    >
+                      Circular Economy
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setServicesDropdown(false);
+                        setSelectedService(SERVICES_DATA["zero-waste-business"]);
+                      }}
+                      className="w-full text-left text-white/80 active:text-[#5EDC1F] font-normal text-[13.5px] cursor-pointer transition-colors duration-75 select-none"
+                    >
+                      Zero Waste
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setServicesDropdown(false);
+                        setSelectedService(SERVICES_DATA["paper-shredding"]);
+                      }}
+                      className="w-full text-left text-white/80 active:text-[#5EDC1F] font-normal text-[13.5px] cursor-pointer transition-colors duration-75 select-none"
+                    >
+                      Paper Shredding
+                    </button>
+                  </li>
+                </ul>
+
+                {/* Sub-col 3 */}
+                <ul className="space-y-3.5 text-left">
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setServicesDropdown(false);
+                        setSelectedService(SERVICES_DATA["csr-services"]);
+                      }}
+                      className="w-full text-left text-white/80 active:text-[#5EDC1F] font-normal text-[13.5px] cursor-pointer transition-colors duration-75 select-none"
+                    >
+                      CSR Services
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setServicesDropdown(false);
+                        setSelectedService(SERVICES_DATA["zero-waste-event"]);
+                      }}
+                      className="w-full text-left text-white/80 active:text-[#5EDC1F] font-normal text-[13.5px] cursor-pointer transition-colors duration-75 select-none"
+                    >
+                      Zero Waste Event
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setServicesDropdown(false);
+                        setSelectedService(SERVICES_DATA["rfp-ewaste"]);
+                      }}
+                      className="w-full text-left text-white/80 active:text-[#5EDC1F] font-normal text-[13.5px] cursor-pointer transition-colors duration-75 select-none"
+                    >
+                      RFP for E-waste Recycling
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Column 3: For Governments */}
+            <div className="col-span-1">
+              <div className="border-b border-[#5EDC1F]/40 pb-2 mb-4">
+                <h4 className="text-[#5EDC1F] font-semibold text-[14px] tracking-wide">
+                  For Governments
+                </h4>
+              </div>
+              <ul className="space-y-3.5 text-left">
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setServicesDropdown(false);
+                      setSelectedService(SERVICES_DATA["mrf"]);
+                    }}
+                    className="w-full text-left text-white/80 active:text-[#5EDC1F] font-normal text-[13.5px] cursor-pointer transition-colors duration-75 select-none"
+                  >
+                    Material Recovery Facility
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setServicesDropdown(false);
+                      setSelectedService(SERVICES_DATA["iec"]);
+                    }}
+                    className="w-full text-left text-white/80 active:text-[#5EDC1F] font-normal text-[13.5px] cursor-pointer transition-colors duration-75 select-none"
+                  >
+                    IEC
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setServicesDropdown(false);
+                      setSelectedService(SERVICES_DATA["drs"]);
+                    }}
+                    className="w-full text-left text-white/80 active:text-[#5EDC1F] font-normal text-[13.5px] cursor-pointer transition-colors duration-75 select-none"
+                  >
+                    Deposit Refund System (DRS)
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-slate-200 dark:border-white/10 bg-white/98 dark:bg-zinc-950/98 backdrop-blur-2xl px-5 pt-4 pb-8 space-y-4 animate-in slide-in-from-top-2 duration-200 shadow-2xl">
+        <div className="md:hidden border-t border-slate-200 dark:border-white/10 bg-white/98 dark:bg-zinc-950/98 backdrop-blur-2xl px-5 pt-4 pb-8 space-y-4 animate-in slide-in-from-top-2 duration-200 shadow-2xl text-left">
           <nav className="flex flex-col gap-2 text-base font-medium text-slate-800 dark:text-slate-100">
-            <a
-              href="#rate-list"
-              onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
+            <button
+              type="button"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onOpenRateList?.();
+              }}
+              className="px-3 py-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 transition-colors text-left font-medium text-emerald-600 dark:text-emerald-400 cursor-pointer"
             >
-              Check Rate Card
-            </a>
+              Check Rate List
+            </button>
+
+            {/* Mobile Services Accordion */}
+            <div>
+              <button
+                type="button"
+                onClick={() => setMobileServicesOpen(!mobileServicesOpen)}
+                className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 transition-colors text-left font-medium"
+              >
+                <span>Services</span>
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform ${
+                    mobileServicesOpen ? "rotate-180 text-emerald-400" : ""
+                  }`}
+                />
+              </button>
+              {mobileServicesOpen && (
+                <div className="pl-3 pr-2 py-3 space-y-4 text-xs bg-black/40 rounded-xl my-1 border border-white/10">
+                  <div>
+                    <div className="text-[#5EDC1F] font-bold uppercase tracking-wider text-[11px] mb-1.5 border-b border-[#5EDC1F]/30 pb-1">
+                      For Individuals
+                    </div>
+                    <div className="space-y-1.5 pl-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          setSelectedService(SERVICES_DATA["scrap-collection"]);
+                        }}
+                        className="block text-slate-300 active:text-[#5EDC1F] text-left py-0.5 cursor-pointer select-none"
+                      >
+                        Scrap Collection
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          setSelectedService(SERVICES_DATA["zero-waste-society"]);
+                        }}
+                        className="block text-slate-300 active:text-[#5EDC1F] text-left py-0.5 cursor-pointer select-none"
+                      >
+                        Zero Waste Society
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          setSelectedService(SERVICES_DATA["vehicle-scrapping"]);
+                        }}
+                        className="block text-slate-300 active:text-[#5EDC1F] text-left py-0.5 cursor-pointer select-none"
+                      >
+                        Vehicle Scrapping
+                      </button>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[#5EDC1F] font-bold uppercase tracking-wider text-[11px] mb-1.5 border-b border-[#5EDC1F]/30 pb-1">
+                      For Businesses
+                    </div>
+                    <div className="space-y-1.5 pl-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          setSelectedService(SERVICES_DATA["commercial-scrap"]);
+                        }}
+                        className="block text-slate-300 active:text-[#5EDC1F] text-left py-0.5 cursor-pointer select-none"
+                      >
+                        Commercial Recycling & EPR
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          setSelectedService(SERVICES_DATA["paper-shredding"]);
+                        }}
+                        className="block text-slate-300 active:text-[#5EDC1F] text-left py-0.5 cursor-pointer select-none"
+                      >
+                        Paper Shredding & Dismantling
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          setSelectedService(SERVICES_DATA["csr-services"]);
+                        }}
+                        className="block text-slate-300 active:text-[#5EDC1F] text-left py-0.5 cursor-pointer select-none"
+                      >
+                        CSR & Zero Waste Events
+                      </button>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[#5EDC1F] font-bold uppercase tracking-wider text-[11px] mb-1.5 border-b border-[#5EDC1F]/30 pb-1">
+                      For Governments
+                    </div>
+                    <div className="space-y-1.5 pl-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          setSelectedService(SERVICES_DATA["mrf"]);
+                        }}
+                        className="block text-slate-300 active:text-[#5EDC1F] text-left py-0.5 cursor-pointer select-none"
+                      >
+                        Material Recovery Facility (MRF) & DRS
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
             <a
               href="#how-it-works"
               onClick={() => setMobileMenuOpen(false)}
               className="px-3 py-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
             >
               How It Works
+            </a>
+            <a
+              href="#contact"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-3 py-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
+            >
+              Contact Us
             </a>
           </nav>
 
@@ -388,6 +752,13 @@ export default function Navbar({
           </div>
         </div>
       )}
+
+      {/* Universal Service Inquiry Modal */}
+      <ServiceInquiryModal
+        isOpen={!!selectedService}
+        onClose={() => setSelectedService(null)}
+        service={selectedService}
+      />
     </header>
   );
 }

@@ -136,13 +136,16 @@ export default function ServicesSection({ onContact }: ServicesSectionProps) {
     if (onContact) {
       onContact();
     } else {
-      const el = document.getElementById("contact") || document.getElementById("rate-list");
+      const el = document.getElementById("contact");
       el?.scrollIntoView({ behavior: "smooth" });
     }
   };
 
   return (
-    <section className="min-h-screen w-full flex flex-col justify-center items-center py-10 sm:py-12 px-6 sm:px-12 box-border relative overflow-hidden bg-[#f8fafc] dark:bg-black border-t border-neutral-200 dark:border-neutral-900 transition-colors duration-200">
+    <section
+      id="services"
+      className="min-h-screen w-full flex flex-col justify-center items-center py-10 sm:py-12 px-6 sm:px-12 box-border relative overflow-hidden bg-[#f8fafc] dark:bg-black border-t border-neutral-200 dark:border-neutral-900 transition-colors duration-200"
+    >
       <div className="max-w-6xl w-full mx-auto">
         {/* Header Block */}
         <div className="text-center max-w-3xl mx-auto">
@@ -165,7 +168,7 @@ export default function ServicesSection({ onContact }: ServicesSectionProps) {
               onClick={() => setActiveTab("all")}
               className={`px-3.5 py-1.5 rounded-lg text-xs sm:text-sm transition-colors cursor-pointer flex items-center gap-1.5 ${
                 activeTab === "all"
-                  ? "bg-[#22c55e] text-black font-semibold"
+                  ? "bg-[#5EDC1F] text-black font-semibold"
                   : "bg-white dark:bg-[#1a1d21] text-neutral-700 dark:text-neutral-300 border border-neutral-300 dark:border-neutral-800 hover:border-neutral-400"
               }`}
             >
@@ -179,7 +182,7 @@ export default function ServicesSection({ onContact }: ServicesSectionProps) {
               onClick={() => setActiveTab("individual")}
               className={`px-3.5 py-1.5 rounded-lg text-xs sm:text-sm transition-colors cursor-pointer flex items-center gap-1.5 ${
                 activeTab === "individual"
-                  ? "bg-[#22c55e] text-black font-semibold"
+                  ? "bg-[#5EDC1F] text-black font-semibold"
                   : "bg-white dark:bg-[#1a1d21] text-neutral-700 dark:text-neutral-300 border border-neutral-300 dark:border-neutral-800 hover:border-neutral-400"
               }`}
             >
@@ -193,7 +196,7 @@ export default function ServicesSection({ onContact }: ServicesSectionProps) {
               onClick={() => setActiveTab("organisation")}
               className={`px-3.5 py-1.5 rounded-lg text-xs sm:text-sm transition-colors cursor-pointer flex items-center gap-1.5 ${
                 activeTab === "organisation"
-                  ? "bg-[#22c55e] text-black font-semibold"
+                  ? "bg-[#5EDC1F] text-black font-semibold"
                   : "bg-white dark:bg-[#1a1d21] text-neutral-700 dark:text-neutral-300 border border-neutral-300 dark:border-neutral-800 hover:border-neutral-400"
               }`}
             >
@@ -238,7 +241,7 @@ export default function ServicesSection({ onContact }: ServicesSectionProps) {
           <button
             type="button"
             onClick={handleContact}
-            className="px-6 py-2 rounded-lg bg-[#22c55e] hover:bg-[#16a34a] text-black font-semibold text-xs sm:text-sm transition-colors cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98]"
+            className="px-6 py-2 rounded-lg bg-[#5EDC1F] hover:bg-[#46b814] text-black font-semibold text-xs sm:text-sm transition-colors cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98]"
           >
             Contact Us
           </button>

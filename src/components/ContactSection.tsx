@@ -41,14 +41,14 @@ export default function ContactSection() {
           </h2>
           <p className="text-neutral-600 dark:text-neutral-400 text-sm sm:text-base mt-2 font-normal">
             Any question or remarks? Just write us a{" "}
-            <span className="text-[#22c55e] font-semibold">message!</span>
+            <span className="text-[#5EDC1F] font-semibold">message!</span>
           </p>
         </div>
 
         {/* Contact Container Box */}
         <div className="rounded-3xl bg-white dark:bg-[#15171a] border border-neutral-200 dark:border-white/[0.06] shadow-xl dark:shadow-2xl overflow-hidden p-3 sm:p-4 lg:p-5 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 transition-colors">
-          {/* Left Column: Pastel Green Contact Info Card */}
-          <div className="lg:col-span-5 rounded-2xl bg-[#d5fad9] p-6 sm:p-8 lg:p-10 flex flex-col justify-between text-slate-900 shadow-xs">
+          {/* Left Column: Pastel Thyme Green Contact Info Card */}
+          <div className="lg:col-span-5 rounded-2xl bg-[#d8f7c8] p-6 sm:p-8 lg:p-10 flex flex-col justify-between text-slate-900 shadow-xs">
             <div>
               <h3 className="text-3xl sm:text-4xl font-black text-slate-950 tracking-tight leading-tight">
                 Contact Information
@@ -100,7 +100,7 @@ export default function ContactSection() {
                   <MapPin className="h-5 w-5 stroke-[2.2]" />
                 </div>
                 <p className="text-xs sm:text-sm font-medium text-slate-800 leading-relaxed">
-                  The Kabadiwala, 3rd floor, Plot No. 22, Beside Biscoman Bhawan, Gandhi Maidan,
+                  KabaadSe, 3rd floor, Plot No. 22, Beside Biscoman Bhawan, Gandhi Maidan,
                   Gate No. 07, Patna, Bihar, 800001
                 </p>
               </div>
@@ -217,7 +217,7 @@ export default function ContactSection() {
                 <div className="flex justify-end pt-2">
                   <button
                     type="submit"
-                    className="px-7 py-2.5 rounded-lg bg-[#22c55e] hover:bg-[#16a34a] text-black font-semibold text-sm transition-all duration-200 cursor-pointer shadow-md hover:scale-[1.02] active:scale-[0.98]"
+                    className="px-7 py-2.5 rounded-lg bg-[#5EDC1F] hover:bg-[#46b814] text-black font-semibold text-sm transition-all duration-200 cursor-pointer shadow-md hover:scale-[1.02] active:scale-[0.98]"
                   >
                     Send Message
                   </button>

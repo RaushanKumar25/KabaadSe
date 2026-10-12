@@ -8,17 +8,14 @@ import ServicesSection from "@/components/ServicesSection";
 import HowItWorks from "@/components/HowItWorks";
 import ImpactSection from "@/components/ImpactSection";
 import ContactSection from "@/components/ContactSection";
-import BrandLogo from "@/components/BrandLogo";
+import Footer from "@/components/Footer";
 import {
   ChevronDown,
-  ArrowRight,
-  Scale,
-  Zap,
   CheckCircle2,
-  Search,
   Truck,
   X,
   Building,
+  Search,
 } from "lucide-react";
 
 interface ScrapRate {
@@ -28,115 +25,30 @@ interface ScrapRate {
   rate: number;
   unit: string;
   badge?: string;
-  description: string;
 }
 
 const SCRAP_RATES: ScrapRate[] = [
-  {
-    id: "newspaper",
-    name: "Newspaper (Akbhar)",
-    category: "Paper",
-    rate: 16,
-    unit: "kg",
-    badge: "Trending",
-    description: "Daily newspapers, printed gazettes & publications",
-  },
-  {
-    id: "cardboard",
-    name: "Corrugated Cardboard (Gatta)",
-    category: "Paper",
-    rate: 14,
-    unit: "kg",
-    badge: "High Demand",
-    description: "E-commerce delivery boxes, packaging cartons, kraft boards",
-  },
-  {
-    id: "books",
-    name: "Office Paper / Books / Notebooks",
-    category: "Paper",
-    rate: 15,
-    unit: "kg",
-    description: "Textbooks, magazines, office shredded documents",
-  },
-  {
-    id: "copper",
-    name: "Copper Wire & Utensils",
-    category: "Metals",
-    rate: 460,
-    unit: "kg",
-    badge: "Highest Value",
-    description: "Armature coils, electrical copper wires, utensils",
-  },
-  {
-    id: "brass",
-    name: "Brass (Peetal)",
-    category: "Metals",
-    rate: 340,
-    unit: "kg",
-    description: "Pooja articles, plumbing valves, brass fittings",
-  },
-  {
-    id: "aluminum",
-    name: "Aluminum",
-    category: "Metals",
-    rate: 125,
-    unit: "kg",
-    description: "Window frames, soda cans, aluminum foil & sheets",
-  },
-  {
-    id: "iron",
-    name: "Iron & Steel (Loha)",
-    category: "Metals",
-    rate: 28,
-    unit: "kg",
-    description: "Rebar, grills, sheets, iron pipes, vehicle parts",
-  },
-  {
-    id: "pet-bottles",
-    name: "PET Bottles & Hard Plastic",
-    category: "Plastic",
-    rate: 14,
-    unit: "kg",
-    description: "Mineral water bottles, beverage jugs, plastic buckets",
-  },
-  {
-    id: "soft-plastic",
-    name: "Polythene & Mix Plastic",
-    category: "Plastic",
-    rate: 8,
-    unit: "kg",
-    description: "Packaging wrap, carry bags, assorted containers",
-  },
-  {
-    id: "ewaste-pc",
-    name: "Desktop CPU / Laptops / PCB",
-    category: "E-Waste",
-    rate: 320,
-    unit: "piece",
-    badge: "Certified",
-    description: "Computers, old laptops, circuit boards & electronics",
-  },
-  {
-    id: "batteries",
-    name: "Lead Acid Batteries (Inverter/Car)",
-    category: "E-Waste",
-    rate: 85,
-    unit: "kg",
-    description: "Automotive batteries, UPS & home inverter batteries",
-  },
+  { id: "newspaper", name: "Newspaper (Akbhar)", category: "Paper", rate: 16, unit: "kg", badge: "Trending" },
+  { id: "cardboard", name: "Corrugated Cardboard (Gatta)", category: "Paper", rate: 14, unit: "kg", badge: "High Demand" },
+  { id: "books", name: "Office Paper / Books / Notebooks", category: "Paper", rate: 15, unit: "kg" },
+  { id: "copper", name: "Copper Wire & Utensils", category: "Metals", rate: 460, unit: "kg", badge: "Highest Value" },
+  { id: "brass", name: "Brass (Peetal)", category: "Metals", rate: 340, unit: "kg" },
+  { id: "aluminum", name: "Aluminum", category: "Metals", rate: 125, unit: "kg" },
+  { id: "iron", name: "Iron & Steel (Loha)", category: "Metals", rate: 28, unit: "kg" },
+  { id: "pet-bottles", name: "PET Bottles & Hard Plastic", category: "Plastic", rate: 14, unit: "kg" },
+  { id: "soft-plastic", name: "Polythene & Mix Plastic", category: "Plastic", rate: 8, unit: "kg" },
+  { id: "ewaste-pc", name: "Desktop CPU / Laptops / PCB", category: "E-Waste", rate: 320, unit: "piece", badge: "Certified" },
+  { id: "batteries", name: "Lead Acid Batteries (Inverter/Car)", category: "E-Waste", rate: 85, unit: "kg" },
 ];
 
 export default function Home() {
   const [sellModalOpen, setSellModalOpen] = useState(false);
   const [businessModalOpen, setBusinessModalOpen] = useState(false);
+  const [rateListModalOpen, setRateListModalOpen] = useState(false);
 
-  // Rate list filters & search
-  const [selectedCategory, setSelectedCategory] = useState<string>("All");
-  const [searchQuery, setSearchQuery] = useState<string>("");
-
-  // Instant Value Estimator
-  const [calcItem, setCalcItem] = useState<string>("cardboard");
-  const [calcWeight, setCalcWeight] = useState<number>(25);
+  // Rate List Modal filter states
+  const [rateSearch, setRateSearch] = useState("");
+  const [rateCategory, setRateCategory] = useState("All");
 
   // Booking Form State
   const [bookingSubmitted, setBookingSubmitted] = useState(false);
@@ -149,21 +61,18 @@ export default function Home() {
     timeSlot: "10:00 AM - 01:00 PM",
   });
 
-  const filteredRates = SCRAP_RATES.filter((item) => {
-    const matchesCategory =
-      selectedCategory === "All" || item.category === selectedCategory;
+  const filteredScrapRates = SCRAP_RATES.filter((item) => {
+    const matchesCategory = rateCategory === "All" || item.category === rateCategory;
     const matchesSearch =
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.category.toLowerCase().includes(searchQuery.toLowerCase());
+      item.name.toLowerCase().includes(rateSearch.toLowerCase()) ||
+      item.category.toLowerCase().includes(rateSearch.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
-  const selectedCalcItemData =
-    SCRAP_RATES.find((item) => item.id === calcItem) || SCRAP_RATES[1];
-  const calculatedTotal = (selectedCalcItemData.rate * calcWeight).toFixed(0);
-
-  const scrollToRateCard = () => {
-    const el = document.getElementById("rate-list");
+  const scrollToNext = () => {
+    const el =
+      document.getElementById("circular-economy") ||
+      document.getElementById("how-it-works");
     el?.scrollIntoView({ behavior: "smooth" });
   };
 
@@ -172,11 +81,13 @@ export default function Home() {
       {/* 1. TOP NAVBAR */}
       <Navbar
         onOpenSellModal={() => setSellModalOpen(true)}
-        onOpenRateList={scrollToRateCard}
+        onOpenRateList={() => setRateListModalOpen(true)}
+        onOpenBusinessModal={() => setBusinessModalOpen(true)}
       />
 
       {/* 2. HERO SECTION (LOCKED TO PERMANENT DARK MODE) */}
-      <section className="min-h-screen w-full flex flex-col justify-between items-center py-6 sm:py-8 px-6 sm:px-12 box-border relative overflow-hidden bg-[#030712] text-white">
+      {/* 2. HERO SECTION (LOCKED TO PERMANENT DARK MODE & EXACT ONE-SLIDE 100VH) */}
+      <section className="h-screen h-[100dvh] max-h-screen w-full flex flex-col justify-between items-center pt-20 sm:pt-24 pb-4 sm:pb-6 px-6 sm:px-12 box-border relative overflow-hidden bg-[#030712] text-white">
         {/* Background HD Image */}
         <div className="absolute inset-0 z-0">
           <Image
@@ -192,15 +103,12 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/60 pointer-events-none" />
         </div>
 
-        {/* Top spacer for fixed header */}
-        <div className="h-16 sm:h-20" />
-
-        {/* Center Hero Content */}
-        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center my-auto py-6 sm:py-8">
-          {/* Main Headline with Satoshi font and professional emerald box */}
-          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] xl:text-[6.25rem] font-black text-white tracking-tight leading-[1.04] mb-3 drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] select-none">
+        {/* Center Hero Content (Vertically Balanced in Available Viewport) */}
+        <div className="relative z-10 max-w-5xl w-full mx-auto px-4 sm:px-6 text-center my-auto flex flex-col items-center justify-center">
+          {/* Main Headline with Satoshi font and sharp square Thyme box */}
+          <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-7xl xl:text-[5.25rem] font-black text-white tracking-tight leading-[1.06] mb-2 sm:mb-3 drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] select-none">
             Transform Your{" "}
-            <span className="bg-emerald-500 text-slate-950 px-3 sm:px-6 py-0.5 sm:py-1 inline-block mx-1 rounded-sm">
+            <span className="bg-emerald-500 text-slate-950 px-3 sm:px-6 py-0.5 sm:py-1 inline-block mx-1 rounded-none">
               Scrap
             </span>
             <br />
@@ -208,32 +116,20 @@ export default function Home() {
           </h1>
 
           {/* Clean Subtitle */}
-          <p className="text-slate-400 text-sm sm:text-base md:text-lg font-normal mt-3.5 max-w-2xl mx-auto leading-relaxed drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+          <p className="text-slate-300 dark:text-slate-400 text-sm sm:text-base md:text-lg font-normal mt-2 sm:mt-3 max-w-2xl mx-auto leading-relaxed drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
             Doorstep collection with digital weighing and instant payout.
           </p>
-
-          {/* Action Button: View Scrap Rates */}
-          <div className="flex items-center justify-center mt-8">
-            <button
-              type="button"
-              onClick={scrollToRateCard}
-              className="group h-12 px-8 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 font-medium text-sm sm:text-base backdrop-blur-xl transition-all duration-200 shadow-md shadow-black/40 hover:scale-[1.02] active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2.5 whitespace-nowrap"
-            >
-              <span>View Scrap Rates</span>
-              <ArrowRight className="h-4 w-4 text-emerald-400 shrink-0 transition-transform duration-200 group-hover:translate-x-1" />
-            </button>
-          </div>
         </div>
 
-        {/* Downward Chevron Indicator */}
-        <div className="relative z-10 w-full pb-8 pt-2 flex justify-center">
+        {/* Downward Chevron Indicator (Anchored cleanly at bottom of slide) */}
+        <div className="relative z-10 w-full shrink-0 flex justify-center pb-1 pt-1">
           <button
             type="button"
-            onClick={scrollToRateCard}
+            onClick={scrollToNext}
             className="text-white/80 hover:text-white transition-all transform hover:translate-y-1 p-2 cursor-pointer"
-            aria-label="Scroll down to view rates"
+            aria-label="Scroll down to learn more"
           >
-            <ChevronDown className="w-8 h-8 animate-bounce opacity-85 stroke-[2.5]" />
+            <ChevronDown className="w-7 h-7 sm:w-8 sm:h-8 animate-bounce opacity-80 stroke-[2.5]" />
           </button>
         </div>
       </section>
@@ -289,10 +185,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-
-
-
 
       {/* CONTACT SECTION */}
       <ContactSection />
@@ -588,32 +480,153 @@ export default function Home() {
         </div>
       )}
 
-      {/* 8. FOOTER */}
-      <footer className="mt-auto border-t border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-black py-12 transition-colors">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-3">
-              <BrandLogo className="h-10 w-10" size={40} />
-
+      {/* RATE LIST MODAL */}
+      {rateListModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="relative w-full max-w-2xl max-h-[90vh] flex flex-col rounded-3xl bg-white dark:bg-zinc-950 border border-slate-200 dark:border-white/15 shadow-2xl overflow-hidden transition-colors">
+            {/* Header */}
+            <div className="p-5 sm:p-6 border-b border-slate-100 dark:border-white/10 flex items-center justify-between">
               <div>
-                <div className="text-lg font-black text-slate-900 dark:text-white">
-                  kabaad<span className="text-emerald-600 dark:text-emerald-500">se</span>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider mb-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  Live Market Rates
                 </div>
-                <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                  घर बैठे कबाड़ बेचें, सही दाम पाएं
-                </div>
+                <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
+                  Today&apos;s Scrap Rate List
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setRateListModalOpen(false)}
+                className="p-2 rounded-full text-slate-400 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
+                aria-label="Close modal"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Filter and Search Bar */}
+            <div className="p-4 sm:px-6 bg-slate-50 dark:bg-zinc-900/60 border-b border-slate-100 dark:border-white/5 space-y-3">
+              <div className="relative">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search scrap item (e.g. copper, newspaper, iron, laptop)..."
+                  value={rateSearch}
+                  onChange={(e) => setRateSearch(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 text-sm bg-white dark:bg-black border border-slate-200 dark:border-white/15 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 transition-colors"
+                />
+              </div>
+
+              {/* Category Pills */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+                {["All", "Paper", "Metals", "Plastic", "E-Waste"].map((cat) => (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => setRateCategory(cat)}
+                    className={`px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
+                      rateCategory === cat
+                        ? "bg-emerald-600 text-white dark:bg-emerald-500 dark:text-black shadow-xs"
+                        : "bg-white dark:bg-white/5 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200/80 dark:border-white/10"
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
               </div>
             </div>
 
-            <div className="text-xs text-slate-500 text-center sm:text-right">
-              © {new Date().getFullYear()} KabaadSe Recycling Technologies. All
-              rights reserved.
-              <br />
-              Digital scale weighing ISO 9001:2015 certified.
+            {/* Scrollable Rates Grid / List */}
+            <div className="p-4 sm:p-6 overflow-y-auto space-y-2.5 max-h-[46vh]">
+              {filteredScrapRates.length > 0 ? (
+                filteredScrapRates.map((item) => (
+                  <div
+                    key={item.id}
+                    className="p-3.5 rounded-2xl bg-slate-50 dark:bg-zinc-900 border border-slate-200/80 dark:border-white/10 flex items-center justify-between gap-3 hover:border-emerald-500/40 transition-colors"
+                  >
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-bold text-slate-900 dark:text-white">
+                          {item.name}
+                        </span>
+                        {item.badge && (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+                            {item.badge}
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-xs text-slate-500 dark:text-slate-400">
+                        Category: {item.category}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-3 shrink-0">
+                      <div className="text-right">
+                        <div className="text-base sm:text-lg font-black text-emerald-600 dark:text-emerald-400">
+                          ₹{item.rate}
+                          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                            /{item.unit}
+                          </span>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setBookingData((prev) => ({
+                            ...prev,
+                            scrapType:
+                              item.category === "Paper"
+                                ? "Cardboard & Paper"
+                                : item.category === "Metals"
+                                ? "Iron & Metals"
+                                : item.category === "Plastic"
+                                ? "Plastic & Bottles"
+                                : "E-Waste / Electronics",
+                          }));
+                          setRateListModalOpen(false);
+                          setSellModalOpen(true);
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white dark:text-black font-bold text-xs transition cursor-pointer shadow-xs whitespace-nowrap"
+                      >
+                        Sell Now
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="py-8 text-center text-sm text-slate-500 dark:text-slate-400">
+                  No items found matching &quot;{rateSearch}&quot;
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 border-t border-slate-100 dark:border-white/10 bg-slate-50/50 dark:bg-zinc-900/30 flex items-center justify-between gap-4">
+              <span className="text-xs text-slate-500 dark:text-slate-400">
+                100% certified digital scale weighing at your doorstep.
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setRateListModalOpen(false);
+                  setSellModalOpen(true);
+                }}
+                className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 font-bold text-xs transition cursor-pointer shrink-0"
+              >
+                Schedule Pickup
+              </button>
             </div>
           </div>
         </div>
-      </footer>
+      )}
+
+      {/* 8. FOOTER */}
+      <Footer
+        onOpenSellModal={() => setSellModalOpen(true)}
+        onOpenBusinessModal={() => setBusinessModalOpen(true)}
+      />
     </div>
   );
 }
