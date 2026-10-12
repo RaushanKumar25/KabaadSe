@@ -45,8 +45,8 @@ export default function ImpactSection() {
   ];
 
   return (
-    <section className="w-full bg-[#f8fafc] dark:bg-black py-16 sm:py-20 px-4 sm:px-8 lg:px-12 border-t border-neutral-200 dark:border-neutral-900 transition-colors duration-200">
-      <div className="max-w-6xl mx-auto">
+    <section className="min-h-screen w-full flex flex-col justify-center items-center py-10 sm:py-12 px-6 sm:px-12 box-border relative overflow-hidden bg-[#f8fafc] dark:bg-black border-t border-neutral-200 dark:border-neutral-900 transition-colors duration-200">
+      <div className="max-w-6xl w-full mx-auto">
         {/* Main Banner Image Container */}
         <div className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-neutral-200/80 dark:border-white/10 bg-neutral-950">
           <Image

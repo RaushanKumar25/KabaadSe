@@ -27,28 +27,31 @@ export default function Navbar({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [servicesDropdown, setServicesDropdown] = useState(false);
   const [companyDropdown, setCompanyDropdown] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
 
-  const { theme, toggleTheme, setTheme, mounted } = useTheme();
+  const { theme, setTheme, mounted } = useTheme();
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 40) {
-        setIsScrolled(true);
+      // Disappear once user starts scrolling down away from hero section top
+      if (window.scrollY > 50) {
+        setIsVisible(false);
+        setMobileMenuOpen(false);
       } else {
-        setIsScrolled(false);
+        setIsVisible(true);
       }
     };
-    window.addEventListener("scroll", handleScroll);
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-40 w-full transition-all duration-300 ${
-        isScrolled
-          ? "bg-white/95 dark:bg-black/95 backdrop-blur-md border-b border-slate-200/90 dark:border-white/10 shadow-md shadow-slate-200/40 dark:shadow-black/50"
-          : "bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-slate-200/60 dark:border-white/10"
+      className={`absolute top-0 left-0 right-0 w-full z-50 bg-transparent transition-all duration-300 ease-in-out ${
+        isVisible
+          ? "translate-y-0 opacity-100 pointer-events-auto"
+          : "-translate-y-full opacity-0 pointer-events-none"
       }`}
     >
       <nav className="w-full flex items-center justify-between py-3 px-4 sm:px-8 min-h-[72px]">
@@ -62,10 +65,10 @@ export default function Navbar({
 
           {/* Dedicated column container for brand name & Hindi tagline */}
           <div className="flex flex-col justify-center leading-none">
-            <span className="text-2xl sm:text-[1.65rem] font-bold tracking-tight text-slate-900 dark:text-white">
-              Kabaad<span className="text-emerald-600 dark:text-emerald-400">Se</span>
+            <span className="text-2xl sm:text-[1.65rem] font-bold tracking-tight text-white drop-shadow-sm">
+              Kabaad<span className="text-emerald-400">Se</span>
             </span>
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium tracking-wide mt-1">
+            <span className="text-xs text-slate-300 font-medium tracking-wide mt-1 drop-shadow-sm">
               घर बैठे कबाड़ बेचें, सही दाम पाएं
             </span>
           </div>
@@ -81,7 +84,7 @@ export default function Navbar({
           >
             <button
               type="button"
-              className="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition cursor-pointer"
+              className="flex items-center gap-1.5 text-sm font-medium text-white/90 hover:text-white transition cursor-pointer drop-shadow-sm"
             >
               <span>Services</span>
               <ChevronDown
@@ -163,7 +166,7 @@ export default function Navbar({
           >
             <button
               type="button"
-              className="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition cursor-pointer"
+              className="flex items-center gap-1.5 text-sm font-medium text-white/90 hover:text-white transition cursor-pointer drop-shadow-sm"
             >
               <span>Company</span>
               <ChevronDown
@@ -197,7 +200,7 @@ export default function Navbar({
 
           <a
             href="#how-it-works"
-            className="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition"
+            className="flex items-center gap-1.5 text-sm font-medium text-white/90 hover:text-white transition drop-shadow-sm"
           >
             About
           </a>
@@ -209,7 +212,7 @@ export default function Navbar({
           <a
             href="#rate-list"
             onClick={onOpenRateList}
-            className="px-4 py-2 text-xs sm:text-sm font-medium rounded-full border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-white hover:border-slate-400 dark:hover:border-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900/50 transition cursor-pointer flex items-center justify-center whitespace-nowrap"
+            className="px-4 py-2 text-xs sm:text-sm font-medium rounded-full border border-white/30 text-white hover:border-white/60 hover:bg-white/10 backdrop-blur-sm transition cursor-pointer flex items-center justify-center whitespace-nowrap shadow-xs"
           >
             Check Rate List
           </a>
@@ -218,7 +221,7 @@ export default function Navbar({
           <button
             type="button"
             onClick={onOpenSellModal}
-            className="px-4 py-2 text-xs sm:text-sm font-semibold rounded-full bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100 transition cursor-pointer flex items-center justify-center whitespace-nowrap shadow-sm hover:scale-[1.02] active:scale-[0.98]"
+            className="px-4 py-2 text-xs sm:text-sm font-semibold rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition cursor-pointer flex items-center justify-center whitespace-nowrap shadow-md hover:scale-[1.02] active:scale-[0.98]"
           >
             Sell Scrap
           </button>
@@ -227,7 +230,7 @@ export default function Navbar({
           <button
             type="button"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 border border-slate-300/80 dark:border-slate-700/80 bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-800 dark:text-amber-300 transition-all duration-200 shadow-xs cursor-pointer hover:scale-105 active:scale-95"
+            className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 border border-white/20 bg-white/10 hover:bg-white/20 text-white transition-all duration-200 shadow-xs cursor-pointer hover:scale-105 active:scale-95 backdrop-blur-sm"
             aria-label={
               theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
             }
@@ -237,12 +240,12 @@ export default function Navbar({
           >
             {mounted ? (
               theme === "dark" ? (
-                <Sun className="h-4 w-4 text-amber-400 stroke-[2.2] transition-transform duration-300 rotate-0 hover:rotate-45" />
+                <Sun className="h-4 w-4 text-amber-300 stroke-[2.2] transition-transform duration-300 rotate-0 hover:rotate-45" />
               ) : (
-                <Moon className="h-4 w-4 text-slate-800 stroke-[2.2] transition-transform duration-300 -rotate-12 hover:rotate-0" />
+                <Moon className="h-4 w-4 text-white stroke-[2.2] transition-transform duration-300 -rotate-12 hover:rotate-0" />
               )
             ) : (
-              <Sun className="h-4 w-4 text-amber-400 stroke-[2.2]" />
+              <Sun className="h-4 w-4 text-amber-300 stroke-[2.2]" />
             )}
           </button>
         </div>
@@ -253,7 +256,7 @@ export default function Navbar({
           <button
             type="button"
             onClick={onOpenSellModal}
-            className="inline-flex items-center justify-center rounded-full bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-white dark:text-slate-950 font-semibold px-3 py-1.5 text-xs shadow-xs cursor-pointer active:scale-95 transition-transform"
+            className="inline-flex items-center justify-center rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold px-3 py-1.5 text-xs shadow-xs cursor-pointer active:scale-95 transition-transform"
           >
             Sell Scrap
           </button>
@@ -262,7 +265,7 @@ export default function Navbar({
           <button
             type="button"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 border border-slate-200 dark:border-slate-800 bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-800 dark:text-amber-400 transition cursor-pointer active:scale-95"
+            className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 border border-white/20 bg-white/10 hover:bg-white/20 text-white transition cursor-pointer active:scale-95 backdrop-blur-sm"
             aria-label={
               theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
             }
@@ -272,12 +275,12 @@ export default function Navbar({
           >
             {mounted ? (
               theme === "dark" ? (
-                <Sun className="h-4 w-4 text-amber-400 stroke-[2.2]" />
+                <Sun className="h-4 w-4 text-amber-300 stroke-[2.2]" />
               ) : (
-                <Moon className="h-4 w-4 text-slate-800 stroke-[2.2]" />
+                <Moon className="h-4 w-4 text-white stroke-[2.2]" />
               )
             ) : (
-              <Sun className="h-4 w-4 text-amber-400 stroke-[2.2]" />
+              <Sun className="h-4 w-4 text-amber-300 stroke-[2.2]" />
             )}
           </button>
 
@@ -285,7 +288,7 @@ export default function Navbar({
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="inline-flex items-center justify-center rounded-xl p-2 text-slate-800 dark:text-white hover:bg-slate-100 dark:hover:bg-white/10 focus:outline-none transition-colors cursor-pointer"
+            className="inline-flex items-center justify-center rounded-xl p-2 text-white hover:bg-white/10 focus:outline-none transition-colors cursor-pointer"
             aria-label="Toggle navigation menu"
           >
             {mobileMenuOpen ? (
@@ -301,7 +304,7 @@ export default function Navbar({
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="inline-flex items-center justify-center rounded-xl p-2 text-slate-800 dark:text-white hover:bg-slate-100 dark:hover:bg-white/10 focus:outline-none transition-colors cursor-pointer ml-1"
+            className="inline-flex items-center justify-center rounded-xl p-2 text-white hover:bg-white/10 focus:outline-none transition-colors cursor-pointer ml-1"
             aria-label="Toggle navigation menu"
           >
             {mobileMenuOpen ? (
