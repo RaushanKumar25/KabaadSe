@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
+import Image from "next/image";
 import { X, CheckCircle2, ShieldCheck, Sparkles, HelpCircle, Sun, Moon } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
 
@@ -383,6 +385,11 @@ export default function ServiceInquiryModal({
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Fix Page Scroll Lock on Close
   useEffect(() => {
@@ -420,8 +427,8 @@ export default function ServiceInquiryModal({
     }
   }, [isOpen, service?.id]);
 
-  // Return null when closed or no service
-  if (!isOpen || !service) return null;
+  // Return null when closed, no service, or not mounted on client
+  if (!isOpen || !service || !mounted) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -441,7 +448,7 @@ export default function ServiceInquiryModal({
     }, 600);
   };
 
-  return (
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
@@ -501,6 +508,32 @@ export default function ServiceInquiryModal({
           <p className="text-sm text-neutral-300 leading-relaxed font-normal">
             {service.tagline}
           </p>
+
+          {service.id === "vehicle-scrapping" && (
+            <div className="relative w-full rounded-2xl overflow-hidden border border-neutral-800 bg-gradient-to-b from-neutral-900 to-neutral-950 p-4 sm:p-5 flex items-center justify-between gap-4 shadow-md">
+              <div className="relative z-10 max-w-[65%] space-y-1.5 text-left">
+                <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-[#5EDC1F]/20 text-[#5EDC1F] border border-[#5EDC1F]/30">
+                  <ShieldCheck className="w-3 h-3" />
+                  MoRTH Registered RVSF
+                </span>
+                <h4 className="text-sm sm:text-base font-bold text-white">
+                  Govt. Authorized Vehicle Scrapping
+                </h4>
+                <p className="text-[11px] text-neutral-400 leading-snug">
+                  Doorstep flatbed towing, certified weighing &amp; official RTO de-registration Certificate of Deposit (COD).
+                </p>
+              </div>
+              <div className="relative w-24 h-24 sm:w-28 sm:h-28 shrink-0 flex items-center justify-center p-3 rounded-xl bg-neutral-800/80 border border-neutral-700/60 shadow-inner">
+                <Image
+                  src="/images/vehicle.png"
+                  alt="Scrap Vehicle Scrapping"
+                  width={96}
+                  height={96}
+                  className="w-full h-full object-contain filter invert drop-shadow-[0_2px_8px_rgba(94,220,31,0.3)]"
+                />
+              </div>
+            </div>
+          )}
 
           {/* 3-Pillar Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -720,6 +753,7 @@ export default function ServiceInquiryModal({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

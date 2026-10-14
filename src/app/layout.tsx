@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { NavigationTransitionProvider } from "@/context/NavigationTransitionContext";
+import GlobalSplashLoader from "@/components/GlobalSplashLoader";
 
 export const metadata: Metadata = {
   title: "KabaadSe | Sell Scrap Online - Doorstep Pickup & Live Rates",
@@ -36,7 +38,12 @@ export default function RootLayout({
         suppressHydrationWarning
         className="min-h-full flex flex-col font-sans bg-slate-50 text-slate-900 dark:bg-black dark:text-slate-100 transition-colors duration-200 selection:bg-emerald-600 selection:text-white"
       >
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <NavigationTransitionProvider>
+            <GlobalSplashLoader />
+            {children}
+          </NavigationTransitionProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
