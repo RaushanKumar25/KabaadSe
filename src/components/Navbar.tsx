@@ -20,12 +20,14 @@ interface NavbarProps {
   onOpenSellModal?: () => void;
   onOpenRateList?: () => void;
   onOpenBusinessModal?: () => void;
+  alwaysVisible?: boolean;
 }
 
 export default function Navbar({
   onOpenSellModal,
   onOpenRateList,
   onOpenBusinessModal,
+  alwaysVisible = false,
 }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
@@ -81,6 +83,11 @@ export default function Navbar({
   }, [servicesDropdown, companyDropdown]);
 
   useEffect(() => {
+    if (alwaysVisible) {
+      setIsVisible(true);
+      return;
+    }
+
     const handleScroll = () => {
       // Disappear once user starts scrolling down away from hero section top
       if (window.scrollY > 50) {
@@ -95,14 +102,18 @@ export default function Navbar({
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [alwaysVisible]);
 
   return (
     <header
-      className={`absolute top-0 left-0 right-0 w-full z-50 bg-transparent transition-all duration-300 ease-in-out ${
-        isVisible
-          ? "translate-y-0 opacity-100 pointer-events-auto"
-          : "-translate-y-full opacity-0 pointer-events-none"
+      className={`${
+        alwaysVisible
+          ? "fixed top-0 left-0 right-0 w-full z-50 bg-[#0a0a0a]/90 backdrop-blur-xl border-b border-white/10 shadow-lg"
+          : `absolute top-0 left-0 right-0 w-full z-50 bg-transparent transition-all duration-300 ease-in-out ${
+              isVisible
+                ? "translate-y-0 opacity-100 pointer-events-auto"
+                : "-translate-y-full opacity-0 pointer-events-none"
+            }`
       }`}
     >
       <nav className="w-full flex items-center justify-between py-3 px-4 sm:px-8 min-h-[72px]">
@@ -340,16 +351,13 @@ export default function Navbar({
               </div>
               <ul className="space-y-3.5 text-left">
                 <li>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setServicesDropdown(false);
-                      setSelectedService(SERVICES_DATA["scrap-collection"]);
-                    }}
-                    className="w-full text-left text-white/80 active:text-[#5EDC1F] font-normal text-[13.5px] cursor-pointer transition-colors duration-75 select-none"
+                  <Link
+                    href="/services/scrap-collection"
+                    onClick={() => setServicesDropdown(false)}
+                    className="w-full block text-left text-white/80 active:text-[#5EDC1F] font-normal text-[13.5px] cursor-pointer transition-colors duration-75 select-none"
                   >
                     Scrap Collection
-                  </button>
+                  </Link>
                 </li>
                 <li>
                   <button
@@ -594,16 +602,13 @@ export default function Navbar({
                       For Individuals
                     </div>
                     <div className="space-y-1.5 pl-1">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setMobileMenuOpen(false);
-                          setSelectedService(SERVICES_DATA["scrap-collection"]);
-                        }}
+                      <Link
+                        href="/services/scrap-collection"
+                        onClick={() => setMobileMenuOpen(false)}
                         className="block text-slate-300 active:text-[#5EDC1F] text-left py-0.5 cursor-pointer select-none"
                       >
                         Scrap Collection
-                      </button>
+                      </Link>
                       <button
                         type="button"
                         onClick={() => {

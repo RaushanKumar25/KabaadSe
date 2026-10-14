@@ -16,7 +16,10 @@ import {
   X,
   Building,
   Search,
+  Sun,
+  Moon,
 } from "lucide-react";
+import { useTheme } from "@/context/ThemeContext";
 
 interface ScrapRate {
   id: string;
@@ -42,6 +45,8 @@ const SCRAP_RATES: ScrapRate[] = [
 ];
 
 export default function Home() {
+  const { theme, toggleTheme } = useTheme();
+
   const [sellModalOpen, setSellModalOpen] = useState(false);
   const [businessModalOpen, setBusinessModalOpen] = useState(false);
   const [rateListModalOpen, setRateListModalOpen] = useState(false);
@@ -96,17 +101,18 @@ export default function Home() {
             fill
             priority
             quality={95}
-            className="w-full h-full object-cover object-center brightness-[0.88] contrast-[1.05]"
+            className="w-full h-full object-cover object-center brightness-[0.76] contrast-[1.05]"
           />
 
-          {/* Clean, High-Clarity Neutral Dark Vignette Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/60 pointer-events-none" />
+          {/* Clean, High-Clarity Dual-Layer Dark Scrim for Perfect Text Readability */}
+          <div className="absolute inset-0 bg-black/35 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/70 pointer-events-none" />
         </div>
 
         {/* Center Hero Content (Vertically Balanced in Available Viewport) */}
         <div className="relative z-10 max-w-5xl w-full mx-auto px-4 sm:px-6 text-center my-auto flex flex-col items-center justify-center">
           {/* Main Headline with Satoshi font and sharp square Thyme box */}
-          <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-7xl xl:text-[5.25rem] font-black text-white tracking-tight leading-[1.06] mb-2 sm:mb-3 drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] select-none">
+          <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-7xl xl:text-[5.25rem] font-black text-white tracking-tight leading-[1.06] mb-2 sm:mb-3 drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)] select-none">
             Transform Your{" "}
             <span className="bg-emerald-500 text-slate-950 px-3 sm:px-6 py-0.5 sm:py-1 inline-block mx-1 rounded-none">
               Scrap
@@ -116,7 +122,7 @@ export default function Home() {
           </h1>
 
           {/* Clean Subtitle */}
-          <p className="text-slate-300 dark:text-slate-400 text-sm sm:text-base md:text-lg font-normal mt-2 sm:mt-3 max-w-2xl mx-auto leading-relaxed drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+          <p className="text-slate-100 text-sm sm:text-base md:text-lg font-medium mt-2 sm:mt-3 max-w-2xl mx-auto leading-relaxed drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)]">
             Doorstep collection with digital weighing and instant payout.
           </p>
         </div>
@@ -193,16 +199,32 @@ export default function Home() {
       {sellModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-200">
           <div className="relative w-full max-w-lg rounded-3xl bg-white dark:bg-zinc-950 border border-slate-200 dark:border-white/15 p-6 sm:p-8 shadow-2xl transition-colors">
-            <button
-              type="button"
-              onClick={() => {
-                setSellModalOpen(false);
-                setBookingSubmitted(false);
-              }}
-              className="absolute top-5 right-5 p-2 rounded-full text-slate-400 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
-            >
-              <X className="h-5 w-5" />
-            </button>
+            <div className="absolute top-5 right-5 flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className="p-2 rounded-full text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
+                aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+                title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+              >
+                {theme === "dark" ? (
+                  <Sun className="h-5 w-5 text-amber-400" />
+                ) : (
+                  <Moon className="h-5 w-5 text-slate-700" />
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSellModalOpen(false);
+                  setBookingSubmitted(false);
+                }}
+                className="p-2 rounded-full text-slate-400 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
+                aria-label="Close dialog"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
 
             {!bookingSubmitted ? (
               <div>
@@ -389,13 +411,29 @@ export default function Home() {
       {businessModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-200">
           <div className="relative w-full max-w-lg rounded-3xl bg-white dark:bg-zinc-950 border border-slate-200 dark:border-white/15 p-6 sm:p-8 shadow-2xl transition-colors">
-            <button
-              type="button"
-              onClick={() => setBusinessModalOpen(false)}
-              className="absolute top-5 right-5 p-2 rounded-full text-slate-400 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
-            >
-              <X className="h-5 w-5" />
-            </button>
+            <div className="absolute top-5 right-5 flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className="p-2 rounded-full text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
+                aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+                title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+              >
+                {theme === "dark" ? (
+                  <Sun className="h-5 w-5 text-amber-400" />
+                ) : (
+                  <Moon className="h-5 w-5 text-slate-700" />
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={() => setBusinessModalOpen(false)}
+                className="p-2 rounded-full text-slate-400 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
+                aria-label="Close dialog"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
 
             <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-500 mb-2">
               <Building className="h-5 w-5" />
@@ -495,14 +533,29 @@ export default function Home() {
                   Today&apos;s Scrap Rate List
                 </h3>
               </div>
-              <button
-                type="button"
-                onClick={() => setRateListModalOpen(false)}
-                className="p-2 rounded-full text-slate-400 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
-                aria-label="Close modal"
-              >
-                <X className="h-5 w-5" />
-              </button>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={toggleTheme}
+                  className="p-2 rounded-full text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
+                  aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+                  title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+                >
+                  {theme === "dark" ? (
+                    <Sun className="h-5 w-5 text-amber-400" />
+                  ) : (
+                    <Moon className="h-5 w-5 text-slate-700" />
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRateListModalOpen(false)}
+                  className="p-2 rounded-full text-slate-400 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
+                  aria-label="Close modal"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
             </div>
 
             {/* Filter and Search Bar */}
