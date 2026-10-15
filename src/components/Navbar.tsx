@@ -19,15 +19,15 @@ import {
 
 interface NavbarProps {
   onOpenSellModal?: () => void;
-  onOpenRateList?: () => void;
   onOpenBusinessModal?: () => void;
+  ratesHref?: string;
   alwaysVisible?: boolean;
 }
 
 export default function Navbar({
   onOpenSellModal,
-  onOpenRateList,
   onOpenBusinessModal,
+  ratesHref = "/rates",
   alwaysVisible = false,
 }: NavbarProps) {
   const { triggerTransition } = useNavigationTransition();
@@ -229,14 +229,17 @@ export default function Navbar({
 
         {/* Right: Actions (Desktop & Tablet) */}
         <div className="hidden sm:flex items-center gap-3">
-          {/* Pill button 1: Check Rate List */}
-          <button
-            type="button"
-            onClick={onOpenRateList}
+          {/* Pill button 1: Check Live Rates */}
+          <Link
+            href="/rates"
+            onClick={(e) => {
+              e.preventDefault();
+              triggerTransition("/rates", 1000);
+            }}
             className="px-4 py-2 text-xs sm:text-sm font-medium rounded-full border border-white/30 text-white hover:border-white/60 hover:bg-white/10 backdrop-blur-sm transition cursor-pointer flex items-center justify-center whitespace-nowrap shadow-xs"
           >
-            Check Rate List
-          </button>
+            Check Live Rates
+          </Link>
 
           {/* Pill button 2: Sell Scrap */}
           <button
@@ -576,16 +579,17 @@ export default function Navbar({
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-slate-200 dark:border-white/10 bg-white/98 dark:bg-zinc-950/98 backdrop-blur-2xl px-5 pt-4 pb-8 space-y-4 animate-in slide-in-from-top-2 duration-200 shadow-2xl text-left">
           <nav className="flex flex-col gap-2 text-base font-medium text-slate-800 dark:text-slate-100">
-            <button
-              type="button"
-              onClick={() => {
+            <Link
+              href="/rates"
+              onClick={(e) => {
+                e.preventDefault();
                 setMobileMenuOpen(false);
-                onOpenRateList?.();
+                triggerTransition("/rates", 1000);
               }}
               className="px-3 py-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 transition-colors text-left font-medium text-emerald-600 dark:text-emerald-400 cursor-pointer"
             >
-              Check Rate List
-            </button>
+              Check Live Rates
+            </Link>
 
             {/* Mobile Services Accordion */}
             <div>
