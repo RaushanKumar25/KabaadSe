@@ -28,7 +28,6 @@ import {
   Bed,
   Box,
   Boxes,
-  Sparkles,
   Car,
   ShieldCheck,
   Trash2,

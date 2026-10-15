@@ -43,14 +43,9 @@ export default function GlobalSplashLoader() {
       aria-label="Loading page transition"
       className="fixed inset-0 w-screen h-screen z-[999999] bg-[#0a0a0a] flex flex-col items-center justify-center select-none overflow-hidden transition-all duration-500"
     >
-      {/* Subtle radial ambient green bloom */}
-      <div className="absolute w-[500px] h-[500px] bg-[#5EDC1F]/15 rounded-full blur-[120px] pointer-events-none" />
-
       {/* Central KabaadSe Logo */}
       <div className="relative mb-6 flex items-center justify-center">
-        {/* Ambient pulsing green ring */}
-        <div className="absolute -inset-4 rounded-full border border-[#5EDC1F]/25 animate-ping opacity-40 pointer-events-none" />
-        <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-neutral-900 border border-neutral-800 shadow-2xl shadow-[#5EDC1F]/20 flex items-center justify-center p-3 scale-100 animate-pulse duration-700">
+        <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-neutral-900 border border-neutral-800 shadow-xl flex items-center justify-center p-3 scale-100 animate-pulse duration-700">
           <Image
             src="/images/logo.png"
             alt="KabaadSe Logo"
@@ -58,7 +53,7 @@ export default function GlobalSplashLoader() {
             height={80}
             priority
             quality={100}
-            className="w-full h-full object-contain filter drop-shadow-[0_4px_16px_rgba(94,220,31,0.5)]"
+            className="w-full h-full object-contain"
           />
         </div>
       </div>

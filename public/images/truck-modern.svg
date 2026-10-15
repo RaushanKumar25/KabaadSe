@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 136 54" fill="none" className="w-full h-auto">
+  <!-- Vehicle Main Body Shadow / Glow Filter -->
+  <defs>
+    <filter id="truckGlow" x="-10%" y="-10%" width="120%" height="130%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#5EDC1F" flood-opacity="0.4" />
+    </filter>
+    <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4dbf17" />
+      <stop offset="60%" stop-color="#5EDC1F" />
+      <stop offset="100%" stop-color="#6df527" />
+    </linearGradient>
+    <linearGradient id="windowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#050805" />
+      <stop offset="100%" stop-color="#121812" />
+    </linearGradient>
+  </defs>
+
+  <g filter="url(#truckGlow)">
+    <!-- Aerodynamic Cargo & Cabin Hull -->
+    <path
+      d="
+        M 10 41
+        L 10 13
+        Q 10 8 16 8
+        L 72 8
+        Q 82 8 89 14
+        L 107 26
+        Q 114 30 114 35
+        L 114 41
+        L 111 41
+        A 8.5 8.5 0 0 0 94 41
+        L 57 41
+        A 8.5 8.5 0 0 0 40 41
+        L 39 41
+        A 8.5 8.5 0 0 0 22 41
+        L 10 41
+        Z
+      "
+      fill="url(#bodyGrad)"
+    />
+
+    <!-- Aerodynamic Cabin Window (Transparent / Dark tinted) -->
+    <path
+      d="
+        M 85 16
+        L 102 26
+        Q 104 27.5 102 29.5
+        L 83 29.5
+        Q 80.5 29.5 80.5 27
+        L 80.5 19
+        Q 80.5 16 85 16
+        Z
+      "
+      fill="url(#windowGrad)"
+      stroke="#5EDC1F"
+      stroke-width="0.8"
+      stroke-opacity="0.6"
+    />
+
+    <!-- Sleek Futuristic LED Headlight -->
+    <path
+      d="M 110 32.5 L 114 34.5 L 114 36.5 L 109 35 Z"
+      fill="#FFFFFF"
+      opacity="0.95"
+    />
+
+    <!-- Cargo Box Modern Accent Grooves -->
+    <line x1="16" y1="18" x2="68" y2="18" stroke="#000000" stroke-width="1.2" stroke-linecap="round" opacity="0.22" />
+    <line x1="16" y1="26" x2="68" y2="26" stroke="#000000" stroke-width="1.2" stroke-linecap="round" opacity="0.22" />
+    <line x1="72" y1="9" x2="72" y2="40" stroke="#000000" stroke-width="1.5" stroke-linecap="round" opacity="0.25" />
+
+    <!-- Battery Pack / Aero Side Skirt Lower Accent -->
+    <rect x="58" y="38" width="35" height="3" rx="1.5" fill="#000000" opacity="0.35" />
+    <line x1="62" y1="39.5" x2="89" y2="39.5" stroke="#5EDC1F" stroke-width="0.75" stroke-linecap="round" opacity="0.8" />
+  </g>
+
+  <!-- Wheels (Tandem Dual Rear + Front Steer) -->
+  <!-- Rear Wheel 1 -->
+  <g transform="translate(31, 41)">
+    <circle cx="0" cy="0" r="7.5" fill="#0b0e0c" stroke="#5EDC1F" stroke-width="1.2" />
+    <circle cx="0" cy="0" r="4.2" fill="#5EDC1F" opacity="0.9" />
+    <circle cx="0" cy="0" r="1.6" fill="#0b0e0c" />
+  </g>
+
+  <!-- Rear Wheel 2 -->
+  <g transform="translate(48, 41)">
+    <circle cx="0" cy="0" r="7.5" fill="#0b0e0c" stroke="#5EDC1F" stroke-width="1.2" />
+    <circle cx="0" cy="0" r="4.2" fill="#5EDC1F" opacity="0.9" />
+    <circle cx="0" cy="0" r="1.6" fill="#0b0e0c" />
+  </g>
+
+  <!-- Front Wheel -->
+  <g transform="translate(102.5, 41)">
+    <circle cx="0" cy="0" r="7.5" fill="#0b0e0c" stroke="#5EDC1F" stroke-width="1.2" />
+    <circle cx="0" cy="0" r="4.2" fill="#5EDC1F" opacity="0.9" />
+    <circle cx="0" cy="0" r="1.6" fill="#0b0e0c" />
+  </g>
+</svg>
