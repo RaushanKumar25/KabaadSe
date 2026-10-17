@@ -26,11 +26,35 @@ import {
   CITIES_LIST,
   CityName,
   ScrapCategory,
+  ScrapRateItem,
   SCRAP_ITEMS_DATA,
   CITY_LOCALITIES,
   normalizeCityName,
   getCitySlug,
 } from "@/lib/scrapRatesData";
+
+function ScrapCardIcon({ item }: { item: ScrapRateItem }) {
+  const [hasError, setHasError] = useState(false);
+
+  if (item.image && !hasError) {
+    return (
+      <div className="w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-[#111315] border border-neutral-800 flex items-center justify-center p-1 shrink-0 shadow-inner group-hover:scale-105 transition-transform overflow-hidden">
+        <img
+          src={item.image}
+          alt={item.name}
+          onError={() => setHasError(true)}
+          className="w-full h-full object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]"
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200/90 dark:border-neutral-800 flex items-center justify-center text-xl sm:text-2xl shrink-0 shadow-xs group-hover:scale-105 transition-transform">
+      {item.icon}
+    </div>
+  );
+}
 
 function RatesPageContent() {
   const router = useRouter();
@@ -396,9 +420,7 @@ function RatesPageContent() {
                   >
                     {/* Left: Icon container + Non-truncated Item Title */}
                     <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <div className="w-10 h-10 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200/90 dark:border-neutral-800 flex items-center justify-center text-lg sm:text-xl shrink-0 shadow-xs group-hover:scale-105 transition-transform">
-                        {item.icon}
-                      </div>
+                      <ScrapCardIcon item={item} />
                       <span className="text-sm font-medium text-neutral-900 dark:text-neutral-100 leading-snug break-words">
                         {item.name}
                       </span>

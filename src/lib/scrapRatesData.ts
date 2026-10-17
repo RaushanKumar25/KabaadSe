@@ -28,6 +28,7 @@ export interface ScrapRateItem {
   category: "Paper" | "Plastic" | "Metal" | "E-waste" | "Other";
   price: string;
   icon: string;
+  image?: string;
   popular?: boolean;
 }
 
@@ -78,7 +79,7 @@ export const SCRAP_ITEMS_DATA: ScrapRateItem[] = [
   { id: "ms-drum-50", name: "MS Drum (50 Litre)", category: "Metal", price: "₹20 /kg", icon: "🛢️" },
 
   // E-waste
-  { id: "ewaste", name: "E-waste", category: "E-waste", price: "₹15 /kg", icon: "🔌" },
+  { id: "ewaste", name: "E-waste", category: "E-waste", price: "₹20 /kg", icon: "🔌", image: "/images/ScrapImages/E-waste.png", popular: true },
   { id: "inverter-battery", name: "Inverter Battery", category: "E-waste", price: "₹1700 /pcs", icon: "🔋", popular: true },
   { id: "tv-lcd", name: "Television (LCD/LED)", category: "E-waste", price: "₹100 /pcs", icon: "📺" },
   { id: "laptop", name: "Laptop", category: "E-waste", price: "₹300 /pcs", icon: "💻", popular: true },
