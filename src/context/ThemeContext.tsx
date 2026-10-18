@@ -6,6 +6,7 @@ import React, {
   useEffect,
   useState,
   useCallback,
+  useSyncExternalStore,
 } from "react";
 
 type Theme = "dark" | "light";
@@ -22,8 +23,22 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 const STORAGE_KEY = "kabaadse_theme";
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("dark");
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
+
+  const [theme, setThemeState] = useState<Theme>(() => {
+    if (typeof window === "undefined") return "dark";
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
+      if (stored === "light" || stored === "dark") return stored;
+    } catch {
+      // fallback
+    }
+    return "dark";
+  });
 
   // Apply theme to document element and body
   const applyTheme = useCallback((newTheme: Theme) => {
@@ -54,25 +69,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Sync DOM on mount and whenever theme changes
   useEffect(() => {
-    try {
-      const storedTheme = localStorage.getItem(STORAGE_KEY) as Theme | null;
-      if (storedTheme === "light" || storedTheme === "dark") {
-        setThemeState(storedTheme);
-        applyTheme(storedTheme);
-      } else {
-        const prefersDark = window.matchMedia(
-          "(prefers-color-scheme: dark)"
-        ).matches;
-        const initialTheme: Theme = prefersDark ? "dark" : "dark";
-        setThemeState(initialTheme);
-        applyTheme(initialTheme);
-      }
-    } catch {
-      applyTheme("dark");
-    }
-    setMounted(true);
-  }, [applyTheme]);
+    applyTheme(theme);
+  }, [theme, applyTheme]);
 
   const setTheme = useCallback(
     (newTheme: Theme | ((prev: Theme) => Theme)) => {

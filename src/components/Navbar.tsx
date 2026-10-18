@@ -26,8 +26,6 @@ interface NavbarProps {
 
 export default function Navbar({
   onOpenSellModal,
-  onOpenBusinessModal,
-  ratesHref = "/rates",
   alwaysVisible = false,
 }: NavbarProps) {
   const { triggerTransition } = useNavigationTransition();
@@ -85,10 +83,7 @@ export default function Navbar({
   }, [servicesDropdown, companyDropdown]);
 
   useEffect(() => {
-    if (alwaysVisible) {
-      setIsVisible(true);
-      return;
-    }
+    if (alwaysVisible) return;
 
     const handleScroll = () => {
       // Disappear once user starts scrolling down away from hero section top

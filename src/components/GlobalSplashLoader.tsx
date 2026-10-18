@@ -1,19 +1,18 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import { useNavigationTransition } from "@/context/NavigationTransitionContext";
 
 export default function GlobalSplashLoader() {
   const { isTransitioning } = useNavigationTransition();
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
   const [progressActive, setProgressActive] = useState(false);
-
-  // Guarantee hydration before attempting createPortal
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Control body scroll locking and progress bar animation
   useEffect(() => {
@@ -25,10 +24,10 @@ export default function GlobalSplashLoader() {
 
       return () => {
         clearTimeout(timer);
+        setProgressActive(false);
         document.body.style.overflow = "unset";
       };
     } else {
-      setProgressActive(false);
       document.body.style.overflow = "unset";
     }
   }, [isTransitioning]);

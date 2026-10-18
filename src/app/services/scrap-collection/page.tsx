@@ -30,9 +30,7 @@ import {
   Boxes,
   Car,
   ShieldCheck,
-  Trash2,
   Leaf,
-  Users,
   Sun,
   Moon,
   Check,
@@ -56,17 +54,7 @@ export default function ScrapCollectionPage() {
     "plastics",
   ]);
 
-  // City locality selection for KabaadSe (Patna, Bihar)
-  const [selectedLocation, setSelectedLocation] = useState("Boring Road, Patna");
-  const [locationDropdownOpen, setLocationDropdownOpen] = useState(false);
-
-  const PATNA_LOCALITIES = [
-    "Boring Road, Patna",
-    "Kankarbagh, Patna",
-    "Ashiana Nagar, Patna",
-    "Bailey Road, Patna",
-    "Rajendra Nagar, Patna",
-  ];
+  const selectedLocation = "Boring Road, Patna";
 
   // Booking Form State
   const [bookingSubmitted, setBookingSubmitted] = useState(false);
@@ -91,7 +79,6 @@ export default function ScrapCollectionPage() {
       if (e.key === "Escape") {
         setSellModalOpen(false);
         setDownloadModalOpen(false);
-        setLocationDropdownOpen(false);
         setVehicleInquiryOpen(false);
       }
     };

@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useMemo, useRef, Suspense } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Search,
@@ -13,7 +12,6 @@ import {
   Sun,
   Moon,
   ShieldCheck,
-  PhoneCall,
   X,
   ExternalLink,
 } from "lucide-react";
@@ -39,6 +37,7 @@ function ScrapCardIcon({ item }: { item: ScrapRateItem }) {
   if (item.image && !hasError) {
     return (
       <div className="w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-[#111315] border border-neutral-800 flex items-center justify-center p-1 shrink-0 shadow-inner group-hover:scale-105 transition-transform overflow-hidden">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={item.image}
           alt={item.name}
@@ -72,7 +71,48 @@ function RatesPageContent() {
   const [selectedCity, setSelectedCity] = useState<CityName>(
     initialMatchedCity || "Patna"
   );
-  const [splashProgress, setSplashProgress] = useState(false);
+
+  // Sync state cleanly when URL query param changes directly without cascading effects
+  const [prevCityParam, setPrevCityParam] = useState(cityParam);
+  if (cityParam !== prevCityParam) {
+    setPrevCityParam(cityParam);
+    const matched = normalizeCityName(cityParam);
+    if (matched) {
+      setSelectedCity(matched);
+      setCurrentStep("rates-board");
+    } else if (!cityParam) {
+      setCurrentStep("city-select");
+    }
+  }
+
+  // Live rates state from DB API
+  const [liveRates, setLiveRates] = useState<Record<string, number> | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    const fetchLiveRates = async () => {
+      try {
+        const slug = getCitySlug(selectedCity);
+        const res = await fetch(`/api/rates?city=${encodeURIComponent(slug)}`);
+        if (res.ok) {
+          const data: Array<{ id: string; price: number }> = await res.json();
+          if (active && Array.isArray(data)) {
+            const map: Record<string, number> = {};
+            for (const item of data) {
+              map[item.id] = item.price;
+            }
+            setLiveRates(map);
+          }
+        }
+      } catch (err) {
+        console.warn("Using offline fallback rates:", err);
+      }
+    };
+    fetchLiveRates();
+    return () => {
+      active = false;
+    };
+  }, [selectedCity]);
 
   // Filters & State
   const [selectedCategory, setSelectedCategory] = useState<ScrapCategory>("All");
@@ -81,17 +121,6 @@ function RatesPageContent() {
   const [selectedLocality, setSelectedLocality] = useState<string | null>(null);
 
   const cityDropdownRef = useRef<HTMLDivElement>(null);
-
-  // Sync state if URL query param changes directly
-  useEffect(() => {
-    const matched = normalizeCityName(cityParam);
-    if (matched) {
-      setSelectedCity(matched);
-      setCurrentStep("rates-board");
-    } else if (!cityParam) {
-      setCurrentStep("city-select");
-    }
-  }, [cityParam]);
 
   // Outside click to close city dropdown
   useEffect(() => {
@@ -123,9 +152,18 @@ function RatesPageContent() {
     }, 2500);
   };
 
-  // Filter items based on category and search query
+  // Filter items based on category, search query, and city live rates
   const filteredItems = useMemo(() => {
-    return SCRAP_ITEMS_DATA.filter((item) => {
+    return SCRAP_ITEMS_DATA.map((item) => {
+      if (liveRates && liveRates[item.id] !== undefined) {
+        const unit = item.price.includes("/pcs") ? "/pcs" : "/kg";
+        return {
+          ...item,
+          price: `₹${liveRates[item.id]} ${unit}`,
+        };
+      }
+      return item;
+    }).filter((item) => {
       const matchesCategory =
         selectedCategory === "All" || item.category === selectedCategory;
       const matchesSearch =
@@ -134,7 +172,7 @@ function RatesPageContent() {
         item.category.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesCategory && matchesSearch;
     });
-  }, [selectedCategory, searchQuery]);
+  }, [selectedCategory, searchQuery, liveRates]);
 
   const localities = useMemo(() => {
     return (

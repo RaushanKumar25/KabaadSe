@@ -385,11 +385,22 @@ export default function ServiceInquiryModal({
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const mounted = React.useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  // Reset form status when opened with a new service without cascading effects
+  const [prevResetKey, setPrevResetKey] = useState<string | null>(null);
+  const currentResetKey = isOpen ? `${service?.id || ""}` : null;
+  if (currentResetKey !== prevResetKey) {
+    setPrevResetKey(currentResetKey);
+    if (isOpen) {
+      setSubmitted(false);
+      setIsSubmitting(false);
+    }
+  }
 
   // Fix Page Scroll Lock on Close
   useEffect(() => {
@@ -418,14 +429,6 @@ export default function ServiceInquiryModal({
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [isOpen, onClose]);
-
-  // Reset form status when opened with a new service
-  useEffect(() => {
-    if (isOpen) {
-      setSubmitted(false);
-      setIsSubmitting(false);
-    }
-  }, [isOpen, service?.id]);
 
   // Return null when closed, no service, or not mounted on client
   if (!isOpen || !service || !mounted) return null;
