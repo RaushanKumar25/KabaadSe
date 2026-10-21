@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   X,
   ExternalLink,
+  Navigation,
 } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
 import { useNavigationTransition } from "@/context/NavigationTransitionContext";
@@ -24,33 +25,92 @@ import {
   CITIES_LIST,
   CityName,
   ScrapCategory,
-  ScrapRateItem,
-  SCRAP_ITEMS_DATA,
   CITY_LOCALITIES,
   normalizeCityName,
   getCitySlug,
 } from "@/lib/scrapRatesData";
 
-function ScrapCardIcon({ item }: { item: ScrapRateItem }) {
-  const [hasError, setHasError] = useState(false);
+export interface RateItem {
+  id: string;
+  name: string;
+  category: string;
+  price: number;
+  unit: string;
+  iconPath: string;
+}
 
-  if (item.image && !hasError) {
-    return (
-      <div className="w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-[#111315] border border-neutral-800 flex items-center justify-center p-1 shrink-0 shadow-inner group-hover:scale-105 transition-transform overflow-hidden">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={item.image}
-          alt={item.name}
-          onError={() => setHasError(true)}
-          className="w-full h-full object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]"
-        />
-      </div>
-    );
-  }
+function getCategoryFallbackIcon(category: string, name: string): string {
+  const lowerCat = (category || "").toLowerCase();
+  const lowerName = (name || "").toLowerCase();
+  if (lowerName.includes("newspaper") || lowerName.includes("paper") || lowerName.includes("book") || lowerCat.includes("paper")) return "📰";
+  if (lowerName.includes("plastic") || lowerName.includes("bottle") || lowerCat.includes("plastic")) return "🧴";
+  if (lowerName.includes("battery")) return "🔋";
+  if (lowerName.includes("iron") || lowerName.includes("copper") || lowerName.includes("metal") || lowerName.includes("brass") || lowerCat.includes("metal")) return "⚙️";
+  if (lowerCat.includes("waste") || lowerName.includes("ac") || lowerName.includes("tv") || lowerName.includes("laptop")) return "🔌";
+  return "📦";
+}
+
+function ScrapCardIcon({ item }: { item: RateItem }) {
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
+
+  const imageSrc = useMemo(() => {
+    if (!item.iconPath) {
+      return `/images/ScrapImages/${item.id}.png`;
+    }
+    if (item.iconPath.startsWith("/") || item.iconPath.startsWith("http")) {
+      return item.iconPath;
+    }
+    return `/images/ScrapImages/${item.iconPath}`;
+  }, [item.iconPath, item.id]);
+
+  const hasError = failedSrc === imageSrc;
 
   return (
-    <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200/90 dark:border-neutral-800 flex items-center justify-center text-xl sm:text-2xl shrink-0 shadow-xs group-hover:scale-105 transition-transform">
-      {item.icon}
+    <div className="w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-[#111315] border border-neutral-800 flex items-center justify-center p-1 shrink-0 shadow-inner group-hover:scale-105 transition-transform overflow-hidden">
+      {!hasError ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={imageSrc}
+          alt={item.name}
+          onError={() => setFailedSrc(imageSrc)}
+          className="w-full h-full object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]"
+        />
+      ) : (
+        <span className="text-xl select-none" role="img" aria-label={item.name}>
+          {getCategoryFallbackIcon(item.category, item.name)}
+        </span>
+      )}
+    </div>
+  );
+}
+
+function ScrapCardSkeletonGrid() {
+  return (
+    <div
+      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4"
+      role="status"
+      aria-label="Loading scrap rates"
+    >
+      {Array.from({ length: 8 }).map((_, index) => (
+        <div
+          key={`rates-skeleton-${index}`}
+          className="bg-neutral-50 dark:bg-[#14171a] border border-neutral-200 dark:border-neutral-800 rounded-2xl p-3.5 sm:p-4 flex items-center justify-between gap-3 animate-pulse"
+        >
+          {/* Left: circular icon container placeholder & item text */}
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <div className="w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-neutral-200 dark:bg-neutral-800 shrink-0" />
+            <div className="space-y-2 flex-1 min-w-0">
+              <div className="h-4 bg-neutral-200 dark:bg-neutral-800 rounded-md w-3/4" />
+              <div className="h-3 bg-neutral-200/60 dark:bg-neutral-800/60 rounded-md w-1/2" />
+            </div>
+          </div>
+
+          {/* Right: price placeholder */}
+          <div className="text-right shrink-0 pl-2">
+            <div className="h-5 bg-neutral-200 dark:bg-neutral-800 rounded-md w-16" />
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -85,30 +145,46 @@ function RatesPageContent() {
     }
   }
 
-  // Live rates state from DB API
-  const [liveRates, setLiveRates] = useState<Record<string, number> | null>(null);
+  // Dynamic rates state from backend API /api/rates
+  const [items, setItems] = useState<RateItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
-    const fetchLiveRates = async () => {
+
+    const fetchRates = async () => {
+      setLoading(true);
+      setError(null);
+
       try {
-        const slug = getCitySlug(selectedCity);
-        const res = await fetch(`/api/rates?city=${encodeURIComponent(slug)}`);
-        if (res.ok) {
-          const data: Array<{ id: string; price: number }> = await res.json();
-          if (active && Array.isArray(data)) {
-            const map: Record<string, number> = {};
-            for (const item of data) {
-              map[item.id] = item.price;
-            }
-            setLiveRates(map);
+        const res = await fetch(`/api/rates?city=${encodeURIComponent(selectedCity)}`);
+        if (!res.ok) {
+          throw new Error(`Failed to fetch rates: ${res.statusText}`);
+        }
+        const data = await res.json();
+        if (active) {
+          if (Array.isArray(data)) {
+            setItems(data);
+          } else {
+            setItems([]);
           }
         }
-      } catch (err) {
-        console.warn("Using offline fallback rates:", err);
+      } catch (err: unknown) {
+        if (active) {
+          console.error("Error fetching scrap rates:", err);
+          setError(err instanceof Error ? err.message : "Failed to load rates");
+          setItems([]);
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
       }
     };
-    fetchLiveRates();
+
+    fetchRates();
+
     return () => {
       active = false;
     };
@@ -119,10 +195,13 @@ function RatesPageContent() {
   const [searchQuery, setSearchQuery] = useState("");
   const [cityDropdownOpen, setCityDropdownOpen] = useState(false);
   const [selectedLocality, setSelectedLocality] = useState<string | null>(null);
+  const [localityDropdownOpen, setLocalityDropdownOpen] = useState(false);
+  const [localitySearchQuery, setLocalitySearchQuery] = useState("");
 
   const cityDropdownRef = useRef<HTMLDivElement>(null);
+  const localityDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Outside click to close city dropdown
+  // Outside click to close city & locality dropdowns
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (
@@ -132,16 +211,25 @@ function RatesPageContent() {
       ) {
         setCityDropdownOpen(false);
       }
+      if (
+        localityDropdownOpen &&
+        localityDropdownRef.current &&
+        !localityDropdownRef.current.contains(e.target as Node)
+      ) {
+        setLocalityDropdownOpen(false);
+      }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [cityDropdownOpen]);
+  }, [cityDropdownOpen, localityDropdownOpen]);
 
   // Handle City Selection with 2.5s Animated Cargo Truck Splash transition
   const handleSelectCity = (city: CityName) => {
     setSelectedCity(city);
     setCityDropdownOpen(false);
     setSelectedLocality(null);
+    setLocalitySearchQuery("");
+    setLocalityDropdownOpen(false);
     setCurrentStep("splash");
 
     // 2.5s Animated Green Cargo Truck Transition -> Switch to Rates Board and update URL
@@ -152,27 +240,19 @@ function RatesPageContent() {
     }, 2500);
   };
 
-  // Filter items based on category, search query, and city live rates
+  // Filter dynamic items based on category and search query
   const filteredItems = useMemo(() => {
-    return SCRAP_ITEMS_DATA.map((item) => {
-      if (liveRates && liveRates[item.id] !== undefined) {
-        const unit = item.price.includes("/pcs") ? "/pcs" : "/kg";
-        return {
-          ...item,
-          price: `₹${liveRates[item.id]} ${unit}`,
-        };
-      }
-      return item;
-    }).filter((item) => {
+    return items.filter((item) => {
       const matchesCategory =
-        selectedCategory === "All" || item.category === selectedCategory;
+        selectedCategory === "All" ||
+        item.category.toLowerCase() === selectedCategory.toLowerCase();
       const matchesSearch =
         searchQuery.trim() === "" ||
         item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.category.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesCategory && matchesSearch;
     });
-  }, [selectedCategory, searchQuery, liveRates]);
+  }, [items, selectedCategory, searchQuery]);
 
   const localities = useMemo(() => {
     return (
@@ -185,6 +265,12 @@ function RatesPageContent() {
       ]
     );
   }, [selectedCity]);
+
+  const filteredLocalities = useMemo(() => {
+    if (!localitySearchQuery.trim()) return localities;
+    const q = localitySearchQuery.toLowerCase();
+    return localities.filter((loc) => loc.toLowerCase().includes(q));
+  }, [localities, localitySearchQuery]);
 
   return (
     <div className="min-h-screen bg-white text-neutral-900 dark:bg-[#0a0a0a] dark:text-neutral-100 flex flex-col font-sans transition-colors duration-200">
@@ -274,9 +360,12 @@ function RatesPageContent() {
             <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-48 bg-[#5EDC1F]/10 rounded-full blur-3xl pointer-events-none" />
 
             <div className="mb-8 relative z-10">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#5EDC1F]/15 text-[#5EDC1F] text-xs font-bold uppercase tracking-wider mb-3">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#5EDC1F] animate-pulse" />
-                Live Scrap Benchmark
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#5EDC1F]/15 border border-[#5EDC1F]/30 text-[#5EDC1F] text-xs font-bold uppercase tracking-wider mb-3">
+                <span className="relative flex h-2 w-2 shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#5EDC1F] opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#5EDC1F] animate-live-blink" />
+                </span>
+                <span className="animate-live-blink">Live Scrap Benchmark</span>
               </div>
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-neutral-900 dark:text-white tracking-tight mb-3">
                 Scrap Prices
@@ -327,16 +416,31 @@ function RatesPageContent() {
                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-neutral-900 dark:text-white tracking-tight">
                   Scrap Prices
                 </h1>
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#5EDC1F]/15 text-[#5EDC1F] text-xs font-bold uppercase tracking-wider">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#5EDC1F] animate-pulse" />
-                  Live
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#5EDC1F]/15 border border-[#5EDC1F]/30 text-[#5EDC1F] text-xs font-bold uppercase tracking-wider">
+                  <span className="relative flex h-2 w-2 shrink-0">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#5EDC1F] opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[#5EDC1F] animate-live-blink" />
+                  </span>
+                  <span className="animate-live-blink">Live</span>
                 </span>
               </div>
-              <p className="text-xs sm:text-sm text-neutral-600 dark:text-neutral-400 mt-1">
-                Current scrap benchmark rates for doorstep pickup in{" "}
+              <p className="text-xs sm:text-sm text-neutral-600 dark:text-neutral-400 mt-1 flex flex-wrap items-center gap-1.5">
+                <span>Current scrap benchmark rates for doorstep pickup in</span>
                 <span className="font-semibold text-neutral-900 dark:text-white">
                   {selectedCity}
                 </span>
+                {selectedLocality && (
+                  <>
+                    <span className="text-neutral-400">•</span>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#5EDC1F]/15 border border-[#5EDC1F]/30 text-emerald-600 dark:text-[#5EDC1F] text-xs font-semibold">
+                      <Navigation className="w-3 h-3" />
+                      {selectedLocality}
+                    </span>
+                    <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                      (Doorstep pickup active)
+                    </span>
+                  </>
+                )}
               </p>
             </div>
 
@@ -354,56 +458,208 @@ function RatesPageContent() {
             </button>
           </div>
 
-          {/* Controls Bar: City Dropdown (Left) & Search (Right) */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-neutral-50 dark:bg-[#0f1115] border border-neutral-200 dark:border-neutral-800 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 shadow-sm">
-            {/* City Select Dropdown */}
-            <div className="relative" ref={cityDropdownRef}>
-              <button
-                type="button"
-                onClick={() => setCityDropdownOpen(!cityDropdownOpen)}
-                className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-white dark:bg-[#14171a] border border-neutral-300 dark:border-neutral-800 text-sm font-semibold text-neutral-900 dark:text-white flex items-center justify-between sm:justify-start gap-3 hover:border-neutral-400 dark:hover:border-neutral-700 transition-colors cursor-pointer shadow-xs"
-                aria-expanded={cityDropdownOpen}
-              >
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-[#5EDC1F]" />
-                  <span>{selectedCity}</span>
-                </div>
-                <ChevronDown
-                  className={`w-4 h-4 text-neutral-500 dark:text-neutral-400 transition-transform duration-200 ${
-                    cityDropdownOpen ? "rotate-180" : ""
-                  }`}
-                />
-              </button>
-
-              {/* Popover */}
-              {cityDropdownOpen && (
-                <div className="absolute top-full left-0 mt-2 w-72 max-h-72 overflow-y-auto rounded-2xl bg-white dark:bg-[#121417] border border-neutral-200 dark:border-neutral-800 p-2 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-150">
-                  <div className="text-[11px] font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 px-3 py-1.5 border-b border-neutral-200 dark:border-neutral-800/80 mb-1">
-                    Select City
+          {/* Controls Bar: Location Filters (Left) & Search (Right) */}
+          <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 sm:gap-4">
+            {/* Location Filters: City + Prominent Places */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
+              {/* City Select Dropdown */}
+              <div className="relative" ref={cityDropdownRef}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCityDropdownOpen(!cityDropdownOpen);
+                    setLocalityDropdownOpen(false);
+                  }}
+                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-white dark:bg-[#14171a] border border-neutral-300 dark:border-neutral-800 text-sm font-semibold text-neutral-900 dark:text-white flex items-center justify-between sm:justify-start gap-3 hover:border-neutral-400 dark:hover:border-neutral-700 transition-colors cursor-pointer shadow-xs"
+                  aria-expanded={cityDropdownOpen}
+                >
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-[#5EDC1F]" />
+                    <span>{selectedCity}</span>
                   </div>
-                  {CITIES_LIST.map((city) => (
+                  <ChevronDown
+                    className={`w-4 h-4 text-neutral-500 dark:text-neutral-400 transition-transform duration-200 ${
+                      cityDropdownOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+
+                {/* City Popover */}
+                {cityDropdownOpen && (
+                  <div className="absolute top-full left-0 mt-2 w-72 max-h-72 overflow-y-auto rounded-2xl bg-white dark:bg-[#121417] border border-neutral-200 dark:border-neutral-800 p-2 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-150">
+                    <div className="text-[11px] font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 px-3 py-1.5 border-b border-neutral-200 dark:border-neutral-800/80 mb-1">
+                      Select City
+                    </div>
+                    {CITIES_LIST.map((city) => (
+                      <button
+                        key={city}
+                        type="button"
+                        onClick={() => handleSelectCity(city)}
+                        className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm text-left transition-colors cursor-pointer ${
+                          selectedCity === city
+                            ? "bg-[#5EDC1F]/15 text-[#5EDC1F] font-semibold"
+                            : "text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800/60 hover:text-neutral-900 dark:hover:text-white"
+                        }`}
+                      >
+                        <span>{city}</span>
+                        {selectedCity === city && (
+                          <Check className="w-4 h-4 text-[#5EDC1F]" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Prominent Places Filter Dropdown with Search */}
+              <div className="relative" ref={localityDropdownRef}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLocalityDropdownOpen(!localityDropdownOpen);
+                    setCityDropdownOpen(false);
+                  }}
+                  className={`w-full sm:w-auto px-4 py-2.5 rounded-xl bg-white dark:bg-[#14171a] border text-sm font-semibold flex items-center justify-between sm:justify-start gap-2.5 transition-colors cursor-pointer shadow-xs ${
+                    selectedLocality
+                      ? "border-[#5EDC1F] text-neutral-900 dark:text-white"
+                      : "border-neutral-300 dark:border-neutral-800 text-neutral-700 dark:text-neutral-300 hover:border-neutral-400 dark:hover:border-neutral-700"
+                  }`}
+                  aria-expanded={localityDropdownOpen}
+                >
+                  <div className="flex items-center gap-2 max-w-[200px] truncate">
+                    <Navigation className="w-3.5 h-3.5 text-[#5EDC1F] shrink-0" />
+                    <span className="truncate">
+                      {selectedLocality || `Places in ${selectedCity}`}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    {selectedLocality && (
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedLocality(null);
+                        }}
+                        className="p-0.5 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-800 text-neutral-400 hover:text-neutral-700 dark:hover:text-white transition-colors"
+                        title="Clear area filter"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </span>
+                    )}
+                    <ChevronDown
+                      className={`w-4 h-4 text-neutral-500 dark:text-neutral-400 transition-transform duration-200 ${
+                        localityDropdownOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </div>
+                </button>
+
+                {/* Locality Popover with Search */}
+                {localityDropdownOpen && (
+                  <div className="absolute top-full left-0 sm:left-0 mt-2 w-72 sm:w-80 max-h-80 rounded-2xl bg-white dark:bg-[#121417] border border-neutral-200 dark:border-neutral-800 p-2.5 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-150 flex flex-col">
+                    <div className="flex items-center justify-between px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 border-b border-neutral-200 dark:border-neutral-800/80 mb-2">
+                      <span>Prominent Places ({selectedCity})</span>
+                      <span className="text-[10px] text-[#5EDC1F] font-semibold lowercase">
+                        {localities.length} areas
+                      </span>
+                    </div>
+
+                    {/* Search Input for Places */}
+                    <div className="relative mb-2">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-neutral-400" />
+                      <input
+                        type="text"
+                        placeholder={`Search places in ${selectedCity}...`}
+                        value={localitySearchQuery}
+                        onChange={(e) => setLocalitySearchQuery(e.target.value)}
+                        autoFocus
+                        className="w-full pl-8 pr-7 py-1.5 text-xs bg-neutral-50 dark:bg-[#181b20] border border-neutral-200 dark:border-neutral-700/80 rounded-lg text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus:outline-none focus:border-[#5EDC1F]"
+                      />
+                      {localitySearchQuery && (
+                        <button
+                          type="button"
+                          onClick={() => setLocalitySearchQuery("")}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 text-neutral-400 hover:text-neutral-700 dark:hover:text-white cursor-pointer"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      )}
+                    </div>
+
+                    {/* All Areas Option */}
                     <button
-                      key={city}
                       type="button"
-                      onClick={() => handleSelectCity(city)}
-                      className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm text-left transition-colors cursor-pointer ${
-                        selectedCity === city
+                      onClick={() => {
+                        setSelectedLocality(null);
+                        setLocalityDropdownOpen(false);
+                      }}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium text-left transition-colors cursor-pointer mb-1 shrink-0 ${
+                        selectedLocality === null
                           ? "bg-[#5EDC1F]/15 text-[#5EDC1F] font-semibold"
                           : "text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800/60 hover:text-neutral-900 dark:hover:text-white"
                       }`}
                     >
-                      <span>{city}</span>
-                      {selectedCity === city && (
-                        <Check className="w-4 h-4 text-[#5EDC1F]" />
+                      <div className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#5EDC1F]" />
+                        <span>All Places in {selectedCity}</span>
+                      </div>
+                      {selectedLocality === null && (
+                        <Check className="w-3.5 h-3.5 text-[#5EDC1F]" />
                       )}
                     </button>
-                  ))}
-                </div>
-              )}
+
+                    {/* Filtered Localities List */}
+                    <div className="overflow-y-auto space-y-0.5 scrollbar-thin flex-1 max-h-52">
+                      {filteredLocalities.length === 0 ? (
+                        <div className="py-5 text-center text-xs text-neutral-400 dark:text-neutral-500">
+                          No places found matching &ldquo;{localitySearchQuery}&rdquo;
+                        </div>
+                      ) : (
+                        filteredLocalities.map((loc) => {
+                          const isSelected = selectedLocality === loc;
+                          return (
+                            <button
+                              key={loc}
+                              type="button"
+                              onClick={() => {
+                                setSelectedLocality(loc);
+                                setLocalityDropdownOpen(false);
+                              }}
+                              className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs text-left transition-colors cursor-pointer ${
+                                isSelected
+                                  ? "bg-[#5EDC1F]/15 text-[#5EDC1F] font-semibold"
+                                  : "text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800/60 hover:text-neutral-900 dark:hover:text-white"
+                              }`}
+                            >
+                              <div className="flex items-center gap-2 truncate">
+                                <MapPin
+                                  className={`w-3 h-3 shrink-0 ${
+                                    isSelected ? "text-[#5EDC1F]" : "text-neutral-400"
+                                  }`}
+                                />
+                                <span className="truncate">{loc}</span>
+                              </div>
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                <span className="text-[10px] font-medium text-emerald-600 dark:text-[#5EDC1F] bg-emerald-500/10 px-1.5 py-0.5 rounded">
+                                  Pickup
+                                </span>
+                                {isSelected && (
+                                  <Check className="w-3.5 h-3.5 text-[#5EDC1F]" />
+                                )}
+                              </div>
+                            </button>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Search Input */}
-            <div className="relative flex-1 sm:max-w-md">
+            <div className="relative flex-1 lg:max-w-md">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
               <input
                 type="text"
@@ -447,16 +703,42 @@ function RatesPageContent() {
             )}
           </div>
 
-          {/* Full-Width Scrap Items Grid (NO TRUNCATION, CLEAR TEXT, INCREASED PADDING) */}
+          {/* Full-Width Scrap Items Grid with Loading, Empty & Dynamic Card States */}
           <section aria-label="Scrap Rates Grid">
-            {filteredItems.length > 0 ? (
+            {loading ? (
+              <ScrapCardSkeletonGrid />
+            ) : error || items.length === 0 ? (
+              <div className="py-16 sm:py-20 text-center rounded-3xl border border-dashed border-neutral-300 dark:border-neutral-800 bg-neutral-50/50 dark:bg-[#0c0e11]/50 p-8 space-y-4">
+                <div className="w-14 h-14 mx-auto rounded-2xl bg-neutral-100 dark:bg-neutral-800/80 flex items-center justify-center text-neutral-400 dark:text-neutral-500">
+                  <MapPin className="w-7 h-7" />
+                </div>
+                <div className="space-y-1 max-w-md mx-auto">
+                  <h3 className="text-base sm:text-lg font-bold text-neutral-800 dark:text-neutral-200">
+                    No rates available for this city right now.
+                  </h3>
+                  <p className="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400">
+                    We are actively expanding our pickup network to {selectedCity}. Please check back shortly or choose another city.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCurrentStep("city-select");
+                    router.push("/rates", { scroll: false });
+                  }}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#5EDC1F] hover:bg-[#52c41b] text-black text-xs sm:text-sm font-semibold transition cursor-pointer shadow-sm"
+                >
+                  <span>Choose another city</span>
+                </button>
+              </div>
+            ) : filteredItems.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
                 {filteredItems.map((item) => (
                   <div
                     key={item.id}
                     className="bg-neutral-50 dark:bg-[#14171a] border border-neutral-200 dark:border-neutral-800 rounded-2xl p-3.5 sm:p-4 flex items-center justify-between gap-3 hover:border-neutral-300 dark:hover:border-neutral-700 hover:shadow-md transition-all duration-200 group"
                   >
-                    {/* Left: Icon container + Non-truncated Item Title */}
+                    {/* Left: Dark Circular Container Icon + Non-truncated Item Title */}
                     <div className="flex items-center gap-3 min-w-0 flex-1">
                       <ScrapCardIcon item={item} />
                       <span className="text-sm font-medium text-neutral-900 dark:text-neutral-100 leading-snug break-words">
@@ -464,10 +746,10 @@ function RatesPageContent() {
                       </span>
                     </div>
 
-                    {/* Right: High contrast Price Tag */}
+                    {/* Right: Dynamic High Contrast Price Tag */}
                     <div className="text-right shrink-0 pl-2">
                       <span className="text-sm sm:text-base font-extrabold text-emerald-600 dark:text-[#5EDC1F] whitespace-nowrap tracking-tight">
-                        {item.price}
+                        ₹{item.price} /{item.unit ? item.unit.replace(/^\/+/, "") : "kg"}
                       </span>
                     </div>
                   </div>
