@@ -14,7 +14,7 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-export const prisma =
+const basePrisma =
   globalForPrisma.prisma ??
   new PrismaClient({
     log:
@@ -22,6 +22,21 @@ export const prisma =
         ? ["query", "error", "warn"]
         : ["error"],
   });
+
+// Alias prisma.pickup to prisma.pickupRequest for seamless compatibility
+if (basePrisma && !("pickup" in basePrisma) && "pickupRequest" in basePrisma) {
+  Object.defineProperty(basePrisma, "pickup", {
+    get() {
+      return (this as any).pickupRequest;
+    },
+    enumerable: true,
+    configurable: true,
+  });
+}
+
+export const prisma = basePrisma as PrismaClient & {
+  pickup: PrismaClient["pickupRequest"];
+};
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 

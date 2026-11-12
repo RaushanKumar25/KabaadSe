@@ -25,9 +25,30 @@ export async function GET() {
       getStorageInfo(),
     ]);
 
+    const total = pickups.length;
+    const pending = pickups.filter(
+      (p) => (p.status || "").toUpperCase() === "PENDING"
+    ).length;
+    const confirmed = pickups.filter(
+      (p) => (p.status || "").toUpperCase() === "CONFIRMED"
+    ).length;
+    const completed = pickups.filter(
+      (p) => (p.status || "").toUpperCase() === "COMPLETED"
+    ).length;
+    const cancelled = pickups.filter(
+      (p) => (p.status || "").toUpperCase() === "CANCELLED"
+    ).length;
+
     return NextResponse.json({
       success: true,
-      count: pickups.length,
+      count: total,
+      summary: {
+        total,
+        pending,
+        confirmed,
+        completed,
+        cancelled,
+      },
       storageInfo,
       pickups,
     });
