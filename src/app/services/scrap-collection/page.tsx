@@ -39,37 +39,15 @@ import {
   Check,
 } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
+import { useNavigationTransition } from "@/context/NavigationTransitionContext";
 import ServiceInquiryModal, { SERVICES_DATA } from "@/components/ServiceInquiryModal";
-
-interface ScrapRate {
-  id: string;
-  name: string;
-  category: "Paper" | "Plastic" | "Metals" | "E-Waste";
-  rate: number;
-  unit: string;
-  badge?: string;
-}
-
-const SCRAP_RATES: ScrapRate[] = [
-  { id: "newspaper", name: "Newspaper (Akbhar)", category: "Paper", rate: 16, unit: "kg", badge: "Trending" },
-  { id: "cardboard", name: "Corrugated Cardboard (Gatta)", category: "Paper", rate: 14, unit: "kg", badge: "High Demand" },
-  { id: "books", name: "Office Paper / Books / Notebooks", category: "Paper", rate: 15, unit: "kg" },
-  { id: "copper", name: "Copper Wire & Utensils", category: "Metals", rate: 460, unit: "kg", badge: "Highest Value" },
-  { id: "brass", name: "Brass (Peetal)", category: "Metals", rate: 340, unit: "kg" },
-  { id: "aluminum", name: "Aluminum", category: "Metals", rate: 125, unit: "kg" },
-  { id: "iron", name: "Iron & Steel (Loha)", category: "Metals", rate: 28, unit: "kg" },
-  { id: "pet-bottles", name: "PET Bottles & Hard Plastic", category: "Plastic", rate: 14, unit: "kg" },
-  { id: "soft-plastic", name: "Polythene & Mix Plastic", category: "Plastic", rate: 8, unit: "kg" },
-  { id: "ewaste-pc", name: "Desktop CPU / Laptops / PCB", category: "E-Waste", rate: 320, unit: "piece", badge: "Certified" },
-  { id: "batteries", name: "Lead Acid Batteries (Inverter/Car)", category: "E-Waste", rate: 85, unit: "kg" },
-];
 
 export default function ScrapCollectionPage() {
   const { theme, toggleTheme } = useTheme();
+  const { triggerTransition } = useNavigationTransition();
 
   // Modal states
   const [sellModalOpen, setSellModalOpen] = useState(false);
-  const [rateListModalOpen, setRateListModalOpen] = useState(false);
   const [downloadModalOpen, setDownloadModalOpen] = useState(false);
   const [vehicleInquiryOpen, setVehicleInquiryOpen] = useState(false);
 
@@ -102,13 +80,9 @@ export default function ScrapCollectionPage() {
     timeSlot: "10:00 AM - 01:00 PM",
   });
 
-  // Rate list search and filter
-  const [rateSearch, setRateSearch] = useState("");
-  const [rateCategory, setRateCategory] = useState("All");
-
   // Scroll lock and ESC key handling for all modals
   useEffect(() => {
-    if (sellModalOpen || rateListModalOpen || downloadModalOpen || vehicleInquiryOpen) {
+    if (sellModalOpen || downloadModalOpen || vehicleInquiryOpen) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "unset";
@@ -117,7 +91,6 @@ export default function ScrapCollectionPage() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         setSellModalOpen(false);
-        setRateListModalOpen(false);
         setDownloadModalOpen(false);
         setLocationDropdownOpen(false);
         setVehicleInquiryOpen(false);
@@ -129,7 +102,7 @@ export default function ScrapCollectionPage() {
       document.body.style.overflow = "unset";
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [sellModalOpen, rateListModalOpen, downloadModalOpen]);
+  }, [sellModalOpen, downloadModalOpen, vehicleInquiryOpen]);
 
   const toggleCategory = (id: string) => {
     setSelectedCategories((prev) =>
@@ -142,21 +115,12 @@ export default function ScrapCollectionPage() {
     setBookingSubmitted(true);
   };
 
-  const filteredScrapRates = SCRAP_RATES.filter((item) => {
-    const matchesCategory = rateCategory === "All" || item.category === rateCategory;
-    const matchesSearch =
-      item.name.toLowerCase().includes(rateSearch.toLowerCase()) ||
-      item.category.toLowerCase().includes(rateSearch.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
-
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white font-sans selection:bg-[#5EDC1F] selection:text-black">
       {/* GLOBAL NAVBAR (Always visible and fixed on service page) */}
       <Navbar
         alwaysVisible={true}
         onOpenSellModal={() => setSellModalOpen(true)}
-        onOpenRateList={() => setRateListModalOpen(true)}
       />
 
       {/* 1. SECTION 1: HERO & INTERACTIVE BOOKING MOCKUP */}
@@ -446,14 +410,17 @@ export default function ScrapCollectionPage() {
                     <Recycle className="w-4 h-4" />
                     <span>Sell scrap</span>
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => setRateListModalOpen(true)}
+                  <Link
+                    href="/rates"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      triggerTransition("/rates", 1000);
+                    }}
                     className="flex flex-col items-center gap-0.5 text-neutral-400 hover:text-neutral-700 transition cursor-pointer"
                   >
                     <Search className="w-4 h-4" />
                     <span>Rate list</span>
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -1510,159 +1477,7 @@ export default function ScrapCollectionPage() {
         </div>
       )}
 
-      {/* RATE LIST MODAL */}
-      {rateListModalOpen && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setRateListModalOpen(false);
-          }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-2xl max-h-[90vh] flex flex-col rounded-3xl bg-[#121417] text-white border border-neutral-800 shadow-2xl overflow-hidden text-left my-auto transition-colors"
-          >
-            {/* Header */}
-            <div className="p-5 sm:p-6 border-b border-neutral-800 flex items-center justify-between">
-              <div>
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#5EDC1F]/15 text-[#5EDC1F] text-xs font-bold uppercase tracking-wider mb-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#5EDC1F] animate-pulse" />
-                  Live Market Rates
-                </div>
-                <h3 className="text-xl sm:text-2xl font-black text-white">
-                  Today&apos;s Scrap Rate List
-                </h3>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={toggleTheme}
-                  className="p-2 rounded-full text-neutral-400 hover:text-white hover:bg-neutral-800 transition cursor-pointer"
-                  aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-                  title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-                >
-                  {theme === "dark" ? (
-                    <Sun className="h-5 w-5 text-amber-400" />
-                  ) : (
-                    <Moon className="h-5 w-5 text-neutral-300" />
-                  )}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setRateListModalOpen(false)}
-                  className="p-2 rounded-full text-neutral-400 hover:text-white hover:bg-neutral-800 transition cursor-pointer"
-                  aria-label="Close dialog"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-            </div>
 
-            {/* Filter and Search Bar */}
-            <div className="p-4 sm:px-6 bg-neutral-900/90 border-b border-neutral-800 space-y-3">
-              <div className="relative">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
-                <input
-                  type="text"
-                  placeholder="Search scrap item (e.g. copper, newspaper, iron, laptop)..."
-                  value={rateSearch}
-                  onChange={(e) => setRateSearch(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 text-sm bg-neutral-950 border border-neutral-800 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-[#5EDC1F] transition-colors"
-                />
-              </div>
-
-              {/* Category Pills */}
-              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-                {["All", "Paper", "Metals", "Plastic", "E-Waste"].map((cat) => (
-                  <button
-                    key={cat}
-                    type="button"
-                    onClick={() => setRateCategory(cat)}
-                    className={`px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
-                      rateCategory === cat
-                        ? "bg-[#5EDC1F] text-black shadow-xs font-bold"
-                        : "bg-neutral-900 text-neutral-400 hover:text-white border border-neutral-800"
-                    }`}
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Scrollable Rates Grid / List */}
-            <div className="p-4 sm:p-6 overflow-y-auto space-y-2.5 max-h-[46vh]">
-              {filteredScrapRates.length > 0 ? (
-                filteredScrapRates.map((item) => (
-                  <div
-                    key={item.id}
-                    className="p-3.5 rounded-2xl bg-neutral-900/70 border border-neutral-800 flex items-center justify-between gap-3 hover:border-[#5EDC1F]/40 transition-colors"
-                  >
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-bold text-white">
-                          {item.name}
-                        </span>
-                        {item.badge && (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#5EDC1F]/15 text-[#5EDC1F]">
-                            {item.badge}
-                          </span>
-                        )}
-                      </div>
-                      <span className="text-xs text-neutral-400">
-                        Category: {item.category}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-3 shrink-0">
-                      <div className="text-right">
-                        <div className="text-base sm:text-lg font-black text-[#5EDC1F]">
-                          ₹{item.rate}
-                          <span className="text-xs font-semibold text-neutral-400">
-                            /{item.unit}
-                          </span>
-                        </div>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setRateListModalOpen(false);
-                          setSellModalOpen(true);
-                        }}
-                        className="px-3 py-1.5 rounded-xl bg-[#5EDC1F] hover:bg-[#52c41b] text-black font-bold text-xs transition cursor-pointer whitespace-nowrap"
-                      >
-                        Sell Now
-                      </button>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="py-8 text-center text-sm text-neutral-400">
-                  No items found matching &quot;{rateSearch}&quot;
-                </div>
-              )}
-            </div>
-
-            {/* Modal Footer */}
-            <div className="p-4 border-t border-neutral-800 bg-neutral-900/60 flex items-center justify-between gap-4">
-              <span className="text-xs text-neutral-400">
-                100% certified digital scale weighing at your doorstep in {selectedLocation}.
-              </span>
-              <button
-                type="button"
-                onClick={() => {
-                  setRateListModalOpen(false);
-                  setSellModalOpen(true);
-                }}
-                className="px-4 py-2 rounded-full bg-white text-black hover:bg-neutral-200 font-bold text-xs transition cursor-pointer shrink-0"
-              >
-                Schedule Pickup
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* VEHICLE SCRAPPING INQUIRY MODAL */}
       <ServiceInquiryModal
