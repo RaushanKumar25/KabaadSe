@@ -13,7 +13,7 @@ type Theme = "dark" | "light";
 interface ThemeContextType {
   theme: Theme;
   toggleTheme: () => void;
-  setTheme: (theme: Theme) => void;
+  setTheme: (theme: Theme | ((prev: Theme) => Theme)) => void;
   mounted: boolean;
 }
 
@@ -25,17 +25,32 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>("dark");
   const [mounted, setMounted] = useState(false);
 
-  // Apply theme to document element
+  // Apply theme to document element and body
   const applyTheme = useCallback((newTheme: Theme) => {
+    if (typeof document === "undefined") return;
     const root = document.documentElement;
+    const body = document.body;
+
     if (newTheme === "dark") {
-      root.classList.add("dark");
       root.classList.remove("light");
+      root.classList.add("dark");
+      root.setAttribute("data-theme", "dark");
       root.style.colorScheme = "dark";
+      if (body) {
+        body.classList.remove("light");
+        body.classList.add("dark");
+        body.setAttribute("data-theme", "dark");
+      }
     } else {
       root.classList.remove("dark");
       root.classList.add("light");
+      root.setAttribute("data-theme", "light");
       root.style.colorScheme = "light";
+      if (body) {
+        body.classList.remove("dark");
+        body.classList.add("light");
+        body.setAttribute("data-theme", "light");
+      }
     }
   }, []);
 
@@ -46,7 +61,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         setThemeState(storedTheme);
         applyTheme(storedTheme);
       } else {
-        // Check system preference, default to dark for KabaadSe
         const prefersDark = window.matchMedia(
           "(prefers-color-scheme: dark)"
         ).matches;
@@ -55,28 +69,31 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         applyTheme(initialTheme);
       }
     } catch {
-      // Fallback in case localStorage is blocked
       applyTheme("dark");
     }
     setMounted(true);
   }, [applyTheme]);
 
   const setTheme = useCallback(
-    (newTheme: Theme) => {
-      setThemeState(newTheme);
-      applyTheme(newTheme);
-      try {
-        localStorage.setItem(STORAGE_KEY, newTheme);
-      } catch (err) {
-        console.warn("Unable to save theme to localStorage:", err);
-      }
+    (newTheme: Theme | ((prev: Theme) => Theme)) => {
+      setThemeState((prev) => {
+        const nextTheme =
+          typeof newTheme === "function" ? newTheme(prev) : newTheme;
+        applyTheme(nextTheme);
+        try {
+          localStorage.setItem(STORAGE_KEY, nextTheme);
+        } catch (err) {
+          console.warn("Unable to save theme to localStorage:", err);
+        }
+        return nextTheme;
+      });
     },
     [applyTheme]
   );
 
   const toggleTheme = useCallback(() => {
-    setTheme(theme === "dark" ? "light" : "dark");
-  }, [theme, setTheme]);
+    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+  }, [setTheme]);
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme, setTheme, mounted }}>

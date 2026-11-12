@@ -28,28 +28,14 @@ export default function RootLayout({
         />
         <script
           dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  var saved = localStorage.getItem('kabaadse_theme');
-                  if (saved === 'light') {
-                    document.documentElement.classList.remove('dark');
-                    document.documentElement.classList.add('light');
-                    document.documentElement.style.colorScheme = 'light';
-                  } else {
-                    document.documentElement.classList.add('dark');
-                    document.documentElement.classList.remove('light');
-                    document.documentElement.style.colorScheme = 'dark';
-                  }
-                } catch (e) {
-                  document.documentElement.classList.add('dark');
-                }
-              })();
-            `,
+            __html: `(function(){try{var t=localStorage.getItem('kabaadse_theme')||'dark';document.documentElement.classList.remove('light','dark');document.documentElement.classList.add(t);document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}catch(e){document.documentElement.classList.add('dark');}})();`,
           }}
         />
       </head>
-      <body className="min-h-full flex flex-col font-sans bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-200 selection:bg-emerald-600 selection:text-white">
+      <body
+        suppressHydrationWarning
+        className="min-h-full flex flex-col font-sans bg-slate-50 text-slate-900 dark:bg-black dark:text-slate-100 transition-colors duration-200 selection:bg-emerald-600 selection:text-white"
+      >
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>

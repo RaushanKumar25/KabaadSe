@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
+import CircularEconomy from "@/components/CircularEconomy";
 import BrandLogo from "@/components/BrandLogo";
 import {
   ChevronDown,
@@ -164,15 +165,15 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 flex flex-col font-sans selection:bg-emerald-600 selection:text-white transition-colors duration-200">
+    <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-black dark:text-slate-100 flex flex-col font-sans selection:bg-emerald-600 selection:text-white transition-colors duration-200">
       {/* 1. TOP NAVBAR */}
       <Navbar
         onOpenSellModal={() => setSellModalOpen(true)}
         onOpenRateList={scrollToRateCard}
       />
 
-      {/* 2. HERO SECTION */}
-      <section className="relative min-h-screen w-full flex flex-col justify-between overflow-hidden">
+      {/* 2. HERO SECTION (LOCKED TO PERMANENT DARK MODE) */}
+      <section className="relative min-h-screen w-full flex flex-col justify-between overflow-hidden bg-[#030712] text-white">
         {/* Background HD Image */}
         <div className="absolute inset-0 z-0">
           <Image
@@ -181,11 +182,11 @@ export default function Home() {
             fill
             priority
             quality={95}
-            className="object-cover object-center"
+            className="w-full h-full object-cover object-center brightness-[0.88] contrast-[1.05]"
           />
 
-          {/* High-contrast dark backdrop overlay for hero punchiness in both themes */}
-          <div className="absolute inset-0 bg-slate-950/70 dark:bg-black/75" />
+          {/* Clean, High-Clarity Neutral Dark Vignette Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/60 pointer-events-none" />
         </div>
 
         {/* Top spacer for fixed header */}
@@ -194,9 +195,9 @@ export default function Home() {
         {/* Center Hero Content */}
         <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center my-auto py-10">
           {/* Main Headline with Satoshi font and professional emerald box */}
-          <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-[7rem] font-black text-white tracking-tight leading-[1.04] mb-3 drop-shadow-lg select-none">
+          <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-[7rem] font-black text-white tracking-tight leading-[1.04] mb-3 drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] select-none">
             Transform Your{" "}
-            <span className="bg-emerald-600 text-white px-3 sm:px-6 py-0.5 sm:py-1 inline-block mx-1 rounded-sm">
+            <span className="bg-emerald-500 text-slate-950 px-3 sm:px-6 py-0.5 sm:py-1 inline-block mx-1 rounded-sm">
               Scrap
             </span>
             <br />
@@ -204,7 +205,7 @@ export default function Home() {
           </h1>
 
           {/* Clean Subtitle */}
-          <p className="text-slate-200 dark:text-slate-300 text-sm sm:text-base md:text-lg font-normal mt-3.5 max-w-2xl mx-auto leading-relaxed drop-shadow-sm">
+          <p className="text-slate-400 text-sm sm:text-base md:text-lg font-normal mt-3.5 max-w-2xl mx-auto leading-relaxed drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
             Doorstep collection with digital weighing and instant payout.
           </p>
 
@@ -213,7 +214,7 @@ export default function Home() {
             <button
               type="button"
               onClick={scrollToRateCard}
-              className="group h-12 px-8 rounded-xl bg-zinc-900/80 hover:bg-zinc-800/90 active:bg-zinc-900 border border-white/20 hover:border-white/40 text-white font-medium text-sm sm:text-base backdrop-blur-xl transition-all duration-200 shadow-md shadow-black/40 hover:scale-[1.02] active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2.5 whitespace-nowrap"
+              className="group h-12 px-8 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 font-medium text-sm sm:text-base backdrop-blur-xl transition-all duration-200 shadow-md shadow-black/40 hover:scale-[1.02] active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2.5 whitespace-nowrap"
             >
               <span>View Scrap Rates</span>
               <ArrowRight className="h-4 w-4 text-emerald-400 shrink-0 transition-transform duration-200 group-hover:translate-x-1" />
@@ -233,6 +234,9 @@ export default function Home() {
           </button>
         </div>
       </section>
+
+      {/* CIRCULAR ECONOMY & SUSTAINABILITY */}
+      <CircularEconomy />
 
       {/* 3. TRUST & STATS BAR */}
       <section className="relative z-20 bg-white dark:bg-zinc-950 border-y border-slate-200 dark:border-white/10 py-6 sm:py-8 shadow-xs transition-colors">
@@ -277,7 +281,7 @@ export default function Home() {
       {/* 4. LIVE SCRAP RATE CARD & VALUE ESTIMATOR */}
       <section
         id="rate-list"
-        className="py-20 bg-slate-100/70 dark:bg-slate-900/60 border-b border-slate-200/80 dark:border-white/5 scroll-mt-20 transition-colors"
+        className="py-20 bg-slate-100/70 dark:bg-black border-b border-slate-200/80 dark:border-white/10 scroll-mt-20 transition-colors"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-14">
@@ -461,7 +465,7 @@ export default function Home() {
       {/* 5. HOW IT WORKS */}
       <section
         id="how-it-works"
-        className="py-20 bg-white dark:bg-slate-950 scroll-mt-20 transition-colors"
+        className="py-20 bg-white dark:bg-black scroll-mt-20 transition-colors"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
