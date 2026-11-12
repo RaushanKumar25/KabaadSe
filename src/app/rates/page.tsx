@@ -21,6 +21,7 @@ import { useNavigationTransition } from "@/context/NavigationTransitionContext";
 import BrandLogo from "@/components/BrandLogo";
 import Footer from "@/components/Footer";
 import CityTransitionSplash from "@/components/CityTransitionSplash";
+import PickupBookingModal from "@/components/PickupBookingModal";
 import {
   CITIES_LIST,
   CityName,
@@ -197,6 +198,7 @@ function RatesPageContent() {
   const [selectedLocality, setSelectedLocality] = useState<string | null>(null);
   const [localityDropdownOpen, setLocalityDropdownOpen] = useState(false);
   const [localitySearchQuery, setLocalitySearchQuery] = useState("");
+  const [pickupModalOpen, setPickupModalOpen] = useState(false);
 
   const cityDropdownRef = useRef<HTMLDivElement>(null);
   const localityDropdownRef = useRef<HTMLDivElement>(null);
@@ -317,16 +319,13 @@ function RatesPageContent() {
           {/* Right: Actions */}
           <div className="flex items-center gap-2.5 sm:gap-3">
             {/* Sell Scrap CTA */}
-            <Link
-              href="/"
-              onClick={(e) => {
-                e.preventDefault();
-                triggerTransition("/", 1000);
-              }}
+            <button
+              type="button"
+              onClick={() => setPickupModalOpen(true)}
               className="px-3.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold rounded-full bg-[#5EDC1F] hover:bg-[#52c41b] text-black transition cursor-pointer flex items-center justify-center whitespace-nowrap shadow-sm hover:scale-[1.02] active:scale-[0.98]"
             >
               Sell Scrap
-            </Link>
+            </button>
 
             {/* Theme Toggle Button */}
             <button
@@ -793,12 +792,13 @@ function RatesPageContent() {
                 </Link>
               </div>
 
-              <Link
-                href="/"
-                className="px-4 py-2 rounded-full bg-[#5EDC1F] hover:bg-[#52c41b] text-black font-bold text-xs transition cursor-pointer self-start sm:self-auto shrink-0 shadow-sm"
+              <button
+                type="button"
+                onClick={() => setPickupModalOpen(true)}
+                className="px-4 py-2 rounded-full bg-[#5EDC1F] hover:bg-[#52c41b] text-black font-bold text-xs transition cursor-pointer self-start sm:self-auto shrink-0 shadow-sm hover:scale-[1.02] active:scale-[0.98]"
               >
                 Schedule Doorstep Pickup
-              </Link>
+              </button>
             </div>
 
             {/* Locality Pills */}
@@ -836,6 +836,14 @@ function RatesPageContent() {
           </section>
         </main>
       )}
+
+      {/* Doorstep Pickup Booking Modal */}
+      <PickupBookingModal
+        isOpen={pickupModalOpen}
+        onClose={() => setPickupModalOpen(false)}
+        defaultCity={selectedCity}
+        defaultLocality={selectedLocality || ""}
+      />
 
       {/* FOOTER */}
       <Footer />

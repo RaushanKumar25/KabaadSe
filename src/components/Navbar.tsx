@@ -251,10 +251,18 @@ export default function Navbar({
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 border border-white/20 bg-white/10 hover:bg-white/20 text-white transition-all duration-200 shadow-xs cursor-pointer hover:scale-105 active:scale-95 backdrop-blur-sm"
             aria-label={
-              theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+              mounted
+                ? theme === "dark"
+                  ? "Switch to light mode"
+                  : "Switch to dark mode"
+                : "Toggle theme"
             }
             title={
-              theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+              mounted
+                ? theme === "dark"
+                  ? "Switch to light mode"
+                  : "Switch to dark mode"
+                : "Toggle theme"
             }
           >
             {mounted ? (
@@ -286,10 +294,18 @@ export default function Navbar({
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 border border-white/20 bg-white/10 hover:bg-white/20 text-white transition cursor-pointer active:scale-95 backdrop-blur-sm"
             aria-label={
-              theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+              mounted
+                ? theme === "dark"
+                  ? "Switch to light mode"
+                  : "Switch to dark mode"
+                : "Toggle theme"
             }
             title={
-              theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+              mounted
+                ? theme === "dark"
+                  ? "Switch to light mode"
+                  : "Switch to dark mode"
+                : "Toggle theme"
             }
           >
             {mounted ? (

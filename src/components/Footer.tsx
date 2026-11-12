@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   Briefcase,
   Store,
+  Truck,
 } from "lucide-react";
 
 interface FooterProps {
@@ -322,6 +323,15 @@ export default function Footer({
                 >
                   Terms & Conditions
                 </button>
+              </li>
+              <li>
+                <Link
+                  href="/admin/pickups"
+                  className="hover:text-emerald-400 active:text-emerald-400 focus:text-emerald-400 focus:outline-none transition-colors cursor-pointer text-left inline-flex items-center gap-1.5 text-xs text-slate-400"
+                >
+                  <Truck className="h-3 w-3 text-emerald-400" />
+                  <span>Pickups Ledger</span>
+                </Link>
               </li>
             </ul>
           </div>

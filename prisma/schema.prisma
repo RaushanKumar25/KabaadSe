@@ -42,11 +42,12 @@ model PickupRequest {
   id             String   @id @default(uuid())
   customerName   String
   customerPhone  String
-  city           String
+  city           String   @default("Patna")
   locality       String
   address        String
   pickupDate     DateTime
   estimatedLoad  String
+  scrapTypes     String   @default("Mixed Scrap")
   status         String   @default("PENDING")
   createdAt      DateTime @default(now())
 }

@@ -38,6 +38,7 @@ import {
 import { useTheme } from "@/context/ThemeContext";
 import { useNavigationTransition } from "@/context/NavigationTransitionContext";
 import ServiceInquiryModal, { SERVICES_DATA } from "@/components/ServiceInquiryModal";
+import PickupBookingModal from "@/components/PickupBookingModal";
 
 export default function ScrapCollectionPage() {
   const { theme, toggleTheme } = useTheme();
@@ -55,17 +56,6 @@ export default function ScrapCollectionPage() {
   ]);
 
   const selectedLocation = "Boring Road, Patna";
-
-  // Booking Form State
-  const [bookingSubmitted, setBookingSubmitted] = useState(false);
-  const [bookingData, setBookingData] = useState({
-    name: "",
-    phone: "",
-    address: "",
-    scrapType: "Cardboard & Paper",
-    approxWeight: "20-50 kg",
-    timeSlot: "10:00 AM - 01:00 PM",
-  });
 
   // Scroll lock and ESC key handling for all modals
   useEffect(() => {
@@ -94,11 +84,6 @@ export default function ScrapCollectionPage() {
     setSelectedCategories((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
     );
-  };
-
-  const handleBookingSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setBookingSubmitted(true);
   };
 
   return (
@@ -1213,187 +1198,12 @@ export default function ScrapCollectionPage() {
       />
 
       {/* PICKUP BOOKING MODAL */}
-      {sellModalOpen && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              setSellModalOpen(false);
-              setBookingSubmitted(false);
-            }
-          }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-lg rounded-3xl bg-[#121417] text-white border border-neutral-800 p-6 sm:p-8 shadow-2xl text-left my-auto transition-colors"
-          >
-            <div className="absolute top-5 right-5 flex items-center gap-1.5">
-              <button
-                type="button"
-                onClick={toggleTheme}
-                className="p-2 rounded-full text-neutral-400 hover:text-white hover:bg-neutral-800 transition cursor-pointer"
-                aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-                title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-              >
-                {theme === "dark" ? (
-                  <Sun className="h-5 w-5 text-amber-400" />
-                ) : (
-                  <Moon className="h-5 w-5 text-neutral-300" />
-                )}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setSellModalOpen(false);
-                  setBookingSubmitted(false);
-                }}
-                className="p-2 rounded-full text-neutral-400 hover:text-white hover:bg-neutral-800 transition cursor-pointer"
-                aria-label="Close dialog"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            {!bookingSubmitted ? (
-              <div>
-                <div className="flex items-center gap-2 text-[#5EDC1F] mb-1">
-                  <CalendarCheck className="h-5 w-5" />
-                  <span className="text-xs font-bold uppercase tracking-wider">
-                    Instant Doorstep Booking
-                  </span>
-                </div>
-                <h3 className="text-2xl font-black text-white">
-                  Schedule Scrap Pickup
-                </h3>
-                <p className="text-xs text-neutral-400 mt-1 mb-4">
-                  Verified executive with calibrated digital scale will visit your doorstep in {selectedLocation}.
-                </p>
-
-                {/* Selected categories chip banner */}
-                {selectedCategories.length > 0 && (
-                  <div className="mb-4 p-3 rounded-xl bg-neutral-900 border border-neutral-800">
-                    <div className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1.5">
-                      Selected Items ({selectedCategories.length})
-                    </div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {selectedCategories.map((cat) => (
-                        <span
-                          key={cat}
-                          className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#5EDC1F]/20 text-[#5EDC1F] border border-[#5EDC1F]/40 capitalize"
-                        >
-                          {cat}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <form onSubmit={handleBookingSubmit} className="space-y-3.5">
-                  <div>
-                    <label className="block text-xs font-semibold text-neutral-300 mb-1">
-                      Full Name *
-                    </label>
-                    <input
-                      required
-                      type="text"
-                      placeholder="e.g. Ramesh Kumar"
-                      value={bookingData.name}
-                      onChange={(e) =>
-                        setBookingData({ ...bookingData, name: e.target.value })
-                      }
-                      className="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-[#5EDC1F] focus:ring-1 focus:ring-[#5EDC1F] transition-colors"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                    <div>
-                      <label className="block text-xs font-semibold text-neutral-300 mb-1">
-                        Phone Number *
-                      </label>
-                      <input
-                        required
-                        type="tel"
-                        placeholder="+91 98765 43210"
-                        value={bookingData.phone}
-                        onChange={(e) =>
-                          setBookingData({ ...bookingData, phone: e.target.value })
-                        }
-                        className="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-[#5EDC1F] focus:ring-1 focus:ring-[#5EDC1F] transition-colors"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-neutral-300 mb-1">
-                        Approx Weight
-                      </label>
-                      <select
-                        value={bookingData.approxWeight}
-                        onChange={(e) =>
-                          setBookingData({
-                            ...bookingData,
-                            approxWeight: e.target.value,
-                          })
-                        }
-                        className="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#5EDC1F] focus:ring-1 focus:ring-[#5EDC1F] transition-colors"
-                      >
-                        <option value="10-20 kg" className="bg-[#121417] text-white">10 - 20 kg</option>
-                        <option value="20-50 kg" className="bg-[#121417] text-white">20 - 50 kg</option>
-                        <option value="50-100 kg" className="bg-[#121417] text-white">50 - 100 kg</option>
-                        <option value="100+ kg" className="bg-[#121417] text-white">100+ kg (Bulk)</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-neutral-300 mb-1">
-                      Complete Address *
-                    </label>
-                    <textarea
-                      required
-                      rows={2}
-                      placeholder={`Flat/House No., Society/Locality (${selectedLocation})...`}
-                      value={bookingData.address}
-                      onChange={(e) =>
-                        setBookingData({ ...bookingData, address: e.target.value })
-                      }
-                      className="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-3.5 py-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-[#5EDC1F] focus:ring-1 focus:ring-[#5EDC1F] resize-none transition-colors"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="w-full py-3.5 rounded-full bg-[#5EDC1F] hover:bg-[#52c41b] text-black font-bold text-sm shadow-xl shadow-[#5EDC1F]/20 transition cursor-pointer mt-2 hover:scale-[1.01] active:scale-[0.99]"
-                  >
-                    Confirm Doorstep Pickup
-                  </button>
-                </form>
-              </div>
-            ) : (
-              <div className="py-8 text-center space-y-4">
-                <div className="w-16 h-16 rounded-full bg-[#5EDC1F]/20 text-[#5EDC1F] flex items-center justify-center mx-auto">
-                  <CheckCircle2 className="h-10 w-10" />
-                </div>
-                <h4 className="text-2xl font-black text-white">
-                  Pickup Scheduled!
-                </h4>
-                <p className="text-sm text-neutral-300 max-w-sm mx-auto">
-                  Thank you, <strong>{bookingData.name || "Customer"}</strong>. Our executive
-                  will contact you on <strong>{bookingData.phone}</strong> to confirm your slot in {selectedLocation}.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSellModalOpen(false);
-                    setBookingSubmitted(false);
-                  }}
-                  className="px-6 py-2.5 rounded-full bg-white text-black hover:bg-neutral-200 font-semibold text-sm transition cursor-pointer"
-                >
-                  Close
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      <PickupBookingModal
+        isOpen={sellModalOpen}
+        onClose={() => setSellModalOpen(false)}
+        defaultCity="Patna"
+        defaultLocality="Boring Road"
+      />
 
       {/* DOWNLOAD THE APP MODAL */}
       {downloadModalOpen && (
