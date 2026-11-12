@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
-import Image from "next/image";
+import Link from "next/link";
 import CityTransitionSplash from "@/components/CityTransitionSplash";
 import {
   X,
@@ -40,6 +40,7 @@ function ScrapModalCardIcon({ item }: { item: ScrapRateItem }) {
   if (item.image && !hasError) {
     return (
       <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#111315] border border-neutral-800 flex items-center justify-center p-1 shrink-0 shadow-inner group-hover:scale-105 transition-transform overflow-hidden">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={item.image}
           alt={item.name}
@@ -63,12 +64,16 @@ export default function ScrapPricesModal({
   initialCity = "Patna",
   onOpenSellModal,
 }: ScrapPricesModalProps) {
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
+
   const [currentStep, setCurrentStep] = useState<"city-select" | "splash" | "rates-board">(
     "city-select"
   );
   const [selectedCity, setSelectedCity] = useState<CityName>(initialCity);
-  const [splashProgress, setSplashProgress] = useState(false);
 
   // Rates board states
   const [selectedCategory, setSelectedCategory] = useState<ScrapCategory>("All");
@@ -78,20 +83,18 @@ export default function ScrapPricesModal({
 
   const cityDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Guarantee hydration before createPortal
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // Sync initial city when prop changes
-  useEffect(() => {
+  // Sync state cleanly when props change without cascading renders
+  const [prevInitialCity, setPrevInitialCity] = useState(initialCity);
+  if (initialCity !== prevInitialCity) {
+    setPrevInitialCity(initialCity);
     if (initialCity) {
       setSelectedCity(initialCity);
     }
-  }, [initialCity]);
+  }
 
-  // Reset to step 1 when opening freshly
-  useEffect(() => {
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+  if (isOpen !== prevIsOpen) {
+    setPrevIsOpen(isOpen);
     if (isOpen) {
       setCurrentStep("city-select");
       setSearchQuery("");
@@ -99,7 +102,7 @@ export default function ScrapPricesModal({
       setCityDropdownOpen(false);
       setSelectedLocality(null);
     }
-  }, [isOpen]);
+  }
 
   // Body scroll locking and ESC key listener
   useEffect(() => {
@@ -397,12 +400,12 @@ export default function ScrapPricesModal({
               <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs text-neutral-400 gap-2">
                 <div>
                   <span>Note: For Bulk scrap (Commercial) prices may vary. </span>
-                  <a
+                  <Link
                     href="/#contact"
                     className="text-[#5EDC1F] hover:underline font-semibold inline-flex items-center gap-1 cursor-pointer"
                   >
                     Contact us to know more →
-                  </a>
+                  </Link>
                 </div>
 
                 {onOpenSellModal && (
