@@ -12,7 +12,7 @@ import {
   ArrowLeft,
   Sun,
   Moon,
-  Sparkles,
+  ShieldCheck,
   PhoneCall,
   X,
   ExternalLink,
@@ -239,7 +239,7 @@ function RatesPageContent() {
             </div>
 
             <div className="mt-10 pt-6 border-t border-neutral-200 dark:border-neutral-800/80 text-xs text-neutral-500 dark:text-neutral-400 flex items-center justify-center gap-2">
-              <Sparkles className="w-4 h-4 text-[#5EDC1F]" />
+              <ShieldCheck className="w-4 h-4 text-[#5EDC1F]" />
               <span>Calibrated digital weighing scales • Instant cash/UPI payout guarantee</span>
             </div>
           </div>
@@ -462,7 +462,7 @@ function RatesPageContent() {
             {/* Locality Pills */}
             <div className="border-t border-neutral-200 dark:border-neutral-800 pt-4">
               <div className="text-xs font-bold text-neutral-800 dark:text-neutral-200 mb-2.5 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-[#5EDC1F]" />
+                <MapPin className="w-3.5 h-3.5 text-[#5EDC1F]" />
                 <span>Check scrap rates of specific locality in {selectedCity}</span>
                 {selectedLocality && (
                   <span className="text-emerald-600 dark:text-[#5EDC1F] font-semibold">

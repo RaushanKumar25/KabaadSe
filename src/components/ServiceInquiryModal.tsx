@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
-import { X, CheckCircle2, ShieldCheck, Sparkles, HelpCircle, Sun, Moon } from "lucide-react";
+import { X, CheckCircle2, ShieldCheck, HelpCircle, Sun, Moon } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
 
 export interface ServiceDetail {
@@ -556,7 +556,7 @@ export default function ServiceInquiryModal({
             <div className="bg-neutral-900/60 p-4 rounded-xl border border-neutral-800 flex flex-col justify-between min-w-0">
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <Sparkles className="w-4 h-4 text-[#5EDC1F] shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 text-[#5EDC1F] shrink-0" />
                   <h4 className="text-sm font-bold text-white">
                     Key Benefits
                   </h4>

@@ -22,7 +22,7 @@ export default function BrandLogo({
         height={size}
         priority
         quality={100}
-        className="w-full h-full object-contain filter drop-shadow-[0_2px_8px_rgba(94,220,31,0.35)]"
+        className="w-full h-full object-contain"
       />
     </div>
   );

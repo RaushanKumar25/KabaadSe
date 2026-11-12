@@ -10,7 +10,6 @@ import {
   MapPin,
   ChevronDown,
   Check,
-  Sparkles,
 } from "lucide-react";
 import {
   CITIES_LIST,
@@ -401,7 +400,7 @@ export default function ScrapPricesModal({
 
               <div className="border-t border-neutral-800/80 pt-3">
                 <div className="text-[12px] font-semibold text-neutral-300 mb-2 flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-[#5EDC1F]" />
+                  <MapPin className="w-3.5 h-3.5 text-[#5EDC1F]" />
                   <span>Check scrap rates of specific locality in {selectedCity}</span>
                   {selectedLocality && (
                     <span className="text-[11px] text-[#5EDC1F] font-normal">
