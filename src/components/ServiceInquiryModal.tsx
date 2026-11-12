@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { X, CheckCircle2, ShieldCheck, Sparkles, HelpCircle } from "lucide-react";
+import { X, CheckCircle2, ShieldCheck, Sparkles, HelpCircle, Sun, Moon } from "lucide-react";
+import { useTheme } from "@/context/ThemeContext";
 
 export interface ServiceDetail {
   id: string;
@@ -371,6 +372,8 @@ export default function ServiceInquiryModal({
   onClose,
   service,
 }: ServiceInquiryModalProps) {
+  const { theme, toggleTheme } = useTheme();
+
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -381,7 +384,19 @@ export default function ServiceInquiryModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  // Lock body scroll and handle Escape key
+  // Fix Page Scroll Lock on Close
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
+
+  // Handle keyboard ESC key to trigger onClose()
   useEffect(() => {
     if (!isOpen) return;
 
@@ -391,12 +406,8 @@ export default function ServiceInquiryModal({
       }
     };
 
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
     window.addEventListener("keydown", handleKeyDown);
-
     return () => {
-      document.body.style.overflow = originalOverflow;
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [isOpen, onClose]);
@@ -409,6 +420,7 @@ export default function ServiceInquiryModal({
     }
   }, [isOpen, service?.id]);
 
+  // Return null when closed or no service
   if (!isOpen || !service) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -434,257 +446,278 @@ export default function ServiceInquiryModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="service-modal-title"
-      onClick={onClose}
-      className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 sm:p-6 overflow-y-auto"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-3xl bg-white dark:bg-[#121417] border border-neutral-200 dark:border-neutral-800 rounded-2xl shadow-2xl p-6 sm:p-8 max-h-[90vh] overflow-y-auto"
+        className="relative w-full max-w-2xl max-h-[85vh] flex flex-col bg-[#121417] text-white rounded-2xl border border-neutral-800 shadow-2xl overflow-hidden my-auto"
       >
-        {/* Header Section */}
-        <div className="flex items-start justify-between gap-4 pb-4 border-b border-neutral-100 dark:border-neutral-800">
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <span className="bg-[#5EDC1F]/20 text-[#5EDC1F] text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider">
+        {/* Header (Sticky top) */}
+        <div className="flex items-center justify-between p-5 border-b border-neutral-800 shrink-0">
+          <div className="space-y-1 pr-4">
+            <div className="flex items-center gap-2">
+              <span className="bg-[#5EDC1F]/20 text-[#5EDC1F] text-xs font-semibold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
                 {service.category}
               </span>
             </div>
             <h3
               id="service-modal-title"
-              className="text-2xl sm:text-3xl font-black text-neutral-900 dark:text-white tracking-tight"
+              className="text-xl sm:text-2xl font-bold text-white tracking-tight"
             >
               {service.title}
             </h3>
-            <p className="text-sm sm:text-base text-neutral-600 dark:text-neutral-400 font-normal leading-relaxed">
-              {service.tagline}
-            </p>
           </div>
 
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close modal"
-            className="text-neutral-400 hover:text-neutral-700 dark:hover:text-white p-2 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 transition duration-150 shrink-0 cursor-pointer"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-
-        {/* 3-Pillar Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 my-6">
-          {/* Pillar 1: Why */}
-          <div className="bg-neutral-50 dark:bg-neutral-900/60 p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 flex flex-col justify-between">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <HelpCircle className="w-4 h-4 text-[#5EDC1F]" />
-                <h4 className="text-sm font-bold text-neutral-900 dark:text-white">
-                  Why It Matters
-                </h4>
-              </div>
-              <p className="text-xs text-neutral-600 dark:text-neutral-400 leading-relaxed font-normal">
-                {service.pillars.why}
-              </p>
-            </div>
-          </div>
-
-          {/* Pillar 2: Benefits */}
-          <div className="bg-neutral-50 dark:bg-neutral-900/60 p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 flex flex-col justify-between">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Sparkles className="w-4 h-4 text-[#5EDC1F]" />
-                <h4 className="text-sm font-bold text-neutral-900 dark:text-white">
-                  Key Benefits
-                </h4>
-              </div>
-              {Array.isArray(service.pillars.benefits) ? (
-                <ul className="space-y-1.5 text-xs text-neutral-600 dark:text-neutral-400">
-                  {service.pillars.benefits.map((benefit, idx) => (
-                    <li key={idx} className="flex items-start gap-1.5 leading-snug">
-                      <span className="text-[#5EDC1F] font-bold shrink-0 mt-0.5">•</span>
-                      <span>{benefit}</span>
-                    </li>
-                  ))}
-                </ul>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="text-neutral-400 hover:text-white p-2 rounded-xl hover:bg-neutral-800 transition duration-150 cursor-pointer"
+              aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+              title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            >
+              {theme === "dark" ? (
+                <Sun className="h-5 w-5 text-amber-400" />
               ) : (
-                <p className="text-xs text-neutral-600 dark:text-neutral-400 leading-relaxed font-normal">
-                  {service.pillars.benefits}
-                </p>
+                <Moon className="h-5 w-5 text-neutral-300" />
               )}
-            </div>
-          </div>
-
-          {/* Pillar 3: Our Solution */}
-          <div className="bg-neutral-50 dark:bg-neutral-900/60 p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 flex flex-col justify-between">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <ShieldCheck className="w-4 h-4 text-[#5EDC1F]" />
-                <h4 className="text-sm font-bold text-neutral-900 dark:text-white">
-                  Our Solution
-                </h4>
-              </div>
-              <p className="text-xs text-neutral-600 dark:text-neutral-400 leading-relaxed font-normal">
-                {service.pillars.solution}
-              </p>
-            </div>
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close modal"
+              className="text-neutral-400 hover:text-white p-2 rounded-xl hover:bg-neutral-800 transition duration-150 cursor-pointer"
+            >
+              <X className="h-5 w-5" />
+            </button>
           </div>
         </div>
 
-        {/* "What We Do" Steps list (if available) */}
-        {service.steps && service.steps.length > 0 && (
-          <div className="my-6">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 mb-3">
-              What We Do • Process Flow
-            </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5">
-              {service.steps.map((step, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-start gap-2.5 p-3 rounded-xl bg-neutral-50 dark:bg-neutral-900/40 border border-neutral-200/80 dark:border-neutral-800/80"
-                >
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#5EDC1F]/20 text-[#5EDC1F] text-xs font-bold">
-                    {idx + 1}
-                  </span>
-                  <p className="text-xs text-neutral-700 dark:text-neutral-300 leading-relaxed font-medium">
-                    {step}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Body (Scrollable) */}
+        <div className="p-6 overflow-y-auto space-y-5 flex-1">
+          <p className="text-sm text-neutral-300 leading-relaxed font-normal">
+            {service.tagline}
+          </p>
 
-        {/* Lead Capture Form Section */}
-        <div className="mt-8 pt-6 border-t border-neutral-100 dark:border-neutral-800">
-          <div className="mb-4">
-            <h4 className="text-lg font-bold text-neutral-900 dark:text-white">
-              Request Service Consultation
-            </h4>
-            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
-              Fill in your details below and our service specialist will get back to you within 24 hours.
-            </p>
-          </div>
-
-          {submitted ? (
-            <div className="p-6 rounded-2xl bg-[#5EDC1F]/10 border border-[#5EDC1F]/30 text-center space-y-2 animate-in fade-in duration-200">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#5EDC1F]/20 text-[#5EDC1F] mx-auto mb-1">
-                <CheckCircle2 className="w-6 h-6" />
-              </div>
-              <h5 className="text-base font-bold text-neutral-900 dark:text-white">
-                Inquiry Submitted Successfully!
-              </h5>
-              <p className="text-xs text-neutral-600 dark:text-neutral-300 max-w-md mx-auto">
-                Thank you! Our dedicated specialist for <strong>{service.title}</strong> has received your request and will contact you shortly.
-              </p>
-              <div className="pt-2">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="px-5 py-2 text-xs font-semibold rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition cursor-pointer"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-3.5">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                {/* Name */}
-                <div>
-                  <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                    Your Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    required
-                    type="text"
-                    placeholder="e.g. Ramesh Kumar"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    className="w-full bg-neutral-50 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-xl px-3.5 py-2.5 text-sm text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-none focus:border-[#5EDC1F] focus:ring-1 focus:ring-[#5EDC1F] transition"
-                  />
-                </div>
-
-                {/* Phone Number */}
-                <div>
-                  <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                    Phone Number <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    required
-                    type="tel"
-                    placeholder="+91 98765 43210"
-                    value={formData.phone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, phone: e.target.value })
-                    }
-                    className="w-full bg-neutral-50 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-xl px-3.5 py-2.5 text-sm text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-none focus:border-[#5EDC1F] focus:ring-1 focus:ring-[#5EDC1F] transition"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                {/* Email */}
-                <div>
-                  <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                    Email Address <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    required
-                    type="email"
-                    placeholder="name@company.com"
-                    value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
-                    className="w-full bg-neutral-50 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-xl px-3.5 py-2.5 text-sm text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-none focus:border-[#5EDC1F] focus:ring-1 focus:ring-[#5EDC1F] transition"
-                  />
-                </div>
-
-                {/* City / Society Name */}
-                <div>
-                  <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                    City / Society / Company Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    required
-                    type="text"
-                    placeholder="e.g. Patna / Ashiana Nagar"
-                    value={formData.cityOrSociety}
-                    onChange={(e) =>
-                      setFormData({ ...formData, cityOrSociety: e.target.value })
-                    }
-                    className="w-full bg-neutral-50 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-xl px-3.5 py-2.5 text-sm text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-none focus:border-[#5EDC1F] focus:ring-1 focus:ring-[#5EDC1F] transition"
-                  />
-                </div>
-              </div>
-
-              {/* Message */}
+          {/* 3-Pillar Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {/* Pillar 1: Why */}
+            <div className="bg-neutral-900/60 p-4 rounded-xl border border-neutral-800 flex flex-col justify-between min-w-0">
               <div>
-                <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                  Message / Specific Requirements
-                </label>
-                <textarea
-                  rows={3}
-                  placeholder="Tell us about your estimated scrap quantity, pickup frequency, or any questions..."
-                  value={formData.message}
-                  onChange={(e) =>
-                    setFormData({ ...formData, message: e.target.value })
-                  }
-                  className="w-full bg-neutral-50 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-xl px-3.5 py-2.5 text-sm text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-none focus:border-[#5EDC1F] focus:ring-1 focus:ring-[#5EDC1F] resize-none transition"
-                />
+                <div className="flex items-center gap-2 mb-2">
+                  <HelpCircle className="w-4 h-4 text-[#5EDC1F] shrink-0" />
+                  <h4 className="text-sm font-bold text-white">
+                    Why It Matters
+                  </h4>
+                </div>
+                <p className="text-xs text-neutral-400 leading-relaxed font-normal break-words">
+                  {service.pillars.why}
+                </p>
               </div>
+            </div>
 
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full py-3 bg-[#5EDC1F] hover:bg-[#52c41b] text-black font-semibold rounded-xl transition duration-200 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
-              >
-                {isSubmitting ? "Submitting Inquiry..." : "Submit Inquiry"}
-              </button>
-            </form>
+            {/* Pillar 2: Benefits */}
+            <div className="bg-neutral-900/60 p-4 rounded-xl border border-neutral-800 flex flex-col justify-between min-w-0">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Sparkles className="w-4 h-4 text-[#5EDC1F] shrink-0" />
+                  <h4 className="text-sm font-bold text-white">
+                    Key Benefits
+                  </h4>
+                </div>
+                {Array.isArray(service.pillars.benefits) ? (
+                  <ul className="space-y-1.5 text-xs text-neutral-400">
+                    {service.pillars.benefits.map((benefit, idx) => (
+                      <li key={idx} className="flex items-start gap-1.5 leading-snug break-words">
+                        <span className="text-[#5EDC1F] font-bold shrink-0 mt-0.5">•</span>
+                        <span>{benefit}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-xs text-neutral-400 leading-relaxed font-normal break-words">
+                    {service.pillars.benefits}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Pillar 3: Our Solution */}
+            <div className="bg-neutral-900/60 p-4 rounded-xl border border-neutral-800 flex flex-col justify-between min-w-0">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <ShieldCheck className="w-4 h-4 text-[#5EDC1F] shrink-0" />
+                  <h4 className="text-sm font-bold text-white">
+                    Our Solution
+                  </h4>
+                </div>
+                <p className="text-xs text-neutral-400 leading-relaxed font-normal break-words">
+                  {service.pillars.solution}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* "What We Do" Steps list (if available) */}
+          {service.steps && service.steps.length > 0 && (
+            <div className="space-y-3">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-neutral-400">
+                What We Do • Process Flow
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {service.steps.map((step, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-start gap-2.5 p-3 rounded-xl bg-neutral-900/40 border border-neutral-800/80 min-w-0"
+                  >
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#5EDC1F]/20 text-[#5EDC1F] text-xs font-bold">
+                      {idx + 1}
+                    </span>
+                    <p className="text-xs text-neutral-300 leading-relaxed font-medium break-words">
+                      {step}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
+
+          {/* Lead Capture Form Section */}
+          <div className="pt-5 border-t border-neutral-800 space-y-4">
+            <div>
+              <h4 className="text-base sm:text-lg font-bold text-white">
+                Request Service Consultation
+              </h4>
+              <p className="text-xs text-neutral-400 mt-0.5">
+                Fill in your details below and our service specialist will get back to you within 24 hours.
+              </p>
+            </div>
+
+            {submitted ? (
+              <div className="p-6 rounded-2xl bg-[#5EDC1F]/10 border border-[#5EDC1F]/30 text-center space-y-2 animate-in fade-in duration-200">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#5EDC1F]/20 text-[#5EDC1F] mx-auto mb-1">
+                  <CheckCircle2 className="w-6 h-6" />
+                </div>
+                <h5 className="text-base font-bold text-white">
+                  Inquiry Submitted Successfully!
+                </h5>
+                <p className="text-xs text-neutral-300 max-w-md mx-auto">
+                  Thank you! Our dedicated specialist for <strong>{service.title}</strong> has received your request and will contact you shortly.
+                </p>
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="px-5 py-2 text-xs font-semibold rounded-xl bg-white text-black hover:bg-neutral-200 transition cursor-pointer"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-3.5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  {/* Name */}
+                  <div>
+                    <label className="block text-xs font-medium text-neutral-300 mb-1">
+                      Your Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      required
+                      type="text"
+                      placeholder="e.g. Ramesh Kumar"
+                      value={formData.name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
+                      className="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-[#5EDC1F] focus:ring-1 focus:ring-[#5EDC1F] transition"
+                    />
+                  </div>
+
+                  {/* Phone Number */}
+                  <div>
+                    <label className="block text-xs font-medium text-neutral-300 mb-1">
+                      Phone Number <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      required
+                      type="tel"
+                      placeholder="+91 98765 43210"
+                      value={formData.phone}
+                      onChange={(e) =>
+                        setFormData({ ...formData, phone: e.target.value })
+                      }
+                      className="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-[#5EDC1F] focus:ring-1 focus:ring-[#5EDC1F] transition"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  {/* Email */}
+                  <div>
+                    <label className="block text-xs font-medium text-neutral-300 mb-1">
+                      Email Address <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      required
+                      type="email"
+                      placeholder="name@company.com"
+                      value={formData.email}
+                      onChange={(e) =>
+                        setFormData({ ...formData, email: e.target.value })
+                      }
+                      className="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-[#5EDC1F] focus:ring-1 focus:ring-[#5EDC1F] transition"
+                    />
+                  </div>
+
+                  {/* City / Society Name */}
+                  <div>
+                    <label className="block text-xs font-medium text-neutral-300 mb-1">
+                      City / Society / Company Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      required
+                      type="text"
+                      placeholder="e.g. Patna / Ashiana Nagar"
+                      value={formData.cityOrSociety}
+                      onChange={(e) =>
+                        setFormData({ ...formData, cityOrSociety: e.target.value })
+                      }
+                      className="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-[#5EDC1F] focus:ring-1 focus:ring-[#5EDC1F] transition"
+                    />
+                  </div>
+                </div>
+
+                {/* Message */}
+                <div>
+                  <label className="block text-xs font-medium text-neutral-300 mb-1">
+                    Message / Specific Requirements
+                  </label>
+                  <textarea
+                    rows={3}
+                    placeholder="Tell us about your estimated scrap quantity, pickup frequency, or any questions..."
+                    value={formData.message}
+                    onChange={(e) =>
+                      setFormData({ ...formData, message: e.target.value })
+                    }
+                    className="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-[#5EDC1F] focus:ring-1 focus:ring-[#5EDC1F] resize-none transition"
+                  />
+                </div>
+
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full py-3 bg-[#5EDC1F] hover:bg-[#52c41b] text-black font-semibold rounded-xl transition duration-200 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
+                >
+                  {isSubmitting ? "Submitting Inquiry..." : "Submit Inquiry"}
+                </button>
+              </form>
+            )}
+          </div>
         </div>
       </div>
     </div>
