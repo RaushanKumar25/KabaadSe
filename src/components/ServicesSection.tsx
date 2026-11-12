@@ -142,14 +142,14 @@ export default function ServicesSection({ onContact }: ServicesSectionProps) {
   };
 
   return (
-    <section className="w-full bg-[#f8fafc] dark:bg-black py-20 px-6 sm:px-12 border-t border-neutral-200 dark:border-neutral-900 transition-colors duration-200">
-      <div className="max-w-6xl mx-auto">
+    <section className="min-h-screen w-full flex flex-col justify-center items-center py-10 sm:py-12 px-6 sm:px-12 box-border relative overflow-hidden bg-[#f8fafc] dark:bg-black border-t border-neutral-200 dark:border-neutral-900 transition-colors duration-200">
+      <div className="max-w-6xl w-full mx-auto">
         {/* Header Block */}
         <div className="text-center max-w-3xl mx-auto">
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-neutral-900 dark:text-white text-center tracking-tight leading-tight">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-neutral-900 dark:text-white text-center tracking-tight leading-tight">
             Our Services
           </h2>
-          <p className="text-neutral-600 dark:text-neutral-400 text-center mt-3 text-lg sm:text-xl md:text-2xl font-normal tracking-tight">
+          <p className="text-neutral-600 dark:text-neutral-400 text-center mt-1.5 sm:mt-2 text-sm sm:text-base font-normal tracking-tight">
             Attaining{" "}
             <span className="text-emerald-500 font-semibold">
               sustainable solutions
@@ -158,18 +158,18 @@ export default function ServicesSection({ onContact }: ServicesSectionProps) {
           </p>
 
           {/* Filter Tabs (Centered) */}
-          <div className="flex justify-center items-center gap-3 mt-6 flex-wrap">
+          <div className="flex justify-center items-center gap-2 sm:gap-2.5 mt-4 sm:mt-5 flex-wrap">
             {/* Tab: All Services */}
             <button
               type="button"
               onClick={() => setActiveTab("all")}
-              className={`px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer flex items-center gap-2 ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs sm:text-sm transition-colors cursor-pointer flex items-center gap-1.5 ${
                 activeTab === "all"
                   ? "bg-[#22c55e] text-black font-semibold"
                   : "bg-white dark:bg-[#1a1d21] text-neutral-700 dark:text-neutral-300 border border-neutral-300 dark:border-neutral-800 hover:border-neutral-400"
               }`}
             >
-              <Layers className="h-4 w-4" />
+              <Layers className="h-3.5 w-3.5" />
               <span>All services</span>
             </button>
 
@@ -177,13 +177,13 @@ export default function ServicesSection({ onContact }: ServicesSectionProps) {
             <button
               type="button"
               onClick={() => setActiveTab("individual")}
-              className={`px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer flex items-center gap-2 ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs sm:text-sm transition-colors cursor-pointer flex items-center gap-1.5 ${
                 activeTab === "individual"
                   ? "bg-[#22c55e] text-black font-semibold"
                   : "bg-white dark:bg-[#1a1d21] text-neutral-700 dark:text-neutral-300 border border-neutral-300 dark:border-neutral-800 hover:border-neutral-400"
               }`}
             >
-              <Smartphone className="h-4 w-4" />
+              <Smartphone className="h-3.5 w-3.5" />
               <span>For Individuals</span>
             </button>
 
@@ -191,40 +191,40 @@ export default function ServicesSection({ onContact }: ServicesSectionProps) {
             <button
               type="button"
               onClick={() => setActiveTab("organisation")}
-              className={`px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer flex items-center gap-2 ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs sm:text-sm transition-colors cursor-pointer flex items-center gap-1.5 ${
                 activeTab === "organisation"
                   ? "bg-[#22c55e] text-black font-semibold"
                   : "bg-white dark:bg-[#1a1d21] text-neutral-700 dark:text-neutral-300 border border-neutral-300 dark:border-neutral-800 hover:border-neutral-400"
               }`}
             >
-              <Landmark className="h-4 w-4" />
+              <Landmark className="h-3.5 w-3.5" />
               <span>For Organisations</span>
             </button>
           </div>
         </div>
 
-        {/* Static 3-Column Grid Layout (No Slider) */}
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-10">
+        {/* Static 3-Column Grid Layout (Compact for 100vh) */}
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-3.5 mt-5 sm:mt-6">
           {filteredServices.map((service) => {
             const Icon = service.icon;
             return (
               <div
                 key={service.id}
-                className="flex items-start gap-4 p-5 rounded-2xl bg-white dark:bg-[#121417] border border-neutral-200 dark:border-white/[0.06] transition-colors shadow-xs dark:shadow-none hover:border-emerald-500/40"
+                className="flex items-start gap-3.5 p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white dark:bg-[#121417] border border-neutral-200 dark:border-white/[0.06] transition-colors shadow-xs dark:shadow-none hover:border-emerald-500/40"
               >
                 {/* Circular Pastel Badge */}
                 <div
-                  className={`w-12 h-12 rounded-full shrink-0 flex items-center justify-center ${service.badgeBg} ${service.badgeText}`}
+                  className={`w-10 h-10 rounded-full shrink-0 flex items-center justify-center ${service.badgeBg} ${service.badgeText}`}
                 >
-                  <Icon className="h-5 w-5 stroke-[2.2]" />
+                  <Icon className="h-4 w-4 stroke-[2.2]" />
                 </div>
 
                 {/* Right Side Content */}
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-base font-bold text-neutral-900 dark:text-white mb-1 tracking-tight">
+                  <h3 className="text-sm sm:text-[15px] font-bold text-neutral-900 dark:text-white mb-0.5 tracking-tight">
                     {service.title}
                   </h3>
-                  <p className="text-xs sm:text-sm text-neutral-600 dark:text-neutral-400 leading-snug">
+                  <p className="text-xs text-neutral-600 dark:text-neutral-400 leading-snug">
                     {service.description}
                   </p>
                 </div>
@@ -234,11 +234,11 @@ export default function ServicesSection({ onContact }: ServicesSectionProps) {
         </div>
 
         {/* Contact Us Button */}
-        <div className="flex justify-center mt-10">
+        <div className="flex justify-center mt-5 sm:mt-6">
           <button
             type="button"
             onClick={handleContact}
-            className="px-7 py-2.5 rounded-lg bg-[#22c55e] hover:bg-[#16a34a] text-black font-semibold text-sm transition-colors cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98]"
+            className="px-6 py-2 rounded-lg bg-[#22c55e] hover:bg-[#16a34a] text-black font-semibold text-xs sm:text-sm transition-colors cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98]"
           >
             Contact Us
           </button>

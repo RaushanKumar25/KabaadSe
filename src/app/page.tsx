@@ -5,6 +5,7 @@ import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import CircularEconomy from "@/components/CircularEconomy";
 import ServicesSection from "@/components/ServicesSection";
+import HowItWorks from "@/components/HowItWorks";
 import ImpactSection from "@/components/ImpactSection";
 import ContactSection from "@/components/ContactSection";
 import BrandLogo from "@/components/BrandLogo";
@@ -14,7 +15,6 @@ import {
   Scale,
   Zap,
   CheckCircle2,
-  Calendar,
   Search,
   Truck,
   X,
@@ -176,7 +176,7 @@ export default function Home() {
       />
 
       {/* 2. HERO SECTION (LOCKED TO PERMANENT DARK MODE) */}
-      <section className="relative min-h-screen w-full flex flex-col justify-between overflow-hidden bg-[#030712] text-white">
+      <section className="min-h-screen w-full flex flex-col justify-between items-center py-6 sm:py-8 px-6 sm:px-12 box-border relative overflow-hidden bg-[#030712] text-white">
         {/* Background HD Image */}
         <div className="absolute inset-0 z-0">
           <Image
@@ -193,12 +193,12 @@ export default function Home() {
         </div>
 
         {/* Top spacer for fixed header */}
-        <div className="h-24 sm:h-28" />
+        <div className="h-16 sm:h-20" />
 
         {/* Center Hero Content */}
-        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center my-auto py-10">
+        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center my-auto py-6 sm:py-8">
           {/* Main Headline with Satoshi font and professional emerald box */}
-          <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-[7rem] font-black text-white tracking-tight leading-[1.04] mb-3 drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] select-none">
+          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] xl:text-[6.25rem] font-black text-white tracking-tight leading-[1.04] mb-3 drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] select-none">
             Transform Your{" "}
             <span className="bg-emerald-500 text-slate-950 px-3 sm:px-6 py-0.5 sm:py-1 inline-block mx-1 rounded-sm">
               Scrap
@@ -244,6 +244,9 @@ export default function Home() {
       {/* OUR SERVICES */}
       <ServicesSection onContact={() => setSellModalOpen(true)} />
 
+      {/* HOW IT WORKS */}
+      <HowItWorks />
+
       {/* FARAK PADTA HAI (IMPACT METRICS) */}
       <ImpactSection />
 
@@ -287,260 +290,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 4. LIVE SCRAP RATE CARD & VALUE ESTIMATOR */}
-      <section
-        id="rate-list"
-        className="py-20 bg-slate-100/70 dark:bg-black border-b border-slate-200/80 dark:border-white/10 scroll-mt-20 transition-colors"
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-14">
-            <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-600 dark:text-emerald-400 text-xs font-semibold uppercase tracking-wider mb-3">
-              <Zap className="h-3.5 w-3.5" />
-              Live Scrap Market Rates
-            </span>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight">
-              Transparent, Daily-Updated Pricing
-            </h2>
-            <p className="text-slate-600 dark:text-slate-400 mt-3 text-base sm:text-lg">
-              No bargaining, no cheated weights. We guarantee ISO-calibrated digital
-              scales and live fair market rates.
-            </p>
-          </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-            {/* Left: Cards List & Filter */}
-            <div className="lg:col-span-2 space-y-6">
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-                <div className="flex flex-wrap gap-2">
-                  {["All", "Paper", "Metals", "Plastic", "E-Waste"].map(
-                    (cat) => (
-                      <button
-                        key={cat}
-                        onClick={() => setSelectedCategory(cat)}
-                        className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
-                          selectedCategory === cat
-                            ? "bg-emerald-600 text-white shadow-md shadow-emerald-950/30"
-                            : "bg-white dark:bg-white/5 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-transparent hover:bg-slate-50 dark:hover:bg-white/10"
-                        }`}
-                      >
-                        {cat}
-                      </button>
-                    )
-                  )}
-                </div>
 
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500" />
-                  <input
-                    type="text"
-                    placeholder="Search scrap item..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full sm:w-64 pl-9 pr-4 py-2 rounded-xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-colors shadow-xs"
-                  />
-                </div>
-              </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {filteredRates.map((item) => (
-                  <div
-                    key={item.id}
-                    className="group relative rounded-2xl bg-white dark:bg-slate-950/80 border border-slate-200/90 dark:border-white/10 p-5 hover:border-emerald-500/50 hover:shadow-lg dark:hover:bg-slate-950 transition-all duration-200 shadow-xs"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <h3 className="font-bold text-slate-900 dark:text-white text-base">
-                          {item.name}
-                        </h3>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-1">
-                          {item.description}
-                        </p>
-                      </div>
-                      {item.badge && (
-                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 shrink-0">
-                          {item.badge}
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="mt-4 pt-3 border-t border-slate-100 dark:border-white/5 flex items-baseline justify-between">
-                      <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                        Rate per {item.unit}
-                      </span>
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
-                          ₹{item.rate}
-                        </span>
-                        <span className="text-xs text-slate-500 dark:text-slate-400">
-                          /{item.unit}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Right: Instant Value Estimator */}
-            <div className="rounded-3xl bg-white dark:bg-zinc-950 border border-emerald-500/30 dark:border-emerald-500/30 p-6 sm:p-7 shadow-xl dark:shadow-2xl relative overflow-hidden transition-colors">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
-
-              <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 mb-2">
-                <Scale className="h-5 w-5" />
-                <span className="text-xs font-bold uppercase tracking-wider">
-                  Instant Estimator
-                </span>
-              </div>
-              <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
-                Calculate Scrap Earnings
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Estimate how much money you will receive directly in your bank or cash.
-              </p>
-
-              <div className="mt-6 space-y-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                    Select Scrap Category
-                  </label>
-                  <select
-                    value={calcItem}
-                    onChange={(e) => setCalcItem(e.target.value)}
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/15 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500 transition-colors"
-                  >
-                    {SCRAP_RATES.map((item) => (
-                      <option
-                        key={item.id}
-                        value={item.id}
-                        className="bg-white dark:bg-zinc-900 text-slate-900 dark:text-white"
-                      >
-                        {item.name} (₹{item.rate}/{item.unit})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <div className="flex justify-between items-center mb-1.5">
-                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                      Estimated Quantity ({selectedCalcItemData.unit})
-                    </label>
-                    <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                      {calcWeight} {selectedCalcItemData.unit}
-                    </span>
-                  </div>
-                  <input
-                    type="range"
-                    min="5"
-                    max="200"
-                    step="5"
-                    value={calcWeight}
-                    onChange={(e) => setCalcWeight(Number(e.target.value))}
-                    className="w-full accent-emerald-600 cursor-pointer"
-                  />
-                  <div className="flex justify-between text-[11px] text-slate-500 mt-1">
-                    <span>5 {selectedCalcItemData.unit}</span>
-                    <span>100 {selectedCalcItemData.unit}</span>
-                    <span>200+ {selectedCalcItemData.unit}</span>
-                  </div>
-                </div>
-
-                <div className="rounded-2xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-white/10 p-5 text-center mt-6 transition-colors">
-                  <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                    Estimated Direct Payout
-                  </span>
-                  <div className="text-4xl font-black text-emerald-600 dark:text-emerald-400 mt-1 flex items-center justify-center gap-1">
-                    <span>₹{calculatedTotal}</span>
-                  </div>
-                  <span className="text-[11px] text-slate-500 dark:text-slate-500 mt-1 block">
-                    Instant UPI transfer or hard cash upon doorstep pickup
-                  </span>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setSellModalOpen(true)}
-                  className="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-lg shadow-emerald-950/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <span>Book Pickup for ₹{calculatedTotal}</span>
-                  <ArrowRight className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 5. HOW IT WORKS */}
-      <section
-        id="how-it-works"
-        className="py-20 bg-white dark:bg-black scroll-mt-20 transition-colors"
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-600 dark:text-emerald-400 text-xs font-semibold uppercase tracking-wider mb-3">
-              Fast & Hassle-free
-            </span>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight">
-              How Doorstep Pickup Works
-            </h2>
-            <p className="text-slate-600 dark:text-slate-400 mt-3 text-base sm:text-lg">
-              Say goodbye to searching for local ragpickers. We bring certified scrap
-              recycling right to your doorstep.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-            <div className="relative rounded-3xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-white/10 p-8 flex flex-col items-center text-center group hover:border-emerald-500/40 hover:shadow-md transition-all">
-              <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-6 group-hover:scale-110 transition-transform">
-                <Calendar className="h-8 w-8" />
-              </div>
-              <div className="absolute top-6 right-6 text-3xl font-black text-slate-200 dark:text-white/10">
-                01
-              </div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
-                Schedule Pickup
-              </h3>
-              <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                Choose a suitable date and convenient time slot. Tell us what scrap
-                materials you have.
-              </p>
-            </div>
-
-            <div className="relative rounded-3xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-white/10 p-8 flex flex-col items-center text-center group hover:border-emerald-500/40 hover:shadow-md transition-all">
-              <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-6 group-hover:scale-110 transition-transform">
-                <Scale className="h-8 w-8" />
-              </div>
-              <div className="absolute top-6 right-6 text-3xl font-black text-slate-200 dark:text-white/10">
-                02
-              </div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
-                Certified Digital Weighing
-              </h3>
-              <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                Our verified pickup executive arrives with a calibrated,
-                government-inspected digital scale.
-              </p>
-            </div>
-
-            <div className="relative rounded-3xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-white/10 p-8 flex flex-col items-center text-center group hover:border-emerald-500/40 hover:shadow-md transition-all">
-              <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-6 group-hover:scale-110 transition-transform">
-                <Zap className="h-8 w-8" />
-              </div>
-              <div className="absolute top-6 right-6 text-3xl font-black text-slate-200 dark:text-white/10">
-                03
-              </div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
-                Instant UPI / Cash Payout
-              </h3>
-              <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                Receive instant money straight to your UPI (GPay/PhonePe/Paytm) or cash,
-                plus a digital green recycling certificate.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* CONTACT SECTION */}
       <ContactSection />

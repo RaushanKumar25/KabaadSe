@@ -14,10 +14,10 @@ export default function BrandLogo({
     <div
       className={`relative flex items-center justify-center shrink-0 select-none transition-transform duration-200 group-hover:scale-105 ${className}`}
     >
-      {/* Exact eco-fintech overlapping leaf/loop logo from uploaded design */}
+      {/* Stylized K eco recycling bin brand logo */}
       <Image
         src="/images/logo.png"
-        alt="kabaadse eco leaf loop logo"
+        alt="KabaadSe Logo"
         width={size}
         height={size}
         priority

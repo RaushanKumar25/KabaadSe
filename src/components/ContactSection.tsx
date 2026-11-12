@@ -31,15 +31,15 @@ export default function ContactSection() {
   return (
     <section
       id="contact"
-      className="w-full bg-[#f8fafc] dark:bg-black py-16 sm:py-24 px-4 sm:px-8 lg:px-12 border-t border-neutral-200 dark:border-neutral-900 transition-colors duration-200"
+      className="min-h-screen w-full flex flex-col justify-center items-center py-10 sm:py-12 px-6 sm:px-12 box-border relative overflow-hidden bg-[#f8fafc] dark:bg-black border-t border-neutral-200 dark:border-neutral-900 transition-colors duration-200"
     >
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-6xl w-full mx-auto">
         {/* Header Block */}
-        <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-14">
+        <div className="text-center max-w-2xl mx-auto mb-6 sm:mb-8">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-neutral-900 dark:text-white tracking-tight leading-tight">
             Get in touch with us
           </h2>
-          <p className="text-neutral-600 dark:text-neutral-400 text-sm sm:text-base mt-2.5 font-normal">
+          <p className="text-neutral-600 dark:text-neutral-400 text-sm sm:text-base mt-2 font-normal">
             Any question or remarks? Just write us a{" "}
             <span className="text-[#22c55e] font-semibold">message!</span>
           </p>
