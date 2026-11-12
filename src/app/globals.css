@@ -4,6 +4,21 @@
 
 @custom-variant dark (&:where(.dark, .dark *, [data-theme="dark"], [data-theme="dark"] *));
 
+@theme {
+  --color-thyme: #5EDC1F;
+  --color-emerald-50: #f0fde8;
+  --color-emerald-100: #ddfbc9;
+  --color-emerald-200: #bef797;
+  --color-emerald-300: #96f059;
+  --color-emerald-400: #5EDC1F;
+  --color-emerald-500: #5EDC1F;
+  --color-emerald-600: #3b9c10;
+  --color-emerald-700: #2d7a0d;
+  --color-emerald-800: #26610f;
+  --color-emerald-900: #215110;
+  --color-emerald-950: #0d2c05;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

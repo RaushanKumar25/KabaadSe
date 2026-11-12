@@ -56,7 +56,10 @@ export default function CircularEconomy({ onLearnMore }: CircularEconomyProps) {
   };
 
   return (
-    <section className="min-h-screen w-full flex flex-col justify-center items-center py-12 px-6 sm:px-12 box-border relative overflow-hidden bg-white dark:bg-black border-t border-neutral-200 dark:border-neutral-900 transition-colors duration-300">
+    <section
+      id="circular-economy"
+      className="min-h-screen w-full flex flex-col justify-center items-center py-12 px-6 sm:px-12 box-border relative overflow-hidden bg-white dark:bg-black border-t border-neutral-200 dark:border-neutral-900 transition-colors duration-300"
+    >
       <div className="max-w-6xl w-full mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-center">
         {/* Left Column Graphic: Interactive 3D Perspective Tilt & Suspension Truck */}
         <div
