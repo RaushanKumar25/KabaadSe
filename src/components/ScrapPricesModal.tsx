@@ -34,6 +34,29 @@ interface ScrapPricesModalProps {
   onOpenSellModal?: () => void;
 }
 
+function ScrapModalCardIcon({ item }: { item: ScrapRateItem }) {
+  const [hasError, setHasError] = useState(false);
+
+  if (item.image && !hasError) {
+    return (
+      <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#111315] border border-neutral-800 flex items-center justify-center p-1 shrink-0 shadow-inner group-hover:scale-105 transition-transform overflow-hidden">
+        <img
+          src={item.image}
+          alt={item.name}
+          onError={() => setHasError(true)}
+          className="w-full h-full object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]"
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-9 h-9 rounded-lg bg-neutral-900 border border-neutral-800/80 flex items-center justify-center text-base shrink-0 group-hover:scale-105 transition-transform">
+      {item.icon}
+    </div>
+  );
+}
+
 export default function ScrapPricesModal({
   isOpen,
   onClose,
@@ -338,9 +361,7 @@ export default function ScrapPricesModal({
                       className="bg-[#16181c] border border-neutral-800/80 rounded-xl p-3.5 sm:p-4 flex items-center justify-between gap-3 hover:border-neutral-700 hover:bg-[#1a1c22] transition-colors group cursor-default"
                     >
                       <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                        <div className="w-9 h-9 rounded-lg bg-neutral-900 border border-neutral-800/80 flex items-center justify-center text-base shrink-0 group-hover:scale-105 transition-transform">
-                          {item.icon}
-                        </div>
+                        <ScrapModalCardIcon item={item} />
                         <span className="text-xs sm:text-sm font-medium text-neutral-200 break-words group-hover:text-white transition-colors">
                           {item.name}
                         </span>
