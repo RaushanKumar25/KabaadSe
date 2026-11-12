@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
@@ -36,8 +36,10 @@ import {
   Users,
   Sun,
   Moon,
+  Check,
 } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
+import ServiceInquiryModal, { SERVICES_DATA } from "@/components/ServiceInquiryModal";
 
 interface ScrapRate {
   id: string;
@@ -68,12 +70,26 @@ export default function ScrapCollectionPage() {
   // Modal states
   const [sellModalOpen, setSellModalOpen] = useState(false);
   const [rateListModalOpen, setRateListModalOpen] = useState(false);
+  const [downloadModalOpen, setDownloadModalOpen] = useState(false);
+  const [vehicleInquiryOpen, setVehicleInquiryOpen] = useState(false);
 
-  // Phone Mockup interactive category states
+  // Phone Mockup interactive category states (Defaults to Papers & Plastics)
   const [selectedCategories, setSelectedCategories] = useState<string[]>([
     "papers",
     "plastics",
   ]);
+
+  // City locality selection for KabaadSe (Patna, Bihar)
+  const [selectedLocation, setSelectedLocation] = useState("Boring Road, Patna");
+  const [locationDropdownOpen, setLocationDropdownOpen] = useState(false);
+
+  const PATNA_LOCALITIES = [
+    "Boring Road, Patna",
+    "Kankarbagh, Patna",
+    "Ashiana Nagar, Patna",
+    "Bailey Road, Patna",
+    "Rajendra Nagar, Patna",
+  ];
 
   // Booking Form State
   const [bookingSubmitted, setBookingSubmitted] = useState(false);
@@ -89,6 +105,31 @@ export default function ScrapCollectionPage() {
   // Rate list search and filter
   const [rateSearch, setRateSearch] = useState("");
   const [rateCategory, setRateCategory] = useState("All");
+
+  // Scroll lock and ESC key handling for all modals
+  useEffect(() => {
+    if (sellModalOpen || rateListModalOpen || downloadModalOpen || vehicleInquiryOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setSellModalOpen(false);
+        setRateListModalOpen(false);
+        setDownloadModalOpen(false);
+        setLocationDropdownOpen(false);
+        setVehicleInquiryOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = "unset";
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [sellModalOpen, rateListModalOpen, downloadModalOpen]);
 
   const toggleCategory = (id: string) => {
     setSelectedCategories((prev) =>
@@ -514,81 +555,199 @@ export default function ScrapCollectionPage() {
       <section className="py-20 sm:py-24 px-6 sm:px-12 bg-[#0c0d0e] border-t border-neutral-900 space-y-16">
         <div className="max-w-6xl w-full mx-auto space-y-14">
           {/* BANNER A: VEHICLE SCRAPPING (MATCHES SCREENSHOT 3) */}
-          <div className="rounded-3xl border border-neutral-800 bg-gradient-to-br from-[#1c1613] via-[#15171a] to-[#0c0d0e] p-6 sm:p-10 lg:p-12 relative overflow-hidden shadow-2xl text-left">
-            <div className="max-w-3xl relative z-10 space-y-4">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-tight">
-                Want to get rid of your old vehicle?
-              </h2>
-              <p className="text-neutral-300 text-sm sm:text-base leading-relaxed font-normal">
-                Let go of your age old unfit motor that doesn&apos;t serve its purpose neither to you
-                nor to the environment & help bring circularity in the Indian automobile sector.
-              </p>
+          <div className="rounded-3xl border border-neutral-800/90 bg-gradient-to-br from-[#1a1512] via-[#121417] to-[#0c0d0e] p-6 sm:p-10 lg:p-12 relative overflow-hidden shadow-2xl text-left">
+            {/* Ambient lighting glows for depth */}
+            <div className="absolute -top-24 -right-24 w-80 h-80 bg-amber-600/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-[#5EDC1F]/5 rounded-full blur-3xl pointer-events-none" />
+
+            {/* Top Split Section: Content on the side (left) & Image alongside (right) */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center relative z-10">
+              {/* Content Column (Left side) */}
+              <div className="lg:col-span-7 space-y-5">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-300 text-xs font-semibold tracking-wide">
+                  <Car className="w-3.5 h-3.5 text-amber-400" />
+                  <span>MoRTH Govt. Registered RVSF Facility</span>
+                </div>
+
+                <div className="space-y-3">
+                  <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-[1.12]">
+                    Want to get rid of your{" "}
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-300 to-[#5EDC1F]">
+                      old vehicle?
+                    </span>
+                  </h2>
+                  <p className="text-neutral-300 text-sm sm:text-base leading-relaxed font-normal">
+                    Let go of your age-old, unfit motor that no longer serves you or the environment.
+                    Under India&apos;s National Vehicle Scrappage Policy, KabaadSe provides hassle-free doorstep towing,
+                    transparent scrap metal valuation, and official RTO deregistration with an authorized Certificate of Deposit (COD).
+                  </p>
+                </div>
+
+                {/* Feature Highlights Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                  <div className="flex items-start gap-2.5">
+                    <div className="w-5 h-5 rounded-full bg-[#5EDC1F]/15 text-[#5EDC1F] flex items-center justify-center shrink-0 mt-0.5">
+                      <Check className="w-3 h-3" />
+                    </div>
+                    <span className="text-xs text-neutral-300 leading-snug">
+                      <strong className="text-white font-semibold">Up to 25% Road Tax Rebate</strong> on your next new vehicle purchase
+                    </span>
+                  </div>
+
+                  <div className="flex items-start gap-2.5">
+                    <div className="w-5 h-5 rounded-full bg-[#5EDC1F]/15 text-[#5EDC1F] flex items-center justify-center shrink-0 mt-0.5">
+                      <Check className="w-3 h-3" />
+                    </div>
+                    <span className="text-xs text-neutral-300 leading-snug">
+                      <strong className="text-white font-semibold">Official RTO COD Certificate</strong> ensuring zero future legal liability
+                    </span>
+                  </div>
+
+                  <div className="flex items-start gap-2.5">
+                    <div className="w-5 h-5 rounded-full bg-[#5EDC1F]/15 text-[#5EDC1F] flex items-center justify-center shrink-0 mt-0.5">
+                      <Check className="w-3 h-3" />
+                    </div>
+                    <span className="text-xs text-neutral-300 leading-snug">
+                      <strong className="text-white font-semibold">Free Doorstep Flatbed Towing</strong> across Patna &amp; all Bihar districts
+                    </span>
+                  </div>
+
+                  <div className="flex items-start gap-2.5">
+                    <div className="w-5 h-5 rounded-full bg-[#5EDC1F]/15 text-[#5EDC1F] flex items-center justify-center shrink-0 mt-0.5">
+                      <Check className="w-3 h-3" />
+                    </div>
+                    <span className="text-xs text-neutral-300 leading-snug">
+                      <strong className="text-white font-semibold">Instant Bank Payout</strong> calculated on certified gross vehicle weight
+                    </span>
+                  </div>
+                </div>
+
+                {/* Action Button & Trust Seal */}
+                <div className="flex flex-wrap items-center gap-4 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setVehicleInquiryOpen(true)}
+                    className="px-7 py-3.5 rounded-full bg-[#5EDC1F] hover:bg-[#52c41b] text-black font-extrabold text-xs uppercase tracking-wider transition-all duration-200 cursor-pointer flex items-center gap-2 shadow-lg shadow-[#5EDC1F]/20 hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    <span>Request Vehicle Scrapping</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                  <span className="text-xs text-neutral-400 flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-[#5EDC1F]" />
+                    100% legal RTO chassis destruction
+                  </span>
+                </div>
+              </div>
+
+              {/* Featured Old Vehicle Graphic Column (Right side) */}
+              <div className="lg:col-span-5">
+                <div className="relative group mx-auto max-w-md lg:max-w-none">
+                  {/* Subtle ambient warm glow behind graphic */}
+                  <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-amber-600/25 via-orange-500/15 to-[#5EDC1F]/25 blur-xl opacity-70 group-hover:opacity-100 transition duration-700 pointer-events-none" />
+
+                  {/* Graphic Card Container */}
+                  <div className="relative rounded-3xl overflow-hidden border border-neutral-700/80 bg-gradient-to-b from-[#181a1f] via-[#121418] to-[#0c0d10] shadow-2xl p-6 sm:p-7 flex flex-col items-center justify-center">
+                    
+                    {/* Top Status Badges */}
+                    <div className="w-full flex items-center justify-between mb-3">
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/75 backdrop-blur-md border border-white/15 text-white text-[11px] font-semibold shadow-sm">
+                        <span className="w-2 h-2 rounded-full bg-[#5EDC1F] animate-pulse" />
+                        End-of-Life Vehicle (ELV)
+                      </div>
+                      <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/20 backdrop-blur-md border border-amber-500/40 text-amber-300 text-[11px] font-semibold">
+                        <Car className="w-3 h-3" />
+                        <span>RVSF Facility</span>
+                      </div>
+                    </div>
+
+                    {/* Centered Graphic Icon in Contrast Showcase Pod */}
+                    <div className="relative w-full h-[220px] sm:h-[250px] flex items-center justify-center my-2">
+                      <div className="absolute w-44 h-44 sm:w-52 sm:h-52 rounded-full bg-[#5EDC1F]/15 blur-2xl pointer-events-none" />
+                      <div className="relative w-44 h-44 sm:w-52 sm:h-52 rounded-2xl bg-neutral-900/90 border border-neutral-800 p-6 flex items-center justify-center shadow-xl group-hover:scale-105 transition-transform duration-500">
+                        <Image
+                          src="/images/vehicle.png"
+                          alt="End-of-life scrap vehicle ready for registered RVSF vehicle scrapping and RTO deregistration"
+                          width={240}
+                          height={240}
+                          priority
+                          className="w-full h-full object-contain filter invert drop-shadow-[0_4px_16px_rgba(94,220,31,0.35)]"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Bottom Glassmorphic Certification Pill */}
+                    <div className="w-full p-4 rounded-2xl bg-neutral-950/85 backdrop-blur-md border border-white/10 text-left space-y-1.5 shadow-xl mt-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                          <ShieldCheck className="w-4 h-4 text-[#5EDC1F]" />
+                          Authorized RTO Scrapping
+                        </span>
+                        <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-[#5EDC1F]/20 text-[#5EDC1F] border border-[#5EDC1F]/30">
+                          COD CERTIFIED
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-neutral-300 leading-snug font-normal">
+                        Guaranteed engine depollution, metal recovery &amp; official de-registration certificate within 48 hours.
+                      </p>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* 3 Pillar Cards (Why, Benefits, Our Solution - Screenshot 3 match) */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4.5 mt-8 relative z-10">
+            {/* 3 Pillar Cards (Why, Benefits, Our Solution - Matching Screenshot 3) */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4.5 mt-10 pt-8 border-t border-neutral-800/80 relative z-10">
               {/* Card 1: Why */}
-              <div className="p-5 sm:p-6 rounded-2xl bg-[#162740]/90 border border-blue-900/40 text-left flex flex-col justify-between">
+              <div className="p-5 sm:p-6 rounded-2xl bg-[#162740]/80 hover:bg-[#162740] border border-blue-900/50 hover:border-blue-500/40 text-left flex flex-col justify-between transition-all duration-300 group">
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-xl font-bold text-white">Why</h3>
-                    <span className="w-6 h-6 rounded-full bg-blue-950 border border-blue-500/40 text-blue-300 text-xs font-bold flex items-center justify-center">
+                    <h3 className="text-lg font-bold text-white group-hover:text-blue-300 transition-colors">
+                      1. Why Scrap?
+                    </h3>
+                    <span className="w-7 h-7 rounded-full bg-blue-950 border border-blue-500/40 text-blue-300 text-xs font-bold flex items-center justify-center">
                       1
                     </span>
                   </div>
                   <p className="text-xs text-blue-100/80 leading-relaxed font-normal">
-                    A vehicle as old as 10 to 15 years becomes unfit to drive on roads due to its
-                    decreased efficiency and increased carbon emissions, making it prone to road
-                    accidents, requires high maintenance, and causes extensive harm to the environment.
+                    A vehicle as old as 10 to 15 years becomes unfit to drive on roads due to decreased efficiency and high carbon emissions. It faces impoundment, heavy penalties, requires constant maintenance, and causes extensive harm to the environment.
                   </p>
                 </div>
               </div>
 
               {/* Card 2: Benefits */}
-              <div className="p-5 sm:p-6 rounded-2xl bg-[#162740]/90 border border-blue-900/40 text-left flex flex-col justify-between">
+              <div className="p-5 sm:p-6 rounded-2xl bg-[#162740]/80 hover:bg-[#162740] border border-blue-900/50 hover:border-blue-500/40 text-left flex flex-col justify-between transition-all duration-300 group">
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-xl font-bold text-white">Benefits</h3>
-                    <span className="w-6 h-6 rounded-full bg-blue-950 border border-blue-500/40 text-blue-300 text-xs font-bold flex items-center justify-center">
+                    <h3 className="text-lg font-bold text-white group-hover:text-blue-300 transition-colors">
+                      2. Government Perks
+                    </h3>
+                    <span className="w-7 h-7 rounded-full bg-blue-950 border border-blue-500/40 text-blue-300 text-xs font-bold flex items-center justify-center">
                       2
                     </span>
                   </div>
                   <p className="text-xs text-blue-100/80 leading-relaxed font-normal">
-                    Adhering to the Vehicle Scrappage Policy of 2021, the right disposal of the
-                    scrapped vehicle is streamlined, thus helping to establish a circular economy
-                    in the automobile sector. While you enjoy perks like no registration fee on your
-                    new purchase & road taxes waiver.
+                    Adhering to the Vehicle Scrappage Policy 2021, you enjoy major financial benefits: up to 25% road tax concession on new vehicle registration, registration fee waivers, and official relief from future road tax liabilities.
                   </p>
                 </div>
               </div>
 
               {/* Card 3: Our Solution */}
-              <div className="p-5 sm:p-6 rounded-2xl bg-[#162740]/90 border border-blue-900/40 text-left flex flex-col justify-between">
+              <div className="p-5 sm:p-6 rounded-2xl bg-[#162740]/80 hover:bg-[#162740] border border-blue-900/50 hover:border-blue-500/40 text-left flex flex-col justify-between transition-all duration-300 group">
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-xl font-bold text-white">Our Solution</h3>
-                    <span className="w-6 h-6 rounded-full bg-blue-950 border border-blue-500/40 text-blue-300 text-xs font-bold flex items-center justify-center">
+                    <h3 className="text-lg font-bold text-white group-hover:text-blue-300 transition-colors">
+                      3. KabaadSe Solution
+                    </h3>
+                    <span className="w-7 h-7 rounded-full bg-blue-950 border border-blue-500/40 text-blue-300 text-xs font-bold flex items-center justify-center">
                       3
                     </span>
                   </div>
                   <p className="text-xs text-blue-100/80 leading-relaxed font-normal">
-                    When your vehicle becomes unfit to be on roads, KabaadSe provides solutions for
-                    its right disposal while giving fair value against it. We also issue a certified
-                    vehicle scrapping certificate (COD) so that you can avail benefits under the
-                    Vehicle Scrappage Policy 2021.
+                    KabaadSe provides end-to-end authorized solutions: free doorstep flatbed towing, transparent weight-based payout, and an official Certificate of Deposit (COD) issued directly through the Ministry of Road Transport &amp; Highways portal.
                   </p>
                 </div>
               </div>
-            </div>
-
-            <div className="mt-7 flex flex-wrap items-center gap-4 relative z-10">
-              <button
-                type="button"
-                onClick={() => setSellModalOpen(true)}
-                className="px-6 py-3 rounded-full bg-[#5EDC1F] hover:bg-[#52c41b] text-black font-bold text-xs uppercase tracking-wider transition cursor-pointer"
-              >
-                Request Vehicle Scrapping
-              </button>
             </div>
           </div>
 
@@ -1102,20 +1261,31 @@ export default function ScrapCollectionPage() {
 
       {/* PICKUP BOOKING MODAL */}
       {sellModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/75 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="relative w-full max-w-lg rounded-3xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 p-6 sm:p-8 shadow-2xl text-left transition-colors">
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setSellModalOpen(false);
+              setBookingSubmitted(false);
+            }
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-lg rounded-3xl bg-[#121417] text-white border border-neutral-800 p-6 sm:p-8 shadow-2xl text-left my-auto transition-colors"
+          >
             <div className="absolute top-5 right-5 flex items-center gap-1.5">
               <button
                 type="button"
                 onClick={toggleTheme}
-                className="p-2 rounded-full text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 transition cursor-pointer"
+                className="p-2 rounded-full text-neutral-400 hover:text-white hover:bg-neutral-800 transition cursor-pointer"
                 aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
                 title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
               >
                 {theme === "dark" ? (
                   <Sun className="h-5 w-5 text-amber-400" />
                 ) : (
-                  <Moon className="h-5 w-5 text-neutral-700" />
+                  <Moon className="h-5 w-5 text-neutral-300" />
                 )}
               </button>
               <button
@@ -1124,7 +1294,7 @@ export default function ScrapCollectionPage() {
                   setSellModalOpen(false);
                   setBookingSubmitted(false);
                 }}
-                className="p-2 rounded-full text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 transition cursor-pointer"
+                className="p-2 rounded-full text-neutral-400 hover:text-white hover:bg-neutral-800 transition cursor-pointer"
                 aria-label="Close dialog"
               >
                 <X className="h-5 w-5" />
@@ -1136,19 +1306,38 @@ export default function ScrapCollectionPage() {
                 <div className="flex items-center gap-2 text-[#5EDC1F] mb-1">
                   <CalendarCheck className="h-5 w-5" />
                   <span className="text-xs font-bold uppercase tracking-wider">
-                    Instant Booking
+                    Instant Doorstep Booking
                   </span>
                 </div>
-                <h3 className="text-2xl font-black text-neutral-900 dark:text-white">
+                <h3 className="text-2xl font-black text-white">
                   Schedule Scrap Pickup
                 </h3>
-                <p className="text-xs text-neutral-600 dark:text-neutral-400 mt-1">
-                  Verified executive with calibrated digital scale will visit your doorstep.
+                <p className="text-xs text-neutral-400 mt-1 mb-4">
+                  Verified executive with calibrated digital scale will visit your doorstep in {selectedLocation}.
                 </p>
 
-                <form onSubmit={handleBookingSubmit} className="mt-5 space-y-3.5">
+                {/* Selected categories chip banner */}
+                {selectedCategories.length > 0 && (
+                  <div className="mb-4 p-3 rounded-xl bg-neutral-900 border border-neutral-800">
+                    <div className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1.5">
+                      Selected Items ({selectedCategories.length})
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {selectedCategories.map((cat) => (
+                        <span
+                          key={cat}
+                          className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#5EDC1F]/20 text-[#5EDC1F] border border-[#5EDC1F]/40 capitalize"
+                        >
+                          {cat}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <form onSubmit={handleBookingSubmit} className="space-y-3.5">
                   <div>
-                    <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1">
+                    <label className="block text-xs font-semibold text-neutral-300 mb-1">
                       Full Name *
                     </label>
                     <input
@@ -1159,13 +1348,13 @@ export default function ScrapCollectionPage() {
                       onChange={(e) =>
                         setBookingData({ ...bookingData, name: e.target.value })
                       }
-                      className="w-full bg-neutral-50 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-750 rounded-xl px-3.5 py-2.5 text-sm text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus:outline-none focus:border-[#5EDC1F] focus:ring-1 focus:ring-[#5EDC1F] transition-colors"
+                      className="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-[#5EDC1F] focus:ring-1 focus:ring-[#5EDC1F] transition-colors"
                     />
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                     <div>
-                      <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1">
+                      <label className="block text-xs font-semibold text-neutral-300 mb-1">
                         Phone Number *
                       </label>
                       <input
@@ -1176,11 +1365,11 @@ export default function ScrapCollectionPage() {
                         onChange={(e) =>
                           setBookingData({ ...bookingData, phone: e.target.value })
                         }
-                        className="w-full bg-neutral-50 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-750 rounded-xl px-3.5 py-2.5 text-sm text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus:outline-none focus:border-[#5EDC1F] focus:ring-1 focus:ring-[#5EDC1F] transition-colors"
+                        className="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-[#5EDC1F] focus:ring-1 focus:ring-[#5EDC1F] transition-colors"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1">
+                      <label className="block text-xs font-semibold text-neutral-300 mb-1">
                         Approx Weight
                       </label>
                       <select
@@ -1191,29 +1380,29 @@ export default function ScrapCollectionPage() {
                             approxWeight: e.target.value,
                           })
                         }
-                        className="w-full bg-neutral-50 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-750 rounded-xl px-3 py-2.5 text-sm text-neutral-900 dark:text-white focus:outline-none focus:border-[#5EDC1F] focus:ring-1 focus:ring-[#5EDC1F] transition-colors"
+                        className="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#5EDC1F] focus:ring-1 focus:ring-[#5EDC1F] transition-colors"
                       >
-                        <option value="10-20 kg" className="bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white">10 - 20 kg</option>
-                        <option value="20-50 kg" className="bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white">20 - 50 kg</option>
-                        <option value="50-100 kg" className="bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white">50 - 100 kg</option>
-                        <option value="100+ kg" className="bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white">100+ kg (Bulk)</option>
+                        <option value="10-20 kg" className="bg-[#121417] text-white">10 - 20 kg</option>
+                        <option value="20-50 kg" className="bg-[#121417] text-white">20 - 50 kg</option>
+                        <option value="50-100 kg" className="bg-[#121417] text-white">50 - 100 kg</option>
+                        <option value="100+ kg" className="bg-[#121417] text-white">100+ kg (Bulk)</option>
                       </select>
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1">
+                    <label className="block text-xs font-semibold text-neutral-300 mb-1">
                       Complete Address *
                     </label>
                     <textarea
                       required
                       rows={2}
-                      placeholder="Flat/House No., Society/Locality, City..."
+                      placeholder={`Flat/House No., Society/Locality (${selectedLocation})...`}
                       value={bookingData.address}
                       onChange={(e) =>
                         setBookingData({ ...bookingData, address: e.target.value })
                       }
-                      className="w-full bg-neutral-50 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-750 rounded-xl px-3.5 py-2 text-sm text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus:outline-none focus:border-[#5EDC1F] focus:ring-1 focus:ring-[#5EDC1F] resize-none transition-colors"
+                      className="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-3.5 py-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-[#5EDC1F] focus:ring-1 focus:ring-[#5EDC1F] resize-none transition-colors"
                     />
                   </div>
 
@@ -1230,12 +1419,12 @@ export default function ScrapCollectionPage() {
                 <div className="w-16 h-16 rounded-full bg-[#5EDC1F]/20 text-[#5EDC1F] flex items-center justify-center mx-auto">
                   <CheckCircle2 className="h-10 w-10" />
                 </div>
-                <h4 className="text-2xl font-black text-neutral-900 dark:text-white">
+                <h4 className="text-2xl font-black text-white">
                   Pickup Scheduled!
                 </h4>
-                <p className="text-sm text-neutral-600 dark:text-neutral-300 max-w-sm mx-auto">
+                <p className="text-sm text-neutral-300 max-w-sm mx-auto">
                   Thank you, <strong>{bookingData.name || "Customer"}</strong>. Our executive
-                  will contact you on <strong>{bookingData.phone}</strong> to confirm your slot.
+                  will contact you on <strong>{bookingData.phone}</strong> to confirm your slot in {selectedLocation}.
                 </p>
                 <button
                   type="button"
@@ -1243,7 +1432,7 @@ export default function ScrapCollectionPage() {
                     setSellModalOpen(false);
                     setBookingSubmitted(false);
                   }}
-                  className="px-6 py-2.5 rounded-full bg-neutral-100 hover:bg-neutral-200 dark:bg-white/10 dark:hover:bg-white/20 text-neutral-800 dark:text-white font-semibold text-sm transition cursor-pointer"
+                  className="px-6 py-2.5 rounded-full bg-white text-black hover:bg-neutral-200 font-semibold text-sm transition cursor-pointer"
                 >
                   Close
                 </button>
@@ -1253,18 +1442,94 @@ export default function ScrapCollectionPage() {
         </div>
       )}
 
+      {/* DOWNLOAD THE APP MODAL */}
+      {downloadModalOpen && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setDownloadModalOpen(false);
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-md rounded-3xl bg-[#121417] text-white border border-neutral-800 p-6 sm:p-8 shadow-2xl text-center space-y-4 my-auto animate-in fade-in zoom-in-95 duration-200"
+          >
+            <button
+              type="button"
+              onClick={() => setDownloadModalOpen(false)}
+              className="absolute top-5 right-5 p-2 rounded-full text-neutral-400 hover:text-white hover:bg-neutral-800 transition cursor-pointer"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            <div className="w-14 h-14 rounded-2xl bg-[#5EDC1F]/20 text-[#5EDC1F] flex items-center justify-center mx-auto mb-2">
+              <Download className="w-7 h-7" />
+            </div>
+
+            <h3 className="text-2xl font-black text-white tracking-tight">
+              Get KabaadSe App
+            </h3>
+            <p className="text-xs sm:text-sm text-neutral-400 max-w-xs mx-auto">
+              Sell scrap at guaranteed digital rates, track your eco-impact points, and receive instant payouts directly on UPI.
+            </p>
+
+            <div className="pt-2 flex flex-col sm:flex-row gap-2.5 justify-center">
+              <button
+                type="button"
+                onClick={() => {
+                  alert("Android APK Download initiated! Direct web booking is active immediately.");
+                }}
+                className="flex-1 py-3 px-4 rounded-xl bg-neutral-900 border border-neutral-700 hover:border-[#5EDC1F] text-white text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer hover:bg-neutral-800"
+              >
+                <span>Google Play</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  alert("iOS App Store package initiated! Direct web booking is active immediately.");
+                }}
+                className="flex-1 py-3 px-4 rounded-xl bg-neutral-900 border border-neutral-700 hover:border-[#5EDC1F] text-white text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer hover:bg-neutral-800"
+              >
+                <span>App Store</span>
+              </button>
+            </div>
+
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setDownloadModalOpen(false);
+                  setSellModalOpen(true);
+                }}
+                className="w-full py-3 rounded-xl bg-[#5EDC1F] hover:bg-[#52c41b] text-black font-extrabold text-xs shadow-md transition cursor-pointer"
+              >
+                Or Book Pickup Instantly on Web
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* RATE LIST MODAL */}
       {rateListModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/75 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="relative w-full max-w-2xl max-h-[90vh] flex flex-col rounded-3xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 shadow-2xl overflow-hidden text-left transition-colors">
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setRateListModalOpen(false);
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-2xl max-h-[90vh] flex flex-col rounded-3xl bg-[#121417] text-white border border-neutral-800 shadow-2xl overflow-hidden text-left my-auto transition-colors"
+          >
             {/* Header */}
-            <div className="p-5 sm:p-6 border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
+            <div className="p-5 sm:p-6 border-b border-neutral-800 flex items-center justify-between">
               <div>
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#5EDC1F]/15 text-[#5EDC1F] text-xs font-bold uppercase tracking-wider mb-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#5EDC1F] animate-pulse" />
                   Live Market Rates
                 </div>
-                <h3 className="text-xl sm:text-2xl font-black text-neutral-900 dark:text-white">
+                <h3 className="text-xl sm:text-2xl font-black text-white">
                   Today&apos;s Scrap Rate List
                 </h3>
               </div>
@@ -1272,20 +1537,20 @@ export default function ScrapCollectionPage() {
                 <button
                   type="button"
                   onClick={toggleTheme}
-                  className="p-2 rounded-full text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 transition cursor-pointer"
+                  className="p-2 rounded-full text-neutral-400 hover:text-white hover:bg-neutral-800 transition cursor-pointer"
                   aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
                   title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
                 >
                   {theme === "dark" ? (
                     <Sun className="h-5 w-5 text-amber-400" />
                   ) : (
-                    <Moon className="h-5 w-5 text-neutral-700" />
+                    <Moon className="h-5 w-5 text-neutral-300" />
                   )}
                 </button>
                 <button
                   type="button"
                   onClick={() => setRateListModalOpen(false)}
-                  className="p-2 rounded-full text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 transition cursor-pointer"
+                  className="p-2 rounded-full text-neutral-400 hover:text-white hover:bg-neutral-800 transition cursor-pointer"
                   aria-label="Close dialog"
                 >
                   <X className="h-5 w-5" />
@@ -1294,15 +1559,15 @@ export default function ScrapCollectionPage() {
             </div>
 
             {/* Filter and Search Bar */}
-            <div className="p-4 sm:px-6 bg-neutral-50 dark:bg-neutral-900/60 border-b border-neutral-200 dark:border-neutral-800 space-y-3">
+            <div className="p-4 sm:px-6 bg-neutral-900/90 border-b border-neutral-800 space-y-3">
               <div className="relative">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400 dark:text-neutral-500" />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
                 <input
                   type="text"
                   placeholder="Search scrap item (e.g. copper, newspaper, iron, laptop)..."
                   value={rateSearch}
                   onChange={(e) => setRateSearch(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 text-sm bg-white dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-800 rounded-xl text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus:outline-none focus:border-[#5EDC1F] transition-colors"
+                  className="w-full pl-10 pr-4 py-2 text-sm bg-neutral-950 border border-neutral-800 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-[#5EDC1F] transition-colors"
                 />
               </div>
 
@@ -1316,7 +1581,7 @@ export default function ScrapCollectionPage() {
                     className={`px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
                       rateCategory === cat
                         ? "bg-[#5EDC1F] text-black shadow-xs font-bold"
-                        : "bg-white dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white border border-neutral-200 dark:border-neutral-800"
+                        : "bg-neutral-900 text-neutral-400 hover:text-white border border-neutral-800"
                     }`}
                   >
                     {cat}
@@ -1331,11 +1596,11 @@ export default function ScrapCollectionPage() {
                 filteredScrapRates.map((item) => (
                   <div
                     key={item.id}
-                    className="p-3.5 rounded-2xl bg-neutral-50/80 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 flex items-center justify-between gap-3 hover:border-[#5EDC1F]/40 transition-colors"
+                    className="p-3.5 rounded-2xl bg-neutral-900/70 border border-neutral-800 flex items-center justify-between gap-3 hover:border-[#5EDC1F]/40 transition-colors"
                   >
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-bold text-neutral-900 dark:text-white">
+                        <span className="text-sm font-bold text-white">
                           {item.name}
                         </span>
                         {item.badge && (
@@ -1344,7 +1609,7 @@ export default function ScrapCollectionPage() {
                           </span>
                         )}
                       </div>
-                      <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                      <span className="text-xs text-neutral-400">
                         Category: {item.category}
                       </span>
                     </div>
@@ -1353,7 +1618,7 @@ export default function ScrapCollectionPage() {
                       <div className="text-right">
                         <div className="text-base sm:text-lg font-black text-[#5EDC1F]">
                           ₹{item.rate}
-                          <span className="text-xs font-semibold text-neutral-500 dark:text-neutral-400">
+                          <span className="text-xs font-semibold text-neutral-400">
                             /{item.unit}
                           </span>
                         </div>
@@ -1373,16 +1638,16 @@ export default function ScrapCollectionPage() {
                   </div>
                 ))
               ) : (
-                <div className="py-8 text-center text-sm text-neutral-500 dark:text-neutral-400">
+                <div className="py-8 text-center text-sm text-neutral-400">
                   No items found matching &quot;{rateSearch}&quot;
                 </div>
               )}
             </div>
 
             {/* Modal Footer */}
-            <div className="p-4 border-t border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/40 flex items-center justify-between gap-4">
-              <span className="text-xs text-neutral-600 dark:text-neutral-400">
-                100% certified digital scale weighing at your doorstep.
+            <div className="p-4 border-t border-neutral-800 bg-neutral-900/60 flex items-center justify-between gap-4">
+              <span className="text-xs text-neutral-400">
+                100% certified digital scale weighing at your doorstep in {selectedLocation}.
               </span>
               <button
                 type="button"
@@ -1390,7 +1655,7 @@ export default function ScrapCollectionPage() {
                   setRateListModalOpen(false);
                   setSellModalOpen(true);
                 }}
-                className="px-4 py-2 rounded-full bg-neutral-900 hover:bg-neutral-800 text-white dark:bg-white dark:hover:bg-neutral-200 dark:text-black font-bold text-xs transition cursor-pointer shrink-0"
+                className="px-4 py-2 rounded-full bg-white text-black hover:bg-neutral-200 font-bold text-xs transition cursor-pointer shrink-0"
               >
                 Schedule Pickup
               </button>
@@ -1398,6 +1663,13 @@ export default function ScrapCollectionPage() {
           </div>
         </div>
       )}
+
+      {/* VEHICLE SCRAPPING INQUIRY MODAL */}
+      <ServiceInquiryModal
+        isOpen={vehicleInquiryOpen}
+        onClose={() => setVehicleInquiryOpen(false)}
+        service={SERVICES_DATA["vehicle-scrapping"]}
+      />
     </div>
   );
 }

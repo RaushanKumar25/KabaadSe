@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import BrandLogo from "./BrandLogo";
+import { useNavigationTransition } from "@/context/NavigationTransitionContext";
 import { useTheme } from "@/context/ThemeContext";
 import ServiceInquiryModal, {
   ServiceDetail,
@@ -29,6 +30,7 @@ export default function Navbar({
   onOpenBusinessModal,
   alwaysVisible = false,
 }: NavbarProps) {
+  const { triggerTransition } = useNavigationTransition();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
   const [servicesDropdown, setServicesDropdown] = useState(false);
@@ -353,7 +355,11 @@ export default function Navbar({
                 <li>
                   <Link
                     href="/services/scrap-collection"
-                    onClick={() => setServicesDropdown(false)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setServicesDropdown(false);
+                      triggerTransition("/services/scrap-collection", 1200);
+                    }}
                     className="w-full block text-left text-white/80 active:text-[#5EDC1F] font-normal text-[13.5px] cursor-pointer transition-colors duration-75 select-none"
                   >
                     Scrap Collection
@@ -604,7 +610,11 @@ export default function Navbar({
                     <div className="space-y-1.5 pl-1">
                       <Link
                         href="/services/scrap-collection"
-                        onClick={() => setMobileMenuOpen(false)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setMobileMenuOpen(false);
+                          triggerTransition("/services/scrap-collection", 1200);
+                        }}
                         className="block text-slate-300 active:text-[#5EDC1F] text-left py-0.5 cursor-pointer select-none"
                       >
                         Scrap Collection
