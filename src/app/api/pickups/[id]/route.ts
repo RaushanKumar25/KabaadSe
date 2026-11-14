@@ -2,9 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma, withDbTimeout } from "@/lib/prisma";
 import { deletePickup, updatePickupStatus } from "@/lib/pickupStore";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function DELETE(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> | { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const params = await context.params;
@@ -24,7 +27,7 @@ export async function DELETE(
         prisma.pickup.delete({
           where: { id },
         }),
-        2500
+        15000
       );
       dbSuccess = true;
     } catch (dbErr: any) {
@@ -56,7 +59,7 @@ export async function DELETE(
 
 export async function PATCH(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> | { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const params = await context.params;
@@ -102,7 +105,7 @@ export async function PATCH(
           where: { id },
           data: { status: normalizedStatus },
         }),
-        2500
+        15000
       );
     } catch (dbErr: any) {
       console.warn(
@@ -129,4 +132,3 @@ export async function PATCH(
     );
   }
 }
-

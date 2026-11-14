@@ -159,7 +159,9 @@ function RatesPageContent() {
       setError(null);
 
       try {
-        const res = await fetch(`/api/rates?city=${encodeURIComponent(selectedCity)}`);
+        const res = await fetch(`/api/rates?city=${encodeURIComponent(selectedCity)}`, {
+          cache: "no-store",
+        });
         if (!res.ok) {
           throw new Error(`Failed to fetch rates: ${res.statusText}`);
         }

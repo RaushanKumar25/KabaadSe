@@ -7,6 +7,9 @@ import {
   ManagedRateItem,
 } from "@/lib/rateStore";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export interface RateResponseItem {
   id: string;
   name: string;
@@ -38,7 +41,7 @@ export async function GET(request: NextRequest) {
         {
           status: 200,
           headers: {
-            "Cache-Control": "no-store",
+            "Cache-Control": "no-store, max-age=0, must-revalidate",
           },
         }
       );
@@ -59,7 +62,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(activeClientRates, {
       status: 200,
       headers: {
-        "Cache-Control": "public, s-maxage=30, stale-while-revalidate=120",
+        "Cache-Control": "no-store, max-age=0, must-revalidate",
         "X-Rates-City": rawCity,
       },
     });

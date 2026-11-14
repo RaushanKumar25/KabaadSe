@@ -35,6 +35,11 @@ const DATA_DIR = path.join(process.cwd(), "data");
 const RATES_FILE = path.join(DATA_DIR, "rates-overrides.json");
 
 async function ensureRatesStorage(): Promise<RatesStorageSchema> {
+  const defaultSchema: RatesStorageSchema = {
+    overrides: {},
+    customItems: [],
+  };
+
   try {
     await fs.mkdir(DATA_DIR, { recursive: true });
     try {
@@ -46,15 +51,15 @@ async function ensureRatesStorage(): Promise<RatesStorageSchema> {
       // File does not exist yet
     }
 
-    const defaultSchema: RatesStorageSchema = {
-      overrides: {},
-      customItems: [],
-    };
-    await fs.writeFile(RATES_FILE, JSON.stringify(defaultSchema, null, 2), "utf-8");
+    try {
+      await fs.writeFile(RATES_FILE, JSON.stringify(defaultSchema, null, 2), "utf-8");
+    } catch {
+      // Ignore read-only errors in serverless
+    }
     return defaultSchema;
-  } catch (err) {
-    console.error("Failed to initialize rates storage:", err);
-    return { overrides: {}, customItems: [] };
+  } catch {
+    // In serverless / read-only Vercel environment, fallback to memory default
+    return defaultSchema;
   }
 }
 
@@ -62,8 +67,8 @@ async function saveRatesStorage(data: RatesStorageSchema): Promise<void> {
   try {
     await fs.mkdir(DATA_DIR, { recursive: true });
     await fs.writeFile(RATES_FILE, JSON.stringify(data, null, 2), "utf-8");
-  } catch (err) {
-    console.error("Failed to save rates storage:", err);
+  } catch {
+    // Safe to ignore on serverless read-only filesystem
   }
 }
 
@@ -179,6 +184,7 @@ export async function updateRatePrice(params: {
   const store = await ensureRatesStorage();
   const normalizedCity = normalizeCityName(city) || city || "Patna";
   const cityKey = normalizedCity.toLowerCase();
+  const citySlug = cityKey.replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   const overrideKey = `${cityKey}::${itemId}`;
 
   store.overrides[overrideKey] = {
@@ -191,19 +197,37 @@ export async function updateRatePrice(params: {
 
   // Try updating PostgreSQL database if connected
   try {
+    // Gracefully connect or auto-create City in Neon PostgreSQL
     const dbCity = await withDbTimeout(
-      prisma.city.findFirst({
-        where: {
-          OR: [
-            { name: { equals: normalizedCity, mode: "insensitive" } },
-            { slug: { equals: cityKey, mode: "insensitive" } },
-          ],
+      prisma.city.upsert({
+        where: { slug: citySlug },
+        update: { name: normalizedCity },
+        create: {
+          name: normalizedCity,
+          slug: citySlug,
+          isActive: true,
         },
       }),
-      1500
+      10000
     );
 
     if (dbCity) {
+      // Gracefully connect or auto-create ScrapItem if not present
+      await withDbTimeout(
+        prisma.scrapItem.upsert({
+          where: { id: itemId },
+          update: {},
+          create: {
+            id: itemId,
+            name: itemId.replace(/-/g, " "),
+            category: "Other",
+            unit: "kg",
+            iconPath: `/images/ScrapImages/${itemId}.png`,
+          },
+        }),
+        10000
+      );
+
       await withDbTimeout(
         prisma.scrapRate.upsert({
           where: {
@@ -221,11 +245,11 @@ export async function updateRatePrice(params: {
             price,
           },
         }),
-        1500
+        10000
       );
     }
   } catch (err) {
-    console.warn("Could not sync rate update with PostgreSQL (offline or tables missing):", err);
+    console.warn("Could not sync rate update with PostgreSQL (offline or tables unmigrated):", err);
   }
 
   const allRates = await getManagedRates(normalizedCity);
@@ -245,6 +269,7 @@ export async function addCustomMaterial(params: {
   const store = await ensureRatesStorage();
   const targetCity = params.city?.trim() || "Patna";
   const normalizedCity = normalizeCityName(targetCity) || targetCity;
+  const citySlug = normalizedCity.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   const cleanId = `custom-${params.name
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
@@ -272,9 +297,24 @@ export async function addCustomMaterial(params: {
 
   // Try creating in PostgreSQL database if connected
   try {
+    const dbCity = await withDbTimeout(
+      prisma.city.upsert({
+        where: { slug: citySlug },
+        update: { name: normalizedCity },
+        create: {
+          name: normalizedCity,
+          slug: citySlug,
+          isActive: true,
+        },
+      }),
+      10000
+    );
+
     const dbItem = await withDbTimeout(
-      prisma.scrapItem.create({
-        data: {
+      prisma.scrapItem.upsert({
+        where: { id: cleanId },
+        update: {},
+        create: {
           id: cleanId,
           name: newItem.name,
           category: newItem.category,
@@ -282,31 +322,28 @@ export async function addCustomMaterial(params: {
           iconPath: newItem.iconPath,
         },
       }),
-      1500
-    );
-
-    const dbCity = await withDbTimeout(
-      prisma.city.findFirst({
-        where: {
-          OR: [
-            { name: { equals: normalizedCity, mode: "insensitive" } },
-            { slug: { equals: normalizedCity.toLowerCase(), mode: "insensitive" } },
-          ],
-        },
-      }),
-      1500
+      10000
     );
 
     if (dbItem && dbCity) {
       await withDbTimeout(
-        prisma.scrapRate.create({
-          data: {
+        prisma.scrapRate.upsert({
+          where: {
+            cityId_itemId: {
+              cityId: dbCity.id,
+              itemId: dbItem.id,
+            },
+          },
+          update: {
+            price: newItem.price,
+          },
+          create: {
             cityId: dbCity.id,
             itemId: dbItem.id,
             price: newItem.price,
           },
         }),
-        1500
+        10000
       );
     }
   } catch (err) {
@@ -318,4 +355,3 @@ export async function addCustomMaterial(params: {
     isCustom: true,
   };
 }
-

@@ -1,11 +1,13 @@
 import { PrismaClient } from "@prisma/client";
 
-// Guard against missing or malformed DATABASE_URL strings to prevent P1012 crashes
-if (
-  !process.env.DATABASE_URL ||
-  (!process.env.DATABASE_URL.startsWith("postgresql://") &&
-    !process.env.DATABASE_URL.startsWith("postgres://"))
-) {
+// Clean and sanitize DATABASE_URL from environment
+if (process.env.DATABASE_URL) {
+  // Strip any wrapping quotes from Vercel / .env copy-paste and trim whitespace
+  process.env.DATABASE_URL = process.env.DATABASE_URL.trim().replace(/^["']|["']$/g, "").trim();
+}
+
+// In local development only: provide local fallback string if DATABASE_URL is not set
+if (!process.env.DATABASE_URL && process.env.NODE_ENV !== "production") {
   process.env.DATABASE_URL =
     "postgresql://postgres:postgres@localhost:5432/kabaadse?schema=public";
 }
@@ -14,6 +16,7 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
+// Next.js standard singleton pattern for Vercel / serverless connection reuse
 const basePrisma =
   globalForPrisma.prisma ??
   new PrismaClient({
@@ -41,19 +44,18 @@ export const prisma = basePrisma as PrismaClient & {
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 
 /**
- * Execute a Prisma operation with a resilient timeout.
- * If the database is cold or unreachable, it rejects within timeoutMs
- * instead of hanging the client request indefinitely on a TCP socket timeout.
+ * Execute a Prisma operation with a resilient serverless timeout.
+ * Set to 15,000ms by default to handle Neon PostgreSQL compute cold-starts.
  */
 export async function withDbTimeout<T>(
   promise: Promise<T>,
-  timeoutMs = 2500
+  timeoutMs = 15000
 ): Promise<T> {
   let timer: NodeJS.Timeout;
   const timeoutPromise = new Promise<never>((_, reject) => {
     timer = setTimeout(() => {
       const err: any = new Error(
-        "Database connection timed out (server offline or unreachable)"
+        `Database operation timed out after ${timeoutMs}ms (Neon cold-start or unreachable server)`
       );
       err.code = "P1001";
       reject(err);

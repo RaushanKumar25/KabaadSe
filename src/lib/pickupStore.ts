@@ -21,9 +21,9 @@ const DATA_DIR = path.join(process.cwd(), "data");
 const PICKUPS_FILE = path.join(DATA_DIR, "pickups.json");
 
 /**
- * Ensures data directory and pickups.json file exist
+ * Safely ensures data directory and pickups.json file exist in environments with write access
  */
-async function ensureStorageFile(): Promise<void> {
+async function ensureStorageFile(): Promise<boolean> {
   try {
     await fs.mkdir(DATA_DIR, { recursive: true });
     try {
@@ -31,17 +31,21 @@ async function ensureStorageFile(): Promise<void> {
     } catch {
       await fs.writeFile(PICKUPS_FILE, JSON.stringify([], null, 2), "utf-8");
     }
-  } catch (err) {
-    console.error("Failed to initialize pickups storage file:", err);
+    return true;
+  } catch {
+    // Vercel serverless has a read-only filesystem; safe to ignore
+    return false;
   }
 }
 
 /**
- * Read all local JSON bookings
+ * Read local JSON bookings (for local offline dev fallback)
  */
 export async function getLocalPickups(): Promise<PickupBooking[]> {
   try {
-    await ensureStorageFile();
+    const isWritable = await ensureStorageFile();
+    if (!isWritable) return [];
+
     const raw = await fs.readFile(PICKUPS_FILE, "utf-8");
     if (!raw.trim()) return [];
     const list = JSON.parse(raw);
@@ -52,8 +56,7 @@ export async function getLocalPickups(): Promise<PickupBooking[]> {
         ? item.scrapTypes.join(", ")
         : item.scrapTypes || "Mixed Scrap",
     })) as PickupBooking[];
-  } catch (err) {
-    console.warn("Could not read local pickups:", err);
+  } catch {
     return [];
   }
 }
@@ -63,33 +66,32 @@ export async function getLocalPickups(): Promise<PickupBooking[]> {
  */
 export async function saveLocalPickup(booking: PickupBooking): Promise<void> {
   try {
-    await ensureStorageFile();
+    const isWritable = await ensureStorageFile();
+    if (!isWritable) return;
+
     const current = await getLocalPickups();
-    // Prepend new booking
     const filtered = current.filter((b) => b.id !== booking.id);
     const updated = [booking, ...filtered];
     await fs.writeFile(PICKUPS_FILE, JSON.stringify(updated, null, 2), "utf-8");
-  } catch (err) {
-    console.error("Failed to write pickup to local file:", err);
+  } catch {
+    // Read-only filesystem in production; safe to ignore
   }
 }
 
 /**
- * Fetch all pickups across PostgreSQL and local JSON store, merged and deduplicated
+ * Fetch all pickups: PostgreSQL is the primary source of truth across all devices.
  */
 export async function getAllPickups(): Promise<PickupBooking[]> {
-  const localItems = await getLocalPickups();
-  let dbItems: PickupBooking[] = [];
-
+  // 1. Primary Source of Truth: PostgreSQL database
   try {
     const rawDb = await withDbTimeout(
       prisma.pickupRequest.findMany({
         orderBy: { createdAt: "desc" },
       }),
-      2000
+      15000 // 15-second timeout for Neon PostgreSQL serverless compute
     );
 
-    dbItems = rawDb.map((p) => ({
+    return rawDb.map((p) => ({
       id: p.id,
       customerName: p.customerName,
       customerPhone: p.customerPhone,
@@ -101,53 +103,36 @@ export async function getAllPickups(): Promise<PickupBooking[]> {
       scrapTypes: p.scrapTypes || "Mixed Scrap",
       status: p.status,
       createdAt: p.createdAt.toISOString(),
-      source: "postgres",
+      source: "postgres" as const,
     }));
   } catch (dbErr) {
-    console.warn("PostgreSQL unavailable for reading pickups, returning local store:", dbErr);
-  }
+    console.error("PostgreSQL unavailable in getAllPickups, checking local dev store:", dbErr);
 
-  // Merge and deduplicate by id (Postgres takes precedence if present in both)
-  const map = new Map<string, PickupBooking>();
-  for (const item of localItems) {
-    map.set(item.id, item);
+    // 2. Fallback to local file only if in local development
+    const localItems = await getLocalPickups();
+    return localItems.sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
   }
-  for (const item of dbItems) {
-    map.set(item.id, item);
-  }
-
-  return Array.from(map.values()).sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
 }
 
 /**
- * Update the status of a pickup in both local JSON storage and PostgreSQL (if connected)
+ * Update the status of a pickup in PostgreSQL and local storage
  */
 export async function updatePickupStatus(
   id: string,
   newStatus: string
 ): Promise<PickupBooking | null> {
-  await ensureStorageFile();
-  const current = await getLocalPickups();
-  const existingIndex = current.findIndex((b) => b.id === id);
-
   let updatedRecord: PickupBooking | null = null;
 
-  if (existingIndex !== -1) {
-    current[existingIndex].status = newStatus;
-    updatedRecord = current[existingIndex];
-    await fs.writeFile(PICKUPS_FILE, JSON.stringify(current, null, 2), "utf-8");
-  }
-
-  // Attempt database update if reachable
+  // 1. Attempt database update in PostgreSQL
   try {
     const dbRecord = await withDbTimeout(
       prisma.pickupRequest.update({
         where: { id },
         data: { status: newStatus },
       }),
-      2000
+      15000
     );
 
     if (dbRecord) {
@@ -165,43 +150,54 @@ export async function updatePickupStatus(
         createdAt: dbRecord.createdAt.toISOString(),
         source: "postgres",
       };
-
-      // Ensure local store also mirrors this updated status
-      if (existingIndex === -1) {
-        await saveLocalPickup(updatedRecord);
-      }
     }
   } catch (dbErr) {
-    console.warn(
-      `Could not update pickup ${id} in PostgreSQL (offline or not found in DB). Local store updated:`,
-      dbErr
-    );
+    console.warn(`Could not update pickup ${id} in PostgreSQL:`, dbErr);
+  }
+
+  // 2. Mirror to local file in development
+  try {
+    const current = await getLocalPickups();
+    const existingIndex = current.findIndex((b) => b.id === id);
+    if (existingIndex !== -1) {
+      current[existingIndex].status = newStatus;
+      if (!updatedRecord) updatedRecord = current[existingIndex];
+      await fs.writeFile(PICKUPS_FILE, JSON.stringify(current, null, 2), "utf-8");
+    }
+  } catch {
+    // Ignore read-only errors on serverless
   }
 
   return updatedRecord;
 }
 
 /**
- * Delete a pickup record from local storage and PostgreSQL (if present)
+ * Delete a pickup record from PostgreSQL and local storage
  */
 export async function deletePickup(id: string): Promise<boolean> {
-  await ensureStorageFile();
-  const current = await getLocalPickups();
-  const filtered = current.filter((b) => b.id !== id);
-  await fs.writeFile(PICKUPS_FILE, JSON.stringify(filtered, null, 2), "utf-8");
+  let dbSuccess = false;
 
   try {
     await withDbTimeout(
       prisma.pickupRequest.delete({
         where: { id },
       }),
-      2000
+      15000
     );
-  } catch {
-    // If not in DB or DB offline, ignore
+    dbSuccess = true;
+  } catch (err) {
+    console.warn(`Prisma delete on PostgreSQL for ID ${id}:`, err);
   }
 
-  return true;
+  try {
+    const current = await getLocalPickups();
+    const filtered = current.filter((b) => b.id !== id);
+    await fs.writeFile(PICKUPS_FILE, JSON.stringify(filtered, null, 2), "utf-8");
+  } catch {
+    // Ignore read-only errors on serverless
+  }
+
+  return dbSuccess;
 }
 
 /**
@@ -215,7 +211,7 @@ export async function getStorageInfo(): Promise<{
   let mode: "postgres" | "local-json" = "local-json";
 
   try {
-    await withDbTimeout(prisma.$queryRaw`SELECT 1`, 1200);
+    await withDbTimeout(prisma.$queryRaw`SELECT 1`, 5000);
     mode = "postgres";
   } catch {
     mode = "local-json";
