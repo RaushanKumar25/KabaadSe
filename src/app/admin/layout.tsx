@@ -1,9 +1,6 @@
 import React from "react";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
 export const metadata = {
   title: "KabaadSe Ops | Logistics & Rates Console",
   description: "Production operations management console for doorstep scrap pickup logistics and live rate cards.",

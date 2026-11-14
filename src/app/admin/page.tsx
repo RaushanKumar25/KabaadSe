@@ -1,8 +1,5 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
 import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import {
@@ -214,6 +211,7 @@ export default function AdminDashboardPage() {
       const res = await fetch(`/api/pickups/${encodeURIComponent(id)}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
+        cache: "no-store",
         body: JSON.stringify({ status: newStatus }),
       });
 
@@ -242,6 +240,7 @@ export default function AdminDashboardPage() {
     try {
       const res = await fetch(`/api/pickups/${encodeURIComponent(id)}`, {
         method: "DELETE",
+        cache: "no-store",
       });
       const data = await res.json();
       if (res.ok && data.success) {
@@ -278,6 +277,7 @@ export default function AdminDashboardPage() {
       const res = await fetch("/api/rates", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
+        cache: "no-store",
         body: JSON.stringify({
           city: selectedRateCity,
           itemId: item.id,
@@ -318,6 +318,7 @@ export default function AdminDashboardPage() {
       const res = await fetch("/api/rates", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
+        cache: "no-store",
         body: JSON.stringify({
           city: selectedRateCity,
           itemId: item.id,
@@ -355,6 +356,7 @@ export default function AdminDashboardPage() {
       const res = await fetch("/api/rates", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        cache: "no-store",
         body: JSON.stringify({
           name: newMaterialName.trim(),
           category: newMaterialCategory,
