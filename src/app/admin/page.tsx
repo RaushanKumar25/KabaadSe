@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import {
   Truck,
   Tags,
@@ -20,6 +21,7 @@ import {
   SlidersHorizontal,
   Clock,
   CheckCircle,
+  LogOut,
 } from "lucide-react";
 
 interface PickupItem {
@@ -88,6 +90,22 @@ const STATUS_CONFIGS: Record<
 const RATE_CATEGORIES = ["All", "Paper", "Plastic", "Metal", "E-waste", "Other"] as const;
 
 export default function AdminDashboardPage() {
+  const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await fetch("/api/admin/logout", {
+        method: "POST",
+        cache: "no-store",
+      });
+    } finally {
+      router.push("/admin/login");
+      router.refresh();
+    }
+  };
+
   // -------------------------------------------------------------
   // State: Pickup Queue & Summary
   // -------------------------------------------------------------
@@ -502,6 +520,16 @@ export default function AdminDashboardPage() {
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loadingPickups ? "animate-spin" : ""}`} />
               <span>Refresh Data</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+              className="px-3 py-1.5 rounded-lg bg-red-950/40 hover:bg-red-900/50 border border-red-900/60 text-red-200 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer disabled:opacity-50"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
             </button>
           </div>
         </div>

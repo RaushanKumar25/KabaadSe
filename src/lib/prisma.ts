@@ -1,4 +1,12 @@
+import { Pool, neonConfig } from "@neondatabase/serverless";
+import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaClient } from "@prisma/client";
+import ws from "ws";
+
+// Enable WebSocket support for Neon in Node.js environments
+if (typeof WebSocket === "undefined") {
+  neonConfig.webSocketConstructor = ws;
+}
 
 // Clean and sanitize DATABASE_URL from environment
 if (process.env.DATABASE_URL) {
@@ -6,46 +14,60 @@ if (process.env.DATABASE_URL) {
   process.env.DATABASE_URL = process.env.DATABASE_URL.trim().replace(/^["']|["']$/g, "").trim();
 }
 
-// In local development only: provide local fallback string if DATABASE_URL is not set
-if (!process.env.DATABASE_URL && process.env.NODE_ENV !== "production") {
-  process.env.DATABASE_URL =
-    "postgresql://postgres:postgres@localhost:5432/kabaadse?schema=public";
-}
-
 const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined;
+  prisma: (PrismaClient & { pickup: PrismaClient["pickupRequest"] }) | undefined;
+  pool: Pool | undefined;
 };
 
-// Next.js standard singleton pattern for Vercel / serverless connection reuse
-const basePrisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
-    log:
-      process.env.NODE_ENV === "development"
-        ? ["query", "error", "warn"]
-        : ["error"],
-  });
+function createPrismaClient(): PrismaClient & { pickup: PrismaClient["pickupRequest"] } {
+  const logOptions =
+    process.env.NODE_ENV === "development"
+      ? (["query", "error", "warn"] as const)
+      : (["error"] as const);
 
-// Alias prisma.pickup to prisma.pickupRequest for seamless compatibility
-if (basePrisma && !("pickup" in basePrisma) && "pickupRequest" in basePrisma) {
-  Object.defineProperty(basePrisma, "pickup", {
-    get() {
-      return (this as any).pickupRequest;
-    },
-    enumerable: true,
-    configurable: true,
-  });
+  const connectionString = process.env.DATABASE_URL;
+
+  let client: PrismaClient;
+
+  if (connectionString) {
+    const pool = globalForPrisma.pool ?? new Pool({ connectionString });
+    if (process.env.NODE_ENV !== "production") {
+      globalForPrisma.pool = pool;
+    }
+    const adapter = new PrismaNeon(pool);
+    client = new PrismaClient({
+      adapter,
+      log: logOptions as any,
+    });
+  } else {
+    client = new PrismaClient({
+      log: logOptions as any,
+    });
+  }
+
+  // Alias prisma.pickup to prisma.pickupRequest for seamless backward compatibility
+  if (client && !("pickup" in client) && "pickupRequest" in client) {
+    Object.defineProperty(client, "pickup", {
+      get() {
+        return (this as any).pickupRequest;
+      },
+      enumerable: true,
+      configurable: true,
+    });
+  }
+
+  return client as PrismaClient & { pickup: PrismaClient["pickupRequest"] };
 }
 
-export const prisma = basePrisma as PrismaClient & {
-  pickup: PrismaClient["pickupRequest"];
-};
+export const prisma = globalForPrisma.prisma ?? createPrismaClient();
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = prisma;
+}
 
 /**
  * Execute a Prisma operation with a resilient serverless timeout.
- * Set to 15,000ms by default to handle Neon PostgreSQL compute cold-starts.
+ * Set to 15,000ms (15 seconds) to handle Neon PostgreSQL compute cold-starts over WebSockets.
  */
 export async function withDbTimeout<T>(
   promise: Promise<T>,

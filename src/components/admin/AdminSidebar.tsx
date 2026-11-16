@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import BrandLogo from "@/components/BrandLogo";
 import {
   Truck,
@@ -13,14 +13,30 @@ import {
   X,
   RefreshCw,
   LayoutDashboard,
+  LogOut,
 } from "lucide-react";
 
 export default function AdminSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [pendingCount, setPendingCount] = useState<number>(0);
   const [storageMode, setStorageMode] = useState<"postgres" | "local-json">("postgres");
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await fetch("/api/admin/logout", {
+        method: "POST",
+        cache: "no-store",
+      });
+    } finally {
+      router.push("/admin/login");
+      router.refresh();
+    }
+  };
 
   const fetchStats = async () => {
     setIsRefreshing(true);
@@ -164,6 +180,15 @@ export default function AdminSidebar() {
                 <span>← Live Website</span>
                 <ArrowUpRight className="w-3.5 h-3.5" />
               </Link>
+              <button
+                type="button"
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+                className="w-full flex items-center justify-between py-1.5 text-red-300 hover:text-red-200 transition cursor-pointer"
+              >
+                <span>{isLoggingOut ? "Logging out..." : "Logout Operations"}</span>
+                <LogOut className="w-3.5 h-3.5" />
+              </button>
               <div className="flex items-center gap-2 text-[11px] font-mono text-slate-400 bg-[#111827] p-2 rounded-lg border border-slate-800">
                 <span
                   className={`w-1.5 h-1.5 rounded-full ${
@@ -240,7 +265,7 @@ export default function AdminSidebar() {
         </div>
 
         {/* Footer Meta */}
-        <div className="pt-4 border-t border-slate-800/80 space-y-3">
+        <div className="pt-4 border-t border-slate-800/80 space-y-2">
           <Link
             href="/"
             className="flex items-center justify-between px-3 py-2 rounded-lg text-xs text-slate-400 hover:text-slate-200 hover:bg-[#111827] transition border border-transparent hover:border-slate-800"
@@ -248,6 +273,16 @@ export default function AdminSidebar() {
             <span className="font-medium">← Live Website</span>
             <ArrowUpRight className="w-3.5 h-3.5 text-slate-500" />
           </Link>
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs text-red-300 hover:text-red-200 hover:bg-red-950/40 border border-transparent hover:border-red-900/60 transition cursor-pointer disabled:opacity-50"
+          >
+            <span className="font-medium">{isLoggingOut ? "Logging out..." : "Logout Operations"}</span>
+            <LogOut className="w-3.5 h-3.5" />
+          </button>
 
           {/* Storage Connectivity Status */}
           <div className="px-3 py-2 rounded-lg bg-[#111827] border border-slate-800/80">

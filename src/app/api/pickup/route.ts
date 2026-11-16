@@ -228,26 +228,68 @@ export async function POST(request: NextRequest) {
     const cleanAddress = address.trim();
     const cleanLoad = estimatedLoad.trim();
 
-    // 9. Gracefully ensure City exists in PostgreSQL City table (if table is migrated)
+    // 9. Gracefully ensure City exists in PostgreSQL City table (if DATABASE_URL is configured and table is migrated)
     const citySlug = cleanCity.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-    try {
-      await withDbTimeout(
-        prisma.city.upsert({
-          where: { slug: citySlug },
-          update: {},
-          create: {
-            name: cleanCity,
-            slug: citySlug,
-            isActive: true,
-          },
-        }),
-        5000
-      );
-    } catch {
-      // Safe to ignore if City table is not yet migrated; PickupRequest uses direct string
+    if (process.env.DATABASE_URL) {
+      try {
+        await withDbTimeout(
+          prisma.city.upsert({
+            where: { slug: citySlug },
+            update: {},
+            create: {
+              name: cleanCity,
+              slug: citySlug,
+              isActive: true,
+            },
+          }),
+          5000
+        );
+      } catch {
+        // Safe to ignore if City table is not yet migrated; PickupRequest uses direct string
+      }
     }
 
-    // 10. Save to PostgreSQL database as primary source of truth
+    // 10. If DATABASE_URL is not configured, fall back gracefully to local store
+    if (!process.env.DATABASE_URL) {
+      try {
+        const fallbackRecord: PickupBooking = {
+          id: newId,
+          customerName: cleanCustomerName,
+          customerPhone: sanitizedPhone,
+          city: cleanCity,
+          locality: cleanLocality,
+          address: cleanAddress,
+          pickupDate: parsedDate.toISOString(),
+          estimatedLoad: cleanLoad,
+          scrapTypes: normalizedScrapTypes,
+          status: "PENDING",
+          createdAt: new Date().toISOString(),
+          source: "local-json",
+        };
+
+        await saveLocalPickup(fallbackRecord);
+
+        return NextResponse.json(
+          {
+            success: true,
+            bookingId: newId,
+            message: "Pickup scheduled successfully (local dev store)",
+          },
+          { status: 201 }
+        );
+      } catch (localErr: any) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: localErr?.message || "Local storage error while saving pickup booking.",
+            code: "LOCAL_STORAGE_ERROR",
+          },
+          { status: 500 }
+        );
+      }
+    }
+
+    // 11. Save to PostgreSQL database as primary source of truth
     try {
       const pickup = await withDbTimeout(
         prisma.pickupRequest.create({

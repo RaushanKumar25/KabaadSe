@@ -1,20 +1,22 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
-import BrandLogo from "@/components/BrandLogo";
+import React, { useState, useEffect, useMemo, useRef } from "react";
+import Image from "next/image";
 import {
   X,
   Loader2,
   Check,
-  Scale,
-  Zap,
-  ShieldCheck,
   Truck,
   Boxes,
   Calendar,
   Phone,
   MapPin,
+  User,
+  Search,
+  ChevronDown,
+  ShieldCheck,
 } from "lucide-react";
+import { SCRAP_ITEMS_DATA } from "@/lib/scrapRatesData";
 
 interface PickupBookingModalProps {
   isOpen: boolean;
@@ -23,29 +25,14 @@ interface PickupBookingModalProps {
   defaultLocality?: string;
 }
 
-const PRESET_CITIES = [
-  "Patna",
-  "Jalandhar",
-  "Ludhiana",
-  "Delhi NCR",
-  "Ranchi",
-];
-
-const SCRAP_TYPES = [
-  "Newspaper & Cardboard",
-  "Plastics",
-  "Iron & Steel",
-  "Copper & Brass",
-  "E-Waste & Appliances",
-  "Mixed Scrap",
-];
-
 const WEIGHT_OPTIONS = [
   "< 20 kg",
   "20 - 50 kg",
   "50+ kg",
   "Commercial / Bulk",
 ];
+
+const CATEGORY_TABS = ["All", "Paper", "Plastic", "Metal", "E-waste", "Other"] as const;
 
 export default function PickupBookingModal({
   isOpen,
@@ -60,9 +47,28 @@ export default function PickupBookingModal({
   const [address, setAddress] = useState("");
   const [pickupDate, setPickupDate] = useState("");
   const [selectedScrapTypes, setSelectedScrapTypes] = useState<string[]>([
-    "Newspaper & Cardboard",
+    "Newspaper",
   ]);
   const [estimatedLoad, setEstimatedLoad] = useState("< 20 kg");
+
+  // Dropdown & Searchable rates state
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [scrapSearch, setScrapSearch] = useState("");
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>("All");
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Dynamic live rates list (pre-seeded with SCRAP_ITEMS_DATA)
+  const [scrapItemsList, setScrapItemsList] = useState<
+    Array<{ id: string; name: string; category: string; price: string; icon?: string }>
+  >(() =>
+    SCRAP_ITEMS_DATA.map((item) => ({
+      id: item.id,
+      name: item.name,
+      category: item.category,
+      price: item.price,
+      icon: item.icon,
+    }))
+  );
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -83,13 +89,72 @@ export default function PickupBookingModal({
     if (defaultLocality) setLocality(defaultLocality);
   }, [defaultCity, defaultLocality]);
 
+  // Sync live rates from /api/rates for the selected city
+  useEffect(() => {
+    let isCancelled = false;
+    async function fetchLiveRates() {
+      try {
+        const queryCity = city?.trim() || "Patna";
+        const res = await fetch(`/api/rates?city=${encodeURIComponent(queryCity)}`, {
+          cache: "no-store",
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0 && !isCancelled) {
+          setScrapItemsList(
+            data.map((item: any) => ({
+              id: item.id,
+              name: item.name,
+              category: item.category || "Other",
+              price: item.unit ? `₹${item.price} /${item.unit}` : `₹${item.price}`,
+              icon: item.iconPath || undefined,
+            }))
+          );
+        }
+      } catch {
+        // Fallback gracefully remains SCRAP_ITEMS_DATA
+      }
+    }
+
+    if (isOpen) {
+      fetchLiveRates();
+    }
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [city, isOpen]);
+
+  // Handle click outside dropdown to close menu
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsDropdownOpen(false);
+      }
+    }
+
+    if (isDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isDropdownOpen]);
+
   // Lock body scroll and listen for ESC key
   useEffect(() => {
     if (!isOpen) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        handleDismiss();
+        if (isDropdownOpen) {
+          setIsDropdownOpen(false);
+        } else {
+          handleDismiss();
+        }
       }
     };
 
@@ -101,11 +166,11 @@ export default function PickupBookingModal({
       document.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = originalOverflow;
     };
-  }, [isOpen, confirmedBookingId]);
+  }, [isOpen, confirmedBookingId, isDropdownOpen]);
 
   const handleDismiss = () => {
+    setIsDropdownOpen(false);
     onClose();
-    // If user dismisses after booking confirmation, reset form fields
     if (confirmedBookingId) {
       setTimeout(() => {
         setConfirmedBookingId(null);
@@ -115,7 +180,7 @@ export default function PickupBookingModal({
         setLocality(defaultLocality || "");
         setAddress("");
         setPickupDate("");
-        setSelectedScrapTypes(["Newspaper & Cardboard"]);
+        setSelectedScrapTypes(["Newspaper"]);
         setEstimatedLoad("< 20 kg");
         setErrorMessage(null);
       }, 200);
@@ -131,7 +196,6 @@ export default function PickupBookingModal({
   };
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Only permit numerical digits, cap at 10
     const rawValue = e.target.value.replace(/\D/g, "").slice(0, 10);
     setCustomerPhone(rawValue);
   };
@@ -142,11 +206,29 @@ export default function PickupBookingModal({
     );
   };
 
+  const removeScrapType = (type: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedScrapTypes((prev) => prev.filter((t) => t !== type));
+  };
+
+  // Filtered scrap items according to active category tab and search input
+  const filteredScrapItems = useMemo(() => {
+    return scrapItemsList.filter((item) => {
+      const matchesCategory =
+        selectedCategoryFilter === "All" ||
+        item.category.toLowerCase() === selectedCategoryFilter.toLowerCase();
+      const matchesSearch =
+        !scrapSearch.trim() ||
+        item.name.toLowerCase().includes(scrapSearch.toLowerCase().trim()) ||
+        item.category.toLowerCase().includes(scrapSearch.toLowerCase().trim());
+      return matchesCategory && matchesSearch;
+    });
+  }, [scrapItemsList, selectedCategoryFilter, scrapSearch]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
 
-    // Frontend validations
     if (customerName.trim().length < 2) {
       setErrorMessage("Full name must be at least 2 characters.");
       return;
@@ -158,7 +240,7 @@ export default function PickupBookingModal({
     }
 
     if (!city.trim()) {
-      setErrorMessage("Please enter or select your city.");
+      setErrorMessage("Please enter your city.");
       return;
     }
 
@@ -178,7 +260,7 @@ export default function PickupBookingModal({
     }
 
     if (selectedScrapTypes.length === 0) {
-      setErrorMessage("Please select at least one scrap type category.");
+      setErrorMessage("Please select at least one scrap item.");
       return;
     }
 
@@ -219,7 +301,6 @@ export default function PickupBookingModal({
 
   if (!isOpen) return null;
 
-  // Format reference ID according to guideline: #KB-${id.slice(-6).toUpperCase()}
   const formattedRefId = confirmedBookingId
     ? `#KB-${confirmedBookingId.slice(-6).toUpperCase()}`
     : "";
@@ -227,159 +308,153 @@ export default function PickupBookingModal({
   return (
     <div
       onClick={handleBackdropClick}
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-black/80 backdrop-blur-md overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-slate-950/50 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-200"
       role="dialog"
       aria-modal="true"
       aria-labelledby="pickup-modal-title"
     >
-      {/* Ambient background waves behind modal card (matching reference illustration depth) */}
-      <div className="fixed -top-32 -left-32 w-96 h-96 rounded-full bg-emerald-600/10 blur-[120px] pointer-events-none" />
-      <div className="fixed -bottom-32 -right-32 w-96 h-96 rounded-full bg-emerald-500/15 blur-[120px] pointer-events-none" />
-
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-4xl rounded-2xl sm:rounded-3xl bg-[#0B0F19] border border-slate-800 text-slate-100 shadow-2xl my-auto overflow-hidden transition-all flex flex-col md:flex-row shadow-black/80"
+        className="relative w-full max-w-4xl max-h-[92vh] rounded-2xl sm:rounded-3xl bg-white border border-slate-200 text-slate-900 shadow-2xl my-auto overflow-hidden transition-all flex flex-col md:flex-row shadow-slate-950/20"
       >
-        {/* Close Button */}
+        {/* Close Button - Floating cleanly in top-right corner over image/header */}
         <button
           type="button"
           onClick={handleDismiss}
-          className="absolute top-4 right-4 z-30 p-2 rounded-full text-slate-400 hover:text-white bg-slate-900/80 hover:bg-slate-800 border border-slate-700/60 transition cursor-pointer shadow-md"
+          className="absolute top-4 right-4 z-30 p-2 rounded-full text-slate-800 hover:text-slate-950 bg-white/90 hover:bg-white border border-slate-200/80 transition cursor-pointer shadow-md backdrop-blur-xs"
           aria-label="Close dialog"
         >
-          <X className="w-4 h-4 sm:w-5 sm:h-5" />
+          <X className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
         </button>
 
         {confirmedBookingId ? (
-          /* Confirmation Receipt Card (Spans full modal width) */
-          <div className="w-full p-6 sm:p-8 lg:p-10 space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+          /* Confirmation Receipt Card (Fade-white with emerald accents) */
+          <div className="w-full p-6 sm:p-8 lg:p-10 space-y-5 overflow-y-auto max-h-[90vh] bg-white text-slate-900">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
               <div>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-950/90 text-emerald-400 border border-emerald-800/80">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
                   <Check className="w-3.5 h-3.5 stroke-[2.5]" />
-                  Booking Received Successfully
+                  Booking Confirmed
                 </span>
                 <h3
                   id="pickup-modal-title"
-                  className="text-2xl sm:text-3xl font-black text-white mt-2 tracking-tight"
+                  className="text-2xl sm:text-3xl font-black text-slate-900 mt-2 tracking-tight"
                 >
                   Doorstep Pickup Scheduled
                 </h3>
+                <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                  We have registered your pickup request. Our coordinator will contact you shortly.
+                </p>
               </div>
-              <div className="bg-[#0F172A] border border-slate-800 rounded-xl px-4 py-2.5 sm:text-right">
+              <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 sm:text-right">
                 <span className="block text-[11px] font-medium text-slate-400 uppercase tracking-wider">
                   Booking Reference ID
                 </span>
-                <span className="text-base sm:text-lg font-mono font-bold text-emerald-400">
+                <span className="text-base sm:text-lg font-mono font-bold text-emerald-700">
                   {formattedRefId}
                 </span>
               </div>
             </div>
 
             {/* Summary Details Grid */}
-            <div className="bg-[#0F172A] border border-slate-800 rounded-2xl p-5 sm:p-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm">
+            <div className="bg-slate-50/80 border border-slate-200 rounded-2xl p-5 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-slate-800/80 flex items-center justify-center text-slate-400 shrink-0">
-                  <BrandLogo size={18} className="h-4 w-4" />
+                <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-500 shrink-0 shadow-2xs">
+                  <User className="w-4 h-4 text-emerald-700" />
                 </div>
                 <div>
-                  <span className="text-slate-400 text-xs block">Customer</span>
-                  <span className="text-slate-100 font-semibold">{customerName}</span>
+                  <span className="text-slate-400 text-xs block font-medium">Customer</span>
+                  <span className="text-slate-900 font-semibold">{customerName}</span>
                 </div>
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-slate-800/80 flex items-center justify-center text-slate-400 shrink-0">
-                  <Phone className="w-4 h-4 text-emerald-400" />
+                <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-500 shrink-0 shadow-2xs">
+                  <Phone className="w-4 h-4 text-emerald-700" />
                 </div>
                 <div>
-                  <span className="text-slate-400 text-xs block">Phone</span>
-                  <span className="text-slate-100 font-mono font-semibold">+91 {customerPhone}</span>
+                  <span className="text-slate-400 text-xs block font-medium">Phone</span>
+                  <span className="text-slate-900 font-mono font-semibold">+91 {customerPhone}</span>
                 </div>
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-slate-800/80 flex items-center justify-center text-slate-400 shrink-0">
-                  <MapPin className="w-4 h-4 text-emerald-400" />
+                <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-500 shrink-0 shadow-2xs">
+                  <MapPin className="w-4 h-4 text-emerald-700" />
                 </div>
                 <div>
-                  <span className="text-slate-400 text-xs block">Location</span>
-                  <span className="text-slate-100 font-semibold">{locality}, {city}</span>
+                  <span className="text-slate-400 text-xs block font-medium">Location</span>
+                  <span className="text-slate-900 font-semibold">{locality}, {city}</span>
                 </div>
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-slate-800/80 flex items-center justify-center text-slate-400 shrink-0">
-                  <Calendar className="w-4 h-4 text-emerald-400" />
+                <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-500 shrink-0 shadow-2xs">
+                  <Calendar className="w-4 h-4 text-emerald-700" />
                 </div>
                 <div>
-                  <span className="text-slate-400 text-xs block">Preferred Date</span>
-                  <span className="text-slate-100 font-semibold">{pickupDate}</span>
+                  <span className="text-slate-400 text-xs block font-medium">Preferred Date</span>
+                  <span className="text-slate-900 font-semibold">{pickupDate}</span>
                 </div>
               </div>
 
-              <div className="sm:col-span-2 pt-3 border-t border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="sm:col-span-2 pt-3 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
-                  <Boxes className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span className="text-slate-400 text-xs">Scrap Items:</span>
-                  <span className="text-emerald-300 font-medium">{selectedScrapTypes.join(", ")}</span>
+                  <Boxes className="w-4 h-4 text-emerald-700 shrink-0" />
+                  <span className="text-slate-500 text-xs font-medium">Scrap Items:</span>
+                  <span className="text-slate-900 font-medium">{selectedScrapTypes.join(", ")}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Truck className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span className="text-slate-400 text-xs">Est. Load:</span>
-                  <span className="text-emerald-400 font-bold">{estimatedLoad}</span>
+                  <Truck className="w-4 h-4 text-emerald-700 shrink-0" />
+                  <span className="text-slate-500 text-xs font-medium">Est. Load:</span>
+                  <span className="text-emerald-800 font-bold bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                    {estimatedLoad}
+                  </span>
                 </div>
               </div>
 
-              <div className="sm:col-span-2 text-xs text-slate-400">
-                <span className="text-slate-500">Address: </span>
-                <span className="text-slate-200">{address}</span>
+              <div className="sm:col-span-2 text-xs text-slate-600 bg-white p-3 rounded-xl border border-slate-200">
+                <span className="text-slate-400 font-medium">Address: </span>
+                <span className="text-slate-800">{address}</span>
               </div>
             </div>
 
-            {/* Field Team Notice */}
-            <p className="text-xs text-slate-400 bg-slate-900/60 border border-slate-800 rounded-xl p-3.5 leading-relaxed flex items-center gap-2.5">
-              <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>Our field coordinator will call to confirm your scheduled slot before dispatching the collection vehicle.</span>
+            <p className="text-xs text-slate-600 bg-emerald-50/70 border border-emerald-200/80 rounded-xl p-3.5 leading-relaxed flex items-center gap-2.5">
+              <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0" />
+              <span>Our field coordinator will call your mobile number to confirm the arrival window before dispatching the collection vehicle.</span>
             </p>
 
-            {/* Single Close Button */}
             <button
               type="button"
               onClick={handleDismiss}
-              className="w-full py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-100 font-semibold text-sm transition cursor-pointer border border-slate-700"
+              className="w-full py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm transition cursor-pointer shadow-sm"
             >
-              Close
+              Done
             </button>
           </div>
         ) : (
-          /* Split-Screen Modal Layout: Left Form (60%) + Right Visual Panel (40%) */
+          /* Split-Screen Modal Layout: Left Form (~62%) + Right HD Visual (~38%) */
           <>
-            {/* LEFT COLUMN: Clean Form Area (60%) */}
-            <div className="w-full md:w-[60%] lg:w-[62%] p-5 sm:p-6 lg:p-7 flex flex-col justify-between bg-[#0B0F19] relative z-10">
+            {/* LEFT COLUMN: Clean Form Area (Fade-White Background with Crisp Green Accents) */}
+            <div className="w-full md:w-[62%] lg:w-[64%] p-5 sm:p-6 lg:p-7 flex flex-col justify-between bg-white relative z-10 overflow-y-auto max-h-[90vh] md:max-h-[92vh]">
               <div>
-                {/* Form Header */}
-                <div className="mb-4 pr-6">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950/80 text-emerald-400 border border-emerald-800/60 uppercase tracking-wider">
-                      <Truck className="w-3 h-3" />
-                      Free Doorstep Service
-                    </span>
-                  </div>
+                {/* Form Header (Free Doorstep Service badge removed per user request) */}
+                <div className="mb-4 pr-8">
                   <h3
                     id="pickup-modal-title"
-                    className="text-lg sm:text-xl font-bold text-slate-100 tracking-tight"
+                    className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight"
                   >
                     Schedule Doorstep Pickup
                   </h3>
-                  <p className="text-xs text-slate-400 mt-0.5">
+                  <p className="text-xs sm:text-sm text-slate-500 mt-1">
                     Verified digital scale weighing with instant UPI payment.
                   </p>
                 </div>
 
                 {errorMessage && (
-                  <div className="mb-3 p-2.5 rounded-lg bg-red-950/50 border border-red-900/80 text-red-300 text-xs leading-relaxed">
-                    {errorMessage}
+                  <div className="mb-3 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs leading-relaxed flex items-start gap-2">
+                    <span className="font-bold">•</span>
+                    <span>{errorMessage}</span>
                   </div>
                 )}
 
@@ -387,8 +462,8 @@ export default function PickupBookingModal({
                   {/* Row 1: Full Name | Contact Number */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[11px] font-semibold text-slate-300 mb-1">
-                        Full Name *
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                        Full Name <span className="text-emerald-600">*</span>
                       </label>
                       <input
                         required
@@ -399,16 +474,16 @@ export default function PickupBookingModal({
                         placeholder="e.g. Ramesh Kumar"
                         value={customerName}
                         onChange={(e) => setCustomerName(e.target.value)}
-                        className="w-full bg-[#0F172A] border border-slate-800 rounded-lg px-3 py-2 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-colors"
+                        className="w-full bg-slate-50 hover:bg-slate-50/80 border border-slate-200 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-semibold text-slate-300 mb-1">
-                        Contact Number *
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                        Contact Number <span className="text-emerald-600">*</span>
                       </label>
-                      <div className="flex rounded-lg border border-slate-800 bg-[#0F172A] focus-within:border-emerald-500 transition-colors overflow-hidden">
-                        <span className="inline-flex items-center px-2.5 text-xs font-semibold text-slate-400 bg-slate-900/90 border-r border-slate-800 select-none">
+                      <div className="flex rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-50/80 focus-within:bg-white focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all overflow-hidden">
+                        <span className="inline-flex items-center px-3 text-xs font-bold text-slate-600 bg-slate-100 border-r border-slate-200 select-none">
                           +91
                         </span>
                         <input
@@ -422,17 +497,17 @@ export default function PickupBookingModal({
                           placeholder="9876543210"
                           value={customerPhone}
                           onChange={handlePhoneChange}
-                          className="w-full bg-transparent px-2.5 py-2 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none font-mono"
+                          className="w-full bg-transparent px-3 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none font-mono tracking-wide"
                         />
                       </div>
                     </div>
                   </div>
 
-                  {/* Row 2: City (custom selector without OS popup) | Locality / Area */}
+                  {/* Row 2: City (simple clean input, no chips) | Locality / Area */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[11px] font-semibold text-slate-300 mb-1">
-                        City *
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                        City <span className="text-emerald-600">*</span>
                       </label>
                       <input
                         required
@@ -441,36 +516,16 @@ export default function PickupBookingModal({
                         autoComplete="off"
                         autoCorrect="off"
                         spellCheck={false}
-                        placeholder="Patna, Jalandhar, etc."
+                        placeholder="Enter your city, e.g. Patna"
                         value={city}
                         onChange={(e) => setCity(e.target.value)}
-                        className="w-full bg-[#0F172A] border border-slate-800 rounded-lg px-3 py-2 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-colors"
+                        className="w-full bg-slate-50 hover:bg-slate-50/80 border border-slate-200 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all"
                       />
-                      {/* Preset quick-select city chips */}
-                      <div className="flex flex-wrap gap-1 mt-1.5">
-                        {PRESET_CITIES.map((c) => {
-                          const isSelected = city.toLowerCase() === c.toLowerCase();
-                          return (
-                            <button
-                              key={c}
-                              type="button"
-                              onClick={() => setCity(c)}
-                              className={`px-1.5 py-0.5 rounded text-[10px] font-medium transition cursor-pointer ${
-                                isSelected
-                                  ? "bg-emerald-950 text-emerald-300 border border-emerald-600/80 font-bold"
-                                  : "bg-slate-900/80 text-slate-400 border border-slate-800 hover:text-slate-200"
-                              }`}
-                            >
-                              {c}
-                            </button>
-                          );
-                        })}
-                      </div>
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-semibold text-slate-300 mb-1">
-                        Locality / Area *
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                        Locality / Area <span className="text-emerald-600">*</span>
                       </label>
                       <input
                         required
@@ -479,10 +534,10 @@ export default function PickupBookingModal({
                         autoComplete="off"
                         autoCorrect="off"
                         spellCheck={false}
-                        placeholder="Area, sector, or colony"
+                        placeholder="Enter area, sector, or colony"
                         value={locality}
                         onChange={(e) => setLocality(e.target.value)}
-                        className="w-full bg-[#0F172A] border border-slate-800 rounded-lg px-3 py-2 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-colors"
+                        className="w-full bg-slate-50 hover:bg-slate-50/80 border border-slate-200 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all"
                       />
                     </div>
                   </div>
@@ -490,8 +545,8 @@ export default function PickupBookingModal({
                   {/* Row 3: Preferred Date | Estimated Weight */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[11px] font-semibold text-slate-300 mb-1">
-                        Preferred Pickup Date *
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                        Preferred Pickup Date <span className="text-emerald-600">*</span>
                       </label>
                       <input
                         required
@@ -499,21 +554,21 @@ export default function PickupBookingModal({
                         min={todayString}
                         value={pickupDate}
                         onChange={(e) => setPickupDate(e.target.value)}
-                        className="w-full bg-[#0F172A] border border-slate-800 rounded-lg px-3 py-1.5 text-xs sm:text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-colors cursor-pointer"
+                        className="w-full bg-slate-50 hover:bg-slate-50/80 border border-slate-200 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 focus:bg-white focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all cursor-pointer [color-scheme:light]"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
                         Estimated Weight
                       </label>
                       <select
                         value={estimatedLoad}
                         onChange={(e) => setEstimatedLoad(e.target.value)}
-                        className="w-full bg-[#0F172A] border border-slate-800 rounded-lg px-3 py-2 text-xs sm:text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-colors cursor-pointer"
+                        className="w-full bg-slate-50 hover:bg-slate-50/80 border border-slate-200 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 focus:bg-white focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all cursor-pointer"
                       >
                         {WEIGHT_OPTIONS.map((w) => (
-                          <option key={w} value={w} className="bg-[#0F172A] text-slate-100">
+                          <option key={w} value={w} className="bg-white text-slate-900">
                             {w}
                           </option>
                         ))}
@@ -523,8 +578,8 @@ export default function PickupBookingModal({
 
                   {/* Row 4: Complete Address & Landmark */}
                   <div>
-                    <label className="block text-[11px] font-semibold text-slate-300 mb-1">
-                      Complete Address & Landmark *
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Complete Address & Landmark <span className="text-emerald-600">*</span>
                     </label>
                     <textarea
                       required
@@ -535,53 +590,193 @@ export default function PickupBookingModal({
                       placeholder="House / Flat No., Building name, Street, Landmark"
                       value={address}
                       onChange={(e) => setAddress(e.target.value)}
-                      className="w-full bg-[#0F172A] border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 resize-none transition-colors"
+                      className="w-full bg-slate-50 hover:bg-slate-50/80 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 resize-none transition-all"
                     />
                   </div>
 
-                  {/* Row 5: Scrap Type / Items (Multi-select pills) */}
-                  <div>
+                  {/* Row 5: Searchable Multi-Select Dropdown Synced to Live Rates */}
+                  <div className="relative" ref={dropdownRef}>
                     <div className="flex items-center justify-between mb-1">
-                      <label className="block text-[11px] font-semibold text-slate-300">
-                        Scrap Type / Items <span className="text-slate-500 font-normal">(Select multiple)</span>
+                      <label className="block text-xs font-bold text-slate-700">
+                        Scrap Items to Sell <span className="text-emerald-600">*</span>
                       </label>
-                      <span className="text-[10px] text-emerald-400 font-medium">
+                      <span className="text-[11px] text-emerald-700 font-bold">
                         {selectedScrapTypes.length} selected
                       </span>
                     </div>
-                    <div
-                      className="grid grid-cols-2 sm:grid-cols-3 gap-1.5"
-                      role="group"
-                      aria-label="Select scrap categories"
+
+                    {/* Dropdown Button Trigger */}
+                    <button
+                      type="button"
+                      onClick={() => setIsDropdownOpen((prev) => !prev)}
+                      className={`w-full bg-slate-50 hover:bg-slate-50/90 border rounded-xl px-3.5 py-2.5 text-left text-xs sm:text-sm flex items-center justify-between gap-2 transition-all cursor-pointer ${
+                        isDropdownOpen
+                          ? "bg-white border-emerald-500 ring-2 ring-emerald-500/20"
+                          : "border-slate-200 hover:border-slate-300"
+                      }`}
                     >
-                      {SCRAP_TYPES.map((type) => {
-                        const isSelected = selectedScrapTypes.includes(type);
-                        return (
-                          <button
-                            key={type}
-                            type="button"
-                            onClick={() => toggleScrapType(type)}
-                            className={`py-1.5 px-2 text-[11px] rounded-lg border text-left transition-all cursor-pointer flex items-center justify-between gap-1 ${
-                              isSelected
-                                ? "bg-emerald-950/70 border-emerald-500 text-emerald-300 font-semibold shadow-xs"
-                                : "bg-[#0F172A] border-slate-800 text-slate-300 hover:border-slate-700 hover:text-slate-100"
-                            }`}
-                          >
-                            <span className="truncate">{type}</span>
-                            {isSelected && (
-                              <Check className="w-3 h-3 text-emerald-400 stroke-[3] shrink-0" />
+                      <div className="flex items-center gap-2 truncate">
+                        <Boxes className="w-4 h-4 text-emerald-600 shrink-0" />
+                        {selectedScrapTypes.length === 0 ? (
+                          <span className="text-slate-400">Select Scrap Items (Search live rates)...</span>
+                        ) : (
+                          <span className="text-slate-800 truncate font-semibold">
+                            {selectedScrapTypes.slice(0, 3).join(", ")}
+                            {selectedScrapTypes.length > 3 && (
+                              <span className="text-emerald-700 font-bold ml-1">
+                                +{selectedScrapTypes.length - 3} more
+                              </span>
                             )}
+                          </span>
+                        )}
+                      </div>
+                      <ChevronDown
+                        className={`w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0 ${
+                          isDropdownOpen ? "rotate-180 text-emerald-600" : ""
+                        }`}
+                      />
+                    </button>
+
+                    {/* Selected Tags Display */}
+                    {selectedScrapTypes.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mt-2 max-h-16 overflow-y-auto">
+                        {selectedScrapTypes.map((type) => (
+                          <span
+                            key={type}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs"
+                          >
+                            <span>{type}</span>
+                            <button
+                              type="button"
+                              onClick={(e) => removeScrapType(type, e)}
+                              className="text-emerald-600 hover:text-emerald-950 p-0.5 transition cursor-pointer"
+                              title={`Remove ${type}`}
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Dropdown Floating Panel */}
+                    {isDropdownOpen && (
+                      <div className="absolute left-0 right-0 bottom-full mb-1.5 z-50 bg-white border border-slate-200 rounded-2xl shadow-2xl p-3 space-y-2.5">
+                        {/* Search Input */}
+                        <div className="relative">
+                          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                          <input
+                            type="text"
+                            placeholder="Search scrap items (Newspaper, Iron, AC...)"
+                            value={scrapSearch}
+                            onChange={(e) => setScrapSearch(e.target.value)}
+                            className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-8 pr-7 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-emerald-500"
+                            autoFocus
+                          />
+                          {scrapSearch && (
+                            <button
+                              type="button"
+                              onClick={() => setScrapSearch("")}
+                              className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Category Filter Chips */}
+                        <div className="flex items-center gap-1 overflow-x-auto pb-1 scrollbar-none">
+                          {CATEGORY_TABS.map((cat) => {
+                            const isActive = selectedCategoryFilter === cat;
+                            return (
+                              <button
+                                key={cat}
+                                type="button"
+                                onClick={() => setSelectedCategoryFilter(cat)}
+                                className={`px-2.5 py-1 rounded-full text-[11px] font-semibold whitespace-nowrap transition cursor-pointer ${
+                                  isActive
+                                    ? "bg-[#5EDC1F] text-slate-950 font-bold shadow-xs"
+                                    : "bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900"
+                                }`}
+                              >
+                                {cat}
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        {/* Items Checklist List */}
+                        <div className="max-h-48 overflow-y-auto space-y-1 pr-1 divide-y divide-slate-100">
+                          {filteredScrapItems.length === 0 ? (
+                            <div className="py-4 text-center text-xs text-slate-400">
+                              No scrap items found matching &quot;{scrapSearch}&quot;
+                            </div>
+                          ) : (
+                            filteredScrapItems.map((item) => {
+                              const isChecked = selectedScrapTypes.includes(item.name);
+                              return (
+                                <button
+                                  key={item.id}
+                                  type="button"
+                                  onClick={() => toggleScrapType(item.name)}
+                                  className={`w-full py-1.5 px-2 rounded-lg text-left text-xs flex items-center justify-between gap-2 transition cursor-pointer ${
+                                    isChecked
+                                      ? "bg-emerald-50 text-emerald-900 font-medium"
+                                      : "hover:bg-slate-50 text-slate-700"
+                                  }`}
+                                >
+                                  <div className="flex items-center gap-2 truncate">
+                                    <div
+                                      className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
+                                        isChecked
+                                          ? "bg-[#5EDC1F] border-[#5EDC1F] text-slate-950"
+                                          : "border-slate-300 bg-white"
+                                      }`}
+                                    >
+                                      {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
+                                    </div>
+                                    <span className="truncate font-semibold text-slate-800">
+                                      {item.name}
+                                    </span>
+                                    <span className="text-[10px] text-slate-500 px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200">
+                                      {item.category}
+                                    </span>
+                                  </div>
+                                  <span className="text-xs font-mono font-bold text-emerald-700 shrink-0">
+                                    {item.price}
+                                  </span>
+                                </button>
+                              );
+                            })
+                          )}
+                        </div>
+
+                        {/* Dropdown Footer Actions */}
+                        <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+                          <button
+                            type="button"
+                            onClick={() => setSelectedScrapTypes([])}
+                            className="text-xs text-slate-500 hover:text-slate-800 transition cursor-pointer font-medium"
+                          >
+                            Clear all
                           </button>
-                        );
-                      })}
-                    </div>
+                          <button
+                            type="button"
+                            onClick={() => setIsDropdownOpen(false)}
+                            className="px-3.5 py-1.5 rounded-lg bg-[#5EDC1F] hover:bg-[#52c51b] text-slate-950 text-xs font-bold transition cursor-pointer shadow-xs"
+                          >
+                            Done ({selectedScrapTypes.length})
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Submit CTA Button */}
+                  {/* Primary Submit CTA with project's signature Thyme Green (#5EDC1F) */}
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full mt-3 py-2.5 sm:py-3 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 disabled:opacity-60 disabled:cursor-not-allowed text-slate-950 font-black text-xs sm:text-sm tracking-wide transition-all cursor-pointer flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/40 hover:scale-[1.01] active:scale-[0.99]"
+                    className="w-full mt-3 py-3 px-5 rounded-xl bg-[#5EDC1F] hover:bg-[#52c51b] active:bg-[#47b016] disabled:opacity-60 disabled:cursor-not-allowed text-slate-950 font-black text-sm tracking-wide transition-all cursor-pointer flex items-center justify-center gap-2 shadow-md shadow-emerald-500/20 hover:shadow-lg hover:scale-[1.01] active:scale-[0.99]"
                   >
                     {isSubmitting ? (
                       <>
@@ -596,173 +791,17 @@ export default function PickupBookingModal({
               </div>
             </div>
 
-            {/* RIGHT COLUMN: Branded Visual & Trust Panel (40%) with S-Curve Divider */}
-            <div className="hidden md:flex md:w-[40%] lg:w-[38%] p-6 lg:p-7 flex-col justify-between bg-gradient-to-br from-emerald-600 via-green-700 to-slate-950 text-white relative overflow-hidden select-none">
-              {/* Organic S-Curve Wave Divider carving smoothly from left (matching reference layout) */}
-              <div className="absolute top-0 bottom-0 left-0 w-12 lg:w-16 overflow-hidden pointer-events-none z-10">
-                <svg
-                  viewBox="0 0 100 1000"
-                  preserveAspectRatio="none"
-                  className="h-full w-full fill-[#0B0F19]"
-                >
-                  <path d="M0,0 L95,0 C55,200 12,380 28,520 C45,660 70,820 90,1000 L0,1000 Z" />
-                </svg>
-              </div>
-
-              {/* Decorative Subtle Background Orbs */}
-              <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-emerald-400/20 blur-2xl pointer-events-none" />
-              <div className="absolute -bottom-16 -left-16 w-48 h-48 rounded-full bg-green-500/20 blur-2xl pointer-events-none" />
-
-              {/* Top Header Badge & Headline (inspired by reference card typography) */}
-              <div className="relative z-10 pl-4 text-center md:text-left">
-                <div className="flex items-center gap-2 mb-2.5">
-                  <div className="p-1 rounded-lg bg-black/35 backdrop-blur-sm border border-white/20 shadow-sm">
-                    <BrandLogo size={20} className="h-4.5 w-4.5" />
-                  </div>
-                  <span className="text-[11px] font-black uppercase tracking-wider text-emerald-200">
-                    KabaadSe Doorstep
-                  </span>
-                </div>
-
-                <h4 className="text-xl lg:text-2xl font-black text-white leading-tight tracking-tight drop-shadow-sm">
-                  Turn your household scrap into instant cash.
-                </h4>
-                <p className="text-xs text-emerald-100/90 leading-relaxed font-medium mt-1">
-                  Accurate digital scale weighing & on-the-spot UPI payout.
-                </p>
-              </div>
-
-              {/* Center Vector Illustration (inspired by reference monitor & eco elements) */}
-              <div className="relative z-10 pl-4 my-2 flex items-center justify-center">
-                <div className="relative w-full max-w-[280px] py-2 flex flex-col items-center">
-                  {/* Stylized Doorstep Pickup Vector Graphics */}
-                  <svg
-                    viewBox="0 0 280 130"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="w-full h-auto drop-shadow-xl"
-                  >
-                    {/* Background Decorative Foliage / Eco Leaves */}
-                    <path
-                      d="M20 70C20 40 50 25 70 30C75 55 55 80 20 70Z"
-                      fill="#10B981"
-                      fillOpacity="0.35"
-                    />
-                    <path
-                      d="M260 70C260 40 230 25 210 30C205 55 225 80 260 70Z"
-                      fill="#10B981"
-                      fillOpacity="0.35"
-                    />
-                    <circle cx="140" cy="65" r="55" fill="#047857" fillOpacity="0.4" />
-
-                    {/* Central Digital Weighing Scale & Display Screen */}
-                    <rect
-                      x="70"
-                      y="20"
-                      width="140"
-                      height="85"
-                      rx="12"
-                      fill="#0F172A"
-                      stroke="#34D399"
-                      strokeWidth="2.5"
-                    />
-                    {/* Inner Screen Stand Base */}
-                    <rect x="120" y="105" width="40" height="8" rx="4" fill="#334155" />
-                    <rect x="105" y="113" width="70" height="5" rx="2.5" fill="#1E293B" />
-
-                    {/* Scale Weight Screen Readout */}
-                    <rect x="85" y="32" width="110" height="28" rx="6" fill="#022C22" stroke="#059669" strokeWidth="1" />
-                    <text
-                      x="140"
-                      y="51"
-                      fill="#34D399"
-                      fontFamily="monospace"
-                      fontSize="14"
-                      fontWeight="bold"
-                      textAnchor="middle"
-                    >
-                      24.50 KG
-                    </text>
-                    <circle cx="94" cy="46" r="3" fill="#10B981" />
-
-                    {/* Feature Indicators inside Monitor */}
-                    <rect x="85" y="68" width="50" height="18" rx="4" fill="#1E293B" />
-                    <text x="110" y="81" fill="#E2E8F0" fontSize="9" fontWeight="600" textAnchor="middle">
-                      Verified
-                    </text>
-                    <rect x="145" y="68" width="50" height="18" rx="4" fill="#059669" />
-                    <text x="170" y="81" fill="#FFFFFF" fontSize="9" fontWeight="bold" textAnchor="middle">
-                      ₹ Instant
-                    </text>
-
-                    {/* Floating Shield Badge (Left) */}
-                    <g transform="translate(32, 45)">
-                      <rect width="36" height="36" rx="10" fill="#0B0F19" stroke="#10B981" strokeWidth="1.5" />
-                      <path
-                        d="M18 10L27 14V20C27 24.5 23.2 27.8 18 29C12.8 27.8 9 24.5 9 20V14L18 10Z"
-                        fill="#059669"
-                        fillOpacity="0.4"
-                        stroke="#34D399"
-                        strokeWidth="1.5"
-                      />
-                      <path d="M15 19L17 21L21 16" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </g>
-
-                    {/* Floating Cash/UPI Coin Badge (Right) */}
-                    <g transform="translate(212, 45)">
-                      <circle cx="18" cy="18" r="18" fill="#0B0F19" stroke="#FBBF24" strokeWidth="1.5" />
-                      <circle cx="18" cy="18" r="14" fill="#D97706" fillOpacity="0.3" />
-                      <text x="18" y="23" fill="#FCD34D" fontSize="16" fontWeight="bold" textAnchor="middle">
-                        ₹
-                      </text>
-                    </g>
-                  </svg>
-                </div>
-              </div>
-
-              {/* Structured Trust Highlights */}
-              <div className="relative z-10 pl-4 space-y-2 mb-3">
-                <div className="flex items-center gap-2.5 p-2 rounded-xl bg-black/35 backdrop-blur-md border border-white/10">
-                  <div className="p-1 rounded-md bg-emerald-500/20 text-emerald-300 shrink-0">
-                    <Scale className="w-3.5 h-3.5 stroke-[2.2]" />
-                  </div>
-                  <div className="text-xs">
-                    <span className="font-bold text-white block">Certified Bluetooth Scale</span>
-                    <span className="text-[10px] text-emerald-100/75">Accurate to 10 grams at your doorstep</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2.5 p-2 rounded-xl bg-black/35 backdrop-blur-md border border-white/10">
-                  <div className="p-1 rounded-md bg-emerald-500/20 text-emerald-300 shrink-0">
-                    <Zap className="w-3.5 h-3.5 stroke-[2.2]" />
-                  </div>
-                  <div className="text-xs">
-                    <span className="font-bold text-white block">Instant UPI Transfer</span>
-                    <span className="text-[10px] text-emerald-100/75">Direct bank transfer before vehicle departs</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Bottom Live Summary Card */}
-              <div className="relative z-10 pl-4">
-                <div className="p-2.5 rounded-xl bg-black/40 backdrop-blur-md border border-emerald-400/30 shadow-lg">
-                  <div className="flex items-center justify-between text-[11px] font-semibold text-emerald-300 mb-0.5">
-                    <span className="flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                      Live Summary
-                    </span>
-                    <span className="font-mono text-emerald-200 text-xs">
-                      {estimatedLoad}
-                    </span>
-                  </div>
-                  <div className="text-xs text-white font-bold truncate">
-                    📍 {city || "Patna"} {locality ? `• ${locality}` : ""}
-                  </div>
-                  <div className="text-[10px] text-emerald-200/90 truncate mt-0.5">
-                    📦 {selectedScrapTypes.length > 0 ? selectedScrapTypes.join(", ") : "Select scrap items"}
-                  </div>
-                </div>
-              </div>
+            {/* RIGHT COLUMN: Full-Bleed KabaadSe Doorstep Pickup Image (Zero Text Overlays) */}
+            <div className="hidden md:block md:w-[38%] lg:w-[40%] relative overflow-hidden p-0 self-stretch min-h-[450px]">
+              <Image
+                src="/images/kabaadse-doorstep-pickup.jpg"
+                alt="KabaadSe Doorstep Digital Weighing & Collection"
+                fill
+                sizes="(max-width: 768px) 0vw, 420px"
+                priority
+                quality={95}
+                className="w-full h-full object-cover object-center select-none pointer-events-none"
+              />
             </div>
           </>
         )}

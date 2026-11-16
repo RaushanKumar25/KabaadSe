@@ -9,6 +9,7 @@ import ServiceInquiryModal, {
   ServiceDetail,
   SERVICES_DATA,
 } from "./ServiceInquiryModal";
+import AdminAuthModal from "@/components/ui/admin-auth-modal";
 import {
   ChevronDown,
   Menu,
@@ -223,7 +224,10 @@ export default function Navbar({
         </div>
 
         {/* Right: Actions (Desktop & Tablet) */}
-        <div className="hidden sm:flex items-center gap-3">
+        <div className="hidden sm:flex items-center gap-2.5">
+          {/* Admin Auth Modal Trigger */}
+          <AdminAuthModal triggerText="Admin" />
+
           {/* Pill button 1: Check Live Rates */}
           <Link
             href="/rates"
@@ -769,6 +773,10 @@ export default function Navbar({
           </div>
 
           <div className="pt-2 border-t border-slate-200 dark:border-white/10 flex flex-col gap-2.5">
+            <AdminAuthModal
+              triggerText="Admin Login"
+              triggerClassName="w-full justify-center py-2.5 text-sm"
+            />
             <button
               type="button"
               onClick={() => {
