@@ -224,9 +224,9 @@ export default function Navbar({
         </div>
 
         {/* Right: Actions (Desktop & Tablet) */}
-        <div className="hidden sm:flex items-center gap-2.5">
-          {/* Admin Auth Modal Trigger */}
-          <AdminAuthModal triggerText="Admin" />
+        <div className="hidden sm:flex items-center gap-3">
+          {/* Sign up / Login Modal Trigger */}
+          <AdminAuthModal triggerText="Sign up / Login" />
 
           {/* Pill button 1: Check Live Rates */}
           <Link
@@ -235,16 +235,16 @@ export default function Navbar({
               e.preventDefault();
               triggerTransition("/rates", 1000);
             }}
-            className="px-4 py-2 text-xs sm:text-sm font-medium rounded-full border border-white/30 text-white hover:border-white/60 hover:bg-white/10 backdrop-blur-sm transition cursor-pointer flex items-center justify-center whitespace-nowrap shadow-xs"
+            className="h-10 px-5 py-2 text-sm font-medium rounded-full border border-white/15 bg-white/5 hover:border-white/40 hover:bg-white/10 backdrop-blur-md text-white transition cursor-pointer flex items-center justify-center whitespace-nowrap shadow-xs hover:scale-[1.02] active:scale-[0.98]"
           >
             Check Live Rates
           </Link>
 
-          {/* Pill button 2: Sell Scrap */}
+          {/* Pill button 2: Sell Scrap (Sole Primary Neon-Lime CTA) */}
           <button
             type="button"
             onClick={onOpenSellModal}
-            className="px-4 py-2 text-xs sm:text-sm font-semibold rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition cursor-pointer flex items-center justify-center whitespace-nowrap shadow-md hover:scale-[1.02] active:scale-[0.98]"
+            className="h-10 px-5 py-2 text-sm font-bold rounded-full bg-[#65E817] hover:bg-[#58d012] text-slate-950 transition cursor-pointer flex items-center justify-center whitespace-nowrap shadow-md hover:scale-[1.02] active:scale-[0.98]"
           >
             Sell Scrap
           </button>
@@ -253,7 +253,7 @@ export default function Navbar({
           <button
             type="button"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 border border-white/20 bg-white/10 hover:bg-white/20 text-white transition-all duration-200 shadow-xs cursor-pointer hover:scale-105 active:scale-95 backdrop-blur-sm"
+            className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 border border-white/15 bg-white/5 hover:border-white/30 hover:bg-white/10 text-white transition-all duration-200 shadow-xs cursor-pointer hover:scale-105 active:scale-95 backdrop-blur-md"
             aria-label={
               mounted
                 ? theme === "dark"
@@ -774,8 +774,8 @@ export default function Navbar({
 
           <div className="pt-2 border-t border-slate-200 dark:border-white/10 flex flex-col gap-2.5">
             <AdminAuthModal
-              triggerText="Admin Login"
-              triggerClassName="w-full justify-center py-2.5 text-sm"
+              triggerText="Sign up / Login"
+              triggerClassName="w-full justify-center h-11 text-sm bg-slate-900/90 dark:bg-white/5 border border-slate-800 dark:border-white/15 text-white"
             />
             <button
               type="button"
@@ -783,7 +783,7 @@ export default function Navbar({
                 setMobileMenuOpen(false);
                 onOpenSellModal?.();
               }}
-              className="w-full text-center rounded-full bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100 font-semibold py-3 text-sm shadow-md transition-colors cursor-pointer"
+              className="w-full text-center rounded-full bg-[#65E817] hover:bg-[#58d012] text-slate-950 font-bold py-3 text-sm shadow-md transition-colors cursor-pointer"
             >
               Sell Scrap
             </button>

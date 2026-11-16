@@ -7,6 +7,6 @@ export const metadata = {
 };
 
 export default function AdminLoginPage() {
-  return <AdminAuthModal standalonePage defaultOpen />;
+  return <AdminAuthModal standalonePage defaultOpen defaultTab="admin" />;
 }
 
