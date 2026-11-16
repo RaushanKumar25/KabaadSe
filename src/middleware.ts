@@ -1,12 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifySessionToken, ADMIN_SESSION_COOKIE } from "@/lib/auth";
+import {
+  verifySessionToken,
+  ADMIN_SESSION_COOKIE,
+  verifyCustomerSessionToken,
+  CUSTOMER_SESSION_COOKIE,
+} from "@/lib/auth";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // 1. Protect Customer Dashboard Routes (/dashboard)
+  if (pathname.startsWith("/dashboard")) {
+    const customerCookie = request.cookies.get(CUSTOMER_SESSION_COOKIE)?.value;
+    const customerSession = await verifyCustomerSessionToken(customerCookie);
+
+    if (!customerSession.valid) {
+      const redirectUrl = new URL("/", request.url);
+      redirectUrl.searchParams.set("auth", "customer");
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    return NextResponse.next();
+  }
+
+  // 2. Protect Admin Page Routes (/admin)
   const sessionCookie = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
   const session = await verifySessionToken(sessionCookie);
 
-  // 1. Protect Admin Page Routes
   if (pathname.startsWith("/admin")) {
     const isLoginPage = pathname === "/admin/login";
 
@@ -27,7 +47,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // 2. Protect Admin API Write Operations & Operations Queries
+  // 3. Protect Admin API Write Operations & Operations Queries
   const method = request.method.toUpperCase();
 
   // /api/pickup & /api/pickups:
@@ -70,6 +90,8 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    "/dashboard/:path*",
+    "/dashboard",
     "/admin/:path*",
     "/api/pickups/:path*",
     "/api/pickups",
@@ -79,4 +101,3 @@ export const config = {
     "/api/rates",
   ],
 };
-

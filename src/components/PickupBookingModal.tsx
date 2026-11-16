@@ -73,6 +73,37 @@ export default function PickupBookingModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [confirmedBookingId, setConfirmedBookingId] = useState<string | null>(null);
+  const [activeCustomerId, setActiveCustomerId] = useState<string | null>(null);
+
+  // Check if customer is logged in; if so, pre-fill name, phone, and address
+  useEffect(() => {
+    let isCancelled = false;
+    async function loadCustomerProfile() {
+      try {
+        const res = await fetch("/api/customer/me", { cache: "no-store" });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.success && data.customer && !isCancelled) {
+          setActiveCustomerId(data.customer.id);
+          setCustomerName((prev) => prev || data.customer.name || "");
+          setCustomerPhone((prev) => prev || data.customer.phone || "");
+          if (data.customer.defaultAddress) {
+            setAddress((prev) => prev || data.customer.defaultAddress || "");
+          }
+        }
+      } catch {
+        // Guest mode fallback
+      }
+    }
+
+    if (isOpen) {
+      loadCustomerProfile();
+    }
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [isOpen]);
 
   // Calculate today's date string (YYYY-MM-DD) for date picker minimum
   const todayString = useMemo(() => {
@@ -274,6 +305,7 @@ export default function PickupBookingModal({
         },
         cache: "no-store",
         body: JSON.stringify({
+          customerId: activeCustomerId || undefined,
           customerName: customerName.trim(),
           customerPhone: customerPhone.trim(),
           city: city.trim(),

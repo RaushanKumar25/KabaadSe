@@ -39,16 +39,32 @@ model ScrapRate {
   @@unique([cityId, itemId])
 }
 
+model Customer {
+  id             String          @id @default(uuid())
+  name           String
+  email          String          @unique
+  phone          String          @unique
+  passwordHash   String
+  defaultAddress String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  pickups        PickupRequest[]
+}
+
 model PickupRequest {
-  id             String   @id @default(uuid())
+  id             String    @id @default(uuid())
+  customerId     String?
+  customer       Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
   customerName   String
   customerPhone  String
-  city           String   @default("Patna")
+  city           String    @default("Patna")
   locality       String
   address        String
   pickupDate     DateTime
   estimatedLoad  String
-  scrapTypes     String   @default("Mixed Scrap")
-  status         String   @default("PENDING")
-  createdAt      DateTime @default(now())
+  scrapTypes     String    @default("Mixed Scrap")
+  status         String    @default("PENDING")
+  actualWeightKg Float?
+  finalPayoutInr Float?
+  createdAt      DateTime  @default(now())
 }

@@ -16,6 +16,7 @@ import {
   X,
   Sun,
   Moon,
+  User,
 } from "lucide-react";
 
 interface NavbarProps {
@@ -36,6 +37,30 @@ export default function Navbar({
   const [companyDropdown, setCompanyDropdown] = useState(false);
   const [selectedService, setSelectedService] = useState<ServiceDetail | null>(null);
   const [isVisible, setIsVisible] = useState(true);
+  const [customer, setCustomer] = useState<{ id: string; name: string } | null>(null);
+
+  // Check customer session
+  useEffect(() => {
+    let isCancelled = false;
+    async function checkCustomerAuth() {
+      try {
+        const res = await fetch("/api/customer/me", { cache: "no-store" });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.success && data.customer && !isCancelled) {
+          setCustomer(data.customer);
+        } else if (!isCancelled) {
+          setCustomer(null);
+        }
+      } catch {
+        if (!isCancelled) setCustomer(null);
+      }
+    }
+    checkCustomerAuth();
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
 
   const servicesMenuRef = useRef<HTMLDivElement>(null);
   const servicesBtnRef = useRef<HTMLButtonElement>(null);
@@ -225,8 +250,18 @@ export default function Navbar({
 
         {/* Right: Actions (Desktop & Tablet) */}
         <div className="hidden sm:flex items-center gap-3">
-          {/* Sign up / Login Modal Trigger */}
-          <AdminAuthModal triggerText="Sign up / Login" />
+          {/* Customer Logged In -> My Dashboard / Otherwise -> Sign up / Login */}
+          {customer ? (
+            <Link
+              href="/dashboard"
+              className="h-10 rounded-full border border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/20 backdrop-blur-md px-5 py-2 text-sm font-semibold text-emerald-300 transition-all flex items-center gap-2 cursor-pointer shadow-xs hover:scale-[1.02] active:scale-[0.98]"
+            >
+              <User className="w-4 h-4 text-[#65E817] shrink-0" />
+              <span>My Dashboard</span>
+            </Link>
+          ) : (
+            <AdminAuthModal triggerText="Sign up / Login" />
+          )}
 
           {/* Pill button 1: Check Live Rates */}
           <Link
@@ -773,10 +808,21 @@ export default function Navbar({
           </div>
 
           <div className="pt-2 border-t border-slate-200 dark:border-white/10 flex flex-col gap-2.5">
-            <AdminAuthModal
-              triggerText="Sign up / Login"
-              triggerClassName="w-full justify-center h-11 text-sm bg-slate-900/90 dark:bg-white/5 border border-slate-800 dark:border-white/15 text-white"
-            />
+            {customer ? (
+              <Link
+                href="/dashboard"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full text-center h-11 rounded-full border border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 font-semibold flex items-center justify-center gap-2 text-sm shadow-xs transition-colors cursor-pointer"
+              >
+                <User className="w-4 h-4 text-[#65E817]" />
+                <span>My Dashboard</span>
+              </Link>
+            ) : (
+              <AdminAuthModal
+                triggerText="Sign up / Login"
+                triggerClassName="w-full justify-center h-11 text-sm bg-slate-900/90 dark:bg-white/5 border border-slate-800 dark:border-white/15 text-white"
+              />
+            )}
             <button
               type="button"
               onClick={() => {

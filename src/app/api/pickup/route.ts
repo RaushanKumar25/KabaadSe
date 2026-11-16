@@ -8,6 +8,7 @@ import {
   getStorageInfo,
   PickupBooking,
 } from "@/lib/pickupStore";
+import { verifyCustomerSessionToken, CUSTOMER_SESSION_COOKIE } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -228,7 +229,21 @@ export async function POST(request: NextRequest) {
     const cleanAddress = address.trim();
     const cleanLoad = estimatedLoad.trim();
 
-    // 9. Gracefully ensure City exists in PostgreSQL City table (if DATABASE_URL is configured and table is migrated)
+    // 9. Check if request belongs to an authenticated Customer (via cookie or body)
+    let attachedCustomerId: string | null = (body.customerId || "").trim() || null;
+    if (!attachedCustomerId) {
+      try {
+        const customerCookie = request.cookies.get(CUSTOMER_SESSION_COOKIE)?.value;
+        const customerSession = await verifyCustomerSessionToken(customerCookie);
+        if (customerSession.valid && customerSession.customer?.id) {
+          attachedCustomerId = customerSession.customer.id;
+        }
+      } catch {
+        // Safe to ignore session check error
+      }
+    }
+
+    // 10. Gracefully ensure City exists in PostgreSQL City table (if DATABASE_URL is configured and table is migrated)
     const citySlug = cleanCity.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     if (process.env.DATABASE_URL) {
       try {
@@ -249,7 +264,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 10. If DATABASE_URL is not configured, fall back gracefully to local store
+    // 11. If DATABASE_URL is not configured, fall back gracefully to local store
     if (!process.env.DATABASE_URL) {
       try {
         const fallbackRecord: PickupBooking = {
@@ -273,6 +288,7 @@ export async function POST(request: NextRequest) {
           {
             success: true,
             bookingId: newId,
+            customerId: attachedCustomerId,
             message: "Pickup scheduled successfully (local dev store)",
           },
           { status: 201 }
@@ -289,12 +305,13 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 11. Save to PostgreSQL database as primary source of truth
+    // 12. Save to PostgreSQL database as primary source of truth
     try {
       const pickup = await withDbTimeout(
         prisma.pickupRequest.create({
           data: {
             id: newId,
+            customerId: attachedCustomerId,
             customerName: cleanCustomerName,
             customerPhone: sanitizedPhone,
             city: cleanCity,

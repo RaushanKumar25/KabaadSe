@@ -1,6 +1,16 @@
 export const ADMIN_SESSION_COOKIE = "kabaadse_admin_session";
 export const SESSION_MAX_AGE = 60 * 60 * 24; // 24 hours in seconds
 
+export const CUSTOMER_SESSION_COOKIE = "kabaadse_customer_session";
+export const CUSTOMER_SESSION_MAX_AGE = 60 * 60 * 24 * 7; // 7 days in seconds
+
+export interface CustomerSessionPayload {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+}
+
 function getSecretKey(): string {
   return (
     process.env.ADMIN_SESSION_SECRET ||
@@ -59,6 +69,10 @@ function base64UrlDecode(str: string): string {
     ? atob(base64)
     : Buffer.from(base64, "base64").toString("utf-8");
 }
+
+/* =========================================================================
+   ADMIN SESSION TOKENS
+   ========================================================================= */
 
 export async function signSessionToken(
   username: string,
@@ -127,3 +141,89 @@ export async function verifySessionToken(
   }
 }
 
+/* =========================================================================
+   CUSTOMER SESSION TOKENS (ISOLATED FROM ADMIN)
+   ========================================================================= */
+
+export async function signCustomerSessionToken(
+  customer: CustomerSessionPayload,
+  maxAgeSeconds = CUSTOMER_SESSION_MAX_AGE
+): Promise<string> {
+  const now = Math.floor(Date.now() / 1000);
+  const payload = {
+    cId: customer.id,
+    name: customer.name,
+    email: customer.email,
+    phone: customer.phone,
+    role: "customer",
+    iat: now,
+    exp: now + maxAgeSeconds,
+  };
+  const jsonStr = JSON.stringify(payload);
+  const encodedPayload = base64UrlEncode(jsonStr);
+
+  const key = await getHmacKey(getSecretKey());
+  const enc = new TextEncoder();
+  const signatureBuffer = await crypto.subtle.sign(
+    "HMAC",
+    key,
+    enc.encode(encodedPayload)
+  );
+  const signatureHex = arrayBufferToHex(signatureBuffer);
+
+  return `${encodedPayload}.${signatureHex}`;
+}
+
+export async function verifyCustomerSessionToken(
+  token: string | undefined | null
+): Promise<{ valid: boolean; customer?: CustomerSessionPayload }> {
+  if (!token || typeof token !== "string" || !token.includes(".")) {
+    return { valid: false };
+  }
+
+  const [encodedPayload, signatureHex] = token.split(".");
+  if (!encodedPayload || !signatureHex) {
+    return { valid: false };
+  }
+
+  try {
+    const key = await getHmacKey(getSecretKey());
+    const enc = new TextEncoder();
+    const signatureBuffer = hexToArrayBuffer(signatureHex);
+
+    const isValid = await crypto.subtle.verify(
+      "HMAC",
+      key,
+      signatureBuffer,
+      enc.encode(encodedPayload)
+    );
+
+    if (!isValid) {
+      return { valid: false };
+    }
+
+    const jsonStr = base64UrlDecode(encodedPayload);
+    const payload = JSON.parse(jsonStr);
+
+    const now = Math.floor(Date.now() / 1000);
+    if (!payload.exp || payload.exp < now) {
+      return { valid: false };
+    }
+
+    if (!payload.cId || payload.role !== "customer") {
+      return { valid: false };
+    }
+
+    return {
+      valid: true,
+      customer: {
+        id: payload.cId,
+        name: payload.name,
+        email: payload.email,
+        phone: payload.phone,
+      },
+    };
+  } catch {
+    return { valid: false };
+  }
+}
