@@ -139,7 +139,7 @@ export default function Navbar({
             }`
       }`}
     >
-      <nav className="w-full flex items-center justify-between py-3 px-4 sm:px-8 min-h-[72px]">
+      <nav className="max-w-7xl mx-auto w-full flex items-center justify-between py-3 px-4 sm:px-6 lg:px-8 min-h-[72px]">
         {/* Left: Brand Identity & Logo */}
         <Link
           href="/"
@@ -250,7 +250,7 @@ export default function Navbar({
 
         {/* Right: Actions (Desktop & Tablet) */}
         <div className="hidden sm:flex items-center gap-3">
-          {/* Customer Logged In -> My Dashboard / Otherwise -> Sign up / Login */}
+          {/* Customer Logged In -> My Dashboard / On non-home pages -> Sign up / Login */}
           {customer ? (
             <Link
               href="/dashboard"
@@ -259,9 +259,9 @@ export default function Navbar({
               <User className="w-4 h-4 text-[#65E817] shrink-0" />
               <span>My Dashboard</span>
             </Link>
-          ) : (
+          ) : alwaysVisible ? (
             <AdminAuthModal triggerText="Sign up / Login" />
-          )}
+          ) : null}
 
           {/* Pill button 1: Check Live Rates */}
           <Link

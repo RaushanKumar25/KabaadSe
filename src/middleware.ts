@@ -52,7 +52,8 @@ export async function middleware(request: NextRequest) {
 
   // /api/pickup & /api/pickups:
   // - Public: POST (customer doorstep pickup submissions)
-  // - Protected: GET (operations dashboard data), PATCH (status changes), DELETE (removal)
+  // - Protected (Admin or Customer): PATCH & DELETE on individual bookings (/api/pickups/[id])
+  // - Protected (Admin only): GET (operations dashboard data)
   if (
     pathname.startsWith("/api/pickups") ||
     pathname.startsWith("/api/pickup")
@@ -61,7 +62,20 @@ export async function middleware(request: NextRequest) {
       return NextResponse.next();
     }
 
-    if (["GET", "PATCH", "DELETE"].includes(method)) {
+    if (["PATCH", "DELETE"].includes(method)) {
+      const customerCookie = request.cookies.get(CUSTOMER_SESSION_COOKIE)?.value;
+      const customerSession = await verifyCustomerSessionToken(customerCookie);
+
+      if (!session.valid && !customerSession.valid) {
+        return NextResponse.json(
+          { success: false, error: "Unauthorized. Valid session required." },
+          { status: 401 }
+        );
+      }
+      return NextResponse.next();
+    }
+
+    if (method === "GET") {
       if (!session.valid) {
         return NextResponse.json(
           { success: false, error: "Unauthorized. Admin session required." },

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
@@ -11,6 +11,7 @@ import ImpactSection from "@/components/ImpactSection";
 import ContactSection from "@/components/ContactSection";
 import Footer from "@/components/Footer";
 import PickupBookingModal from "@/components/PickupBookingModal";
+import AdminAuthModal from "@/components/ui/admin-auth-modal";
 import { useNavigationTransition } from "@/context/NavigationTransitionContext";
 import {
   ChevronDown,
@@ -18,6 +19,8 @@ import {
   Sun,
   Moon,
   X,
+  User,
+  ArrowRight,
 } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
 
@@ -27,6 +30,30 @@ export default function Home() {
 
   const [sellModalOpen, setSellModalOpen] = useState(false);
   const [businessModalOpen, setBusinessModalOpen] = useState(false);
+  const [customer, setCustomer] = useState<{ id: string; name: string } | null>(null);
+
+  // Check customer session state
+  useEffect(() => {
+    let isCancelled = false;
+    async function checkCustomerAuth() {
+      try {
+        const res = await fetch("/api/customer/me", { cache: "no-store" });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.success && data.customer && !isCancelled) {
+          setCustomer(data.customer);
+        } else if (!isCancelled) {
+          setCustomer(null);
+        }
+      } catch {
+        if (!isCancelled) setCustomer(null);
+      }
+    }
+    checkCustomerAuth();
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
 
   const scrollToNext = () => {
     const el =
@@ -79,25 +106,23 @@ export default function Home() {
             Doorstep collection with digital weighing and instant payout.
           </p>
 
-          {/* Hero CTAs */}
-          <div className="mt-5 sm:mt-6 flex flex-wrap items-center justify-center gap-3">
-            <button
-              type="button"
-              onClick={() => setSellModalOpen(true)}
-              className="px-5 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-bold rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition cursor-pointer flex items-center justify-center whitespace-nowrap shadow-lg shadow-emerald-950/40 hover:scale-[1.02] active:scale-[0.98]"
-            >
-              Sell Scrap
-            </button>
-            <Link
-              href="/rates"
-              onClick={(e) => {
-                e.preventDefault();
-                triggerTransition("/rates", 1000);
-              }}
-              className="px-5 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold rounded-full border border-white/30 text-white hover:border-white/60 hover:bg-white/10 backdrop-blur-sm transition cursor-pointer flex items-center justify-center whitespace-nowrap shadow-xs hover:scale-[1.02] active:scale-[0.98]"
-            >
-              Check Live Rates
-            </Link>
+          {/* Shifted Sign up / Login Hero Action */}
+          <div className="mt-5 sm:mt-6 flex items-center justify-center">
+            {customer ? (
+              <Link
+                href="/dashboard"
+                className="h-11 sm:h-12 px-7 sm:px-8 text-sm sm:text-base font-bold rounded-full bg-[#65E817] hover:bg-[#58d012] text-slate-950 transition-all cursor-pointer flex items-center gap-2.5 shadow-lg shadow-black/40 hover:scale-[1.02] active:scale-[0.98]"
+              >
+                <User className="w-4 h-4 text-slate-950 shrink-0" />
+                <span>Go to My Dashboard</span>
+                <ArrowRight className="w-4 h-4 text-slate-950 shrink-0" />
+              </Link>
+            ) : (
+              <AdminAuthModal
+                triggerText="Sign up / Login"
+                triggerClassName="h-11 sm:h-12 px-7 sm:px-8 text-sm sm:text-base font-medium rounded-full border border-white/20 bg-white/10 hover:bg-white/15 hover:border-[#65E817]/60 backdrop-blur-md text-white transition-all cursor-pointer flex items-center gap-2.5 shadow-lg shadow-black/40 hover:scale-[1.02] active:scale-[0.98]"
+              />
+            )}
           </div>
         </div>
 

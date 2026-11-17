@@ -141,6 +141,8 @@ export async function verifySessionToken(
   }
 }
 
+export const verifyAdminSessionToken = verifySessionToken;
+
 /* =========================================================================
    CUSTOMER SESSION TOKENS (ISOLATED FROM ADMIN)
    ========================================================================= */

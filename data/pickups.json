@@ -1,5 +1,19 @@
 [
   {
+    "id": "1c0adc65-3e83-4f9c-b39c-e87f97bbd05e",
+    "customerName": "Raushan Kumar",
+    "customerPhone": "7061529409",
+    "city": "Patna",
+    "locality": "Bailey road",
+    "address": "Patna, India",
+    "pickupDate": "2026-11-20T00:00:00.000Z",
+    "estimatedLoad": "< 20 kg",
+    "scrapTypes": "Newspaper, Grey Board",
+    "status": "CONFIRMED",
+    "createdAt": "2026-11-16T16:55:51.136Z",
+    "source": "postgres"
+  },
+  {
     "id": "810db7b2-8911-4ac8-aad1-24f2fd701fea",
     "customerName": "Raushan Kumar",
     "customerPhone": "7061529409",
@@ -51,7 +65,7 @@
     "pickupDate": "2026-11-17T00:00:00.000Z",
     "estimatedLoad": "< 20 kg",
     "scrapTypes": "Newspaper, Cardboard",
-    "status": "PENDING",
+    "status": "CANCELLED",
     "createdAt": "2026-11-16T06:18:08.351Z",
     "source": "postgres"
   },

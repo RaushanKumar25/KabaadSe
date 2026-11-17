@@ -23,6 +23,7 @@ interface PickupBookingModalProps {
   onClose: () => void;
   defaultCity?: string;
   defaultLocality?: string;
+  defaultPickupDate?: string;
 }
 
 const WEIGHT_OPTIONS = [
@@ -39,13 +40,14 @@ export default function PickupBookingModal({
   onClose,
   defaultCity = "Patna",
   defaultLocality = "",
+  defaultPickupDate = "",
 }: PickupBookingModalProps) {
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [city, setCity] = useState(defaultCity);
   const [locality, setLocality] = useState(defaultLocality);
   const [address, setAddress] = useState("");
-  const [pickupDate, setPickupDate] = useState("");
+  const [pickupDate, setPickupDate] = useState(defaultPickupDate);
   const [selectedScrapTypes, setSelectedScrapTypes] = useState<string[]>([
     "Newspaper",
   ]);
@@ -97,6 +99,9 @@ export default function PickupBookingModal({
     }
 
     if (isOpen) {
+      if (defaultPickupDate) {
+        setPickupDate(defaultPickupDate);
+      }
       loadCustomerProfile();
     }
 

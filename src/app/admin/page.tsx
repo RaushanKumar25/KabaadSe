@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useTheme } from "@/context/ThemeContext";
 import {
   Truck,
   Tags,
@@ -22,6 +23,8 @@ import {
   Clock,
   CheckCircle,
   LogOut,
+  Sun,
+  Moon,
 } from "lucide-react";
 
 interface PickupItem {
@@ -91,6 +94,7 @@ const RATE_CATEGORIES = ["All", "Paper", "Plastic", "Metal", "E-waste", "Other"]
 
 export default function AdminDashboardPage() {
   const router = useRouter();
+  const { theme, toggleTheme, mounted } = useTheme();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
@@ -495,20 +499,40 @@ export default function AdminDashboardPage() {
       {/* 1. TOP HEADER & SUMMARY ANALYTICS                         */}
       {/* ========================================================= */}
       <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800/80 pb-4">
           <div>
             <div className="flex items-center gap-2">
-              <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-800 text-slate-300 border border-slate-700">
+              <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                 OPERATIONS
               </span>
-              <span className="text-xs text-slate-400 font-mono">Internal Console</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">Internal Console</span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight mt-1">
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight mt-1">
               Operations Dashboard
             </h1>
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Theme Toggle Button in Admin Header */}
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="px-3 py-1.5 rounded-lg bg-white dark:bg-[#111827] border border-slate-300 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer shadow-xs"
+              title="Toggle Theme"
+            >
+              {mounted && theme === "light" ? (
+                <>
+                  <Moon className="w-3.5 h-3.5 text-amber-500" />
+                  <span>Dark</span>
+                </>
+              ) : (
+                <>
+                  <Sun className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Light</span>
+                </>
+              )}
+            </button>
+
             <button
               type="button"
               onClick={() => {
@@ -516,7 +540,7 @@ export default function AdminDashboardPage() {
                 fetchRates(selectedRateCity, false);
               }}
               disabled={loadingPickups}
-              className="px-3 py-1.5 rounded-lg bg-[#111827] border border-slate-800 hover:border-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer disabled:opacity-50"
+              className="px-3 py-1.5 rounded-lg bg-white dark:bg-[#111827] border border-slate-300 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer disabled:opacity-50 shadow-xs"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loadingPickups ? "animate-spin" : ""}`} />
               <span>Refresh Data</span>
@@ -526,7 +550,7 @@ export default function AdminDashboardPage() {
               type="button"
               onClick={handleLogout}
               disabled={isLoggingOut}
-              className="px-3 py-1.5 rounded-lg bg-red-950/40 hover:bg-red-900/50 border border-red-900/60 text-red-200 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer disabled:opacity-50"
+              className="px-3 py-1.5 rounded-lg bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/50 border border-red-200 dark:border-red-900/60 text-red-600 dark:text-red-200 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer disabled:opacity-50 shadow-xs"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
@@ -539,23 +563,23 @@ export default function AdminDashboardPage() {
           {/* Card 1: Total Pickups */}
           <div
             onClick={() => setStatusFilter("ALL")}
-            className={`p-4 rounded-xl border transition cursor-pointer ${
+            className={`p-4 rounded-xl border transition cursor-pointer shadow-xs ${
               statusFilter === "ALL"
-                ? "bg-[#111827] border-slate-700"
-                : "bg-[#111827] border-slate-800/80 hover:border-slate-700"
+                ? "bg-white dark:bg-[#111827] border-slate-400 dark:border-slate-700 ring-1 ring-slate-400 dark:ring-slate-700"
+                : "bg-white dark:bg-[#111827] border-slate-200 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700"
             }`}
           >
-            <div className="flex items-center justify-between text-xs text-slate-400 mb-1.5">
+            <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mb-1.5">
               <span>Total Pickups</span>
-              <span className="text-[10px] font-mono uppercase text-slate-400">
+              <span className="text-[10px] font-mono uppercase text-slate-400 dark:text-slate-500">
                 Registered
               </span>
             </div>
             <div className="flex items-baseline justify-between">
-              <span className="text-2xl sm:text-3xl font-mono font-bold tabular-nums text-white">
+              <span className="text-2xl sm:text-3xl font-mono font-bold tabular-nums text-slate-900 dark:text-white">
                 {summaryMetrics.total}
               </span>
-              <span className="text-[11px] text-slate-400 font-mono">
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
                 All-time bookings
               </span>
             </div>
@@ -564,26 +588,26 @@ export default function AdminDashboardPage() {
           {/* Card 2: Pending Requests */}
           <div
             onClick={() => setStatusFilter("PENDING")}
-            className={`p-4 rounded-xl border transition cursor-pointer ${
+            className={`p-4 rounded-xl border transition cursor-pointer shadow-xs ${
               statusFilter === "PENDING"
-                ? "bg-[#111827] border-amber-500/60"
-                : "bg-[#111827] border-slate-800/80 hover:border-slate-700"
+                ? "bg-white dark:bg-[#111827] border-amber-500/60 ring-1 ring-amber-500/60"
+                : "bg-white dark:bg-[#111827] border-slate-200 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700"
             }`}
           >
-            <div className="flex items-center justify-between text-xs text-slate-400 mb-1.5">
+            <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mb-1.5">
               <span className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 dark:bg-amber-400" />
                 Pending Requests
               </span>
-              <span className="text-[10px] font-mono uppercase text-amber-300 font-semibold">
+              <span className="text-[10px] font-mono uppercase text-amber-600 dark:text-amber-300 font-semibold">
                 Action Required
               </span>
             </div>
             <div className="flex items-baseline justify-between">
-              <span className="text-2xl sm:text-3xl font-mono font-bold tabular-nums text-white">
+              <span className="text-2xl sm:text-3xl font-mono font-bold tabular-nums text-slate-900 dark:text-white">
                 {summaryMetrics.pending}
               </span>
-              <span className="text-[11px] text-slate-400 font-mono">
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
                 Needs call verification
               </span>
             </div>
@@ -592,26 +616,26 @@ export default function AdminDashboardPage() {
           {/* Card 3: Completed Pickups */}
           <div
             onClick={() => setStatusFilter("COMPLETED")}
-            className={`p-4 rounded-xl border transition cursor-pointer ${
+            className={`p-4 rounded-xl border transition cursor-pointer shadow-xs ${
               statusFilter === "COMPLETED"
-                ? "bg-[#111827] border-emerald-500/60"
-                : "bg-[#111827] border-slate-800/80 hover:border-slate-700"
+                ? "bg-white dark:bg-[#111827] border-emerald-500/60 ring-1 ring-emerald-500/60"
+                : "bg-white dark:bg-[#111827] border-slate-200 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700"
             }`}
           >
-            <div className="flex items-center justify-between text-xs text-slate-400 mb-1.5">
+            <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mb-1.5">
               <span className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400" />
                 Completed Pickups
               </span>
-              <span className="text-[10px] font-mono uppercase text-emerald-300 font-semibold">
+              <span className="text-[10px] font-mono uppercase text-emerald-600 dark:text-emerald-300 font-semibold">
                 Settled
               </span>
             </div>
             <div className="flex items-baseline justify-between">
-              <span className="text-2xl sm:text-3xl font-mono font-bold tabular-nums text-white">
+              <span className="text-2xl sm:text-3xl font-mono font-bold tabular-nums text-slate-900 dark:text-white">
                 {summaryMetrics.completed}
               </span>
-              <span className="text-[11px] text-slate-400 font-mono">
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
                 Weighed & paid out
               </span>
             </div>
@@ -625,11 +649,11 @@ export default function AdminDashboardPage() {
       <section id="pickup-queue" className="space-y-3.5 scroll-mt-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-              <Truck className="w-4 h-4 text-emerald-400" />
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <Truck className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
               Pickup Queue
             </h2>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               Live requests submitted via Sell Scrap doorstep booking form.
             </p>
           </div>
@@ -651,14 +675,16 @@ export default function AdminDashboardPage() {
                   onClick={() => setStatusFilter(tab.id)}
                   className={`px-2.5 py-1 rounded-lg text-xs font-medium transition cursor-pointer flex items-center gap-1.5 ${
                     active
-                      ? "bg-[#111827] text-white border border-slate-700 font-semibold"
-                      : "text-slate-400 hover:text-slate-200 hover:bg-[#111827]/40"
+                      ? "bg-white dark:bg-[#111827] text-slate-900 dark:text-white border border-slate-300 dark:border-slate-700 font-semibold shadow-xs"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#111827]/40"
                   }`}
                 >
                   <span>{tab.label}</span>
                   <span
                     className={`px-1.5 py-0.2 rounded text-[10px] font-mono tabular-nums ${
-                      active ? "bg-slate-800 text-white font-bold" : "text-slate-400"
+                      active
+                        ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-bold"
+                        : "text-slate-500 dark:text-slate-400"
                     }`}
                   >
                     {tab.count}
@@ -672,19 +698,19 @@ export default function AdminDashboardPage() {
         {/* Toolbar: Search & City Filter */}
         <div className="flex flex-col sm:flex-row gap-2.5">
           <div className="relative flex-1">
-            <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-2.5" />
+            <Search className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 absolute left-3 top-2.5" />
             <input
               type="text"
               placeholder="Search customer, phone number, locality, scrap types, or ID..."
               value={pickupSearch}
               onChange={(e) => setPickupSearch(e.target.value)}
-              className="w-full bg-[#111827] border border-slate-800 rounded-lg pl-8.5 pr-8 py-1.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-colors"
+              className="w-full bg-white dark:bg-[#111827] border border-slate-300 dark:border-slate-800 rounded-lg pl-8.5 pr-8 py-1.5 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-colors shadow-xs"
             />
             {pickupSearch && (
               <button
                 type="button"
                 onClick={() => setPickupSearch("")}
-                className="absolute right-2.5 top-2 text-slate-400 hover:text-white"
+                className="absolute right-2.5 top-2 text-slate-400 hover:text-slate-600 dark:hover:text-white"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -695,7 +721,7 @@ export default function AdminDashboardPage() {
             <select
               value={pickupCityFilter}
               onChange={(e) => setPickupCityFilter(e.target.value)}
-              className="bg-[#111827] border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 cursor-pointer"
+              className="bg-white dark:bg-[#111827] border border-slate-300 dark:border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-emerald-500 cursor-pointer shadow-xs"
             >
               <option value="ALL">All Cities ({uniquePickupCities.length})</option>
               {uniquePickupCities.map((c) => (
@@ -713,7 +739,7 @@ export default function AdminDashboardPage() {
                   setStatusFilter("ALL");
                   setPickupCityFilter("ALL");
                 }}
-                className="px-2.5 py-1.5 rounded-lg text-xs text-slate-400 hover:text-white bg-[#111827] border border-slate-800 transition cursor-pointer"
+                className="px-2.5 py-1.5 rounded-lg text-xs text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-[#111827] border border-slate-200 dark:border-slate-800 transition cursor-pointer"
               >
                 Reset
               </button>
@@ -722,10 +748,10 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Pickup Queue Table */}
-        <div className="rounded-xl border border-slate-800/80 bg-[#111827] overflow-hidden">
+        <div className="rounded-xl border border-slate-200 dark:border-slate-800/80 bg-white dark:bg-[#111827] overflow-hidden shadow-xs">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-300">
-              <thead className="bg-[#0B0F19] text-[11px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-800/80 select-none">
+            <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300">
+              <thead className="bg-slate-50 dark:bg-[#0B0F19] text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-800/80 select-none">
                 <tr>
                   <th className="py-2.5 px-4">Booking ID & Date</th>
                   <th className="py-2.5 px-4">Customer</th>
@@ -735,10 +761,10 @@ export default function AdminDashboardPage() {
                   <th className="py-2.5 px-4 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60 font-sans">
+              <tbody className="divide-y divide-slate-200 dark:divide-slate-800/60 font-sans">
                 {loadingPickups ? (
                   <tr>
-                    <td colSpan={6} className="py-10 text-center text-slate-500">
+                    <td colSpan={6} className="py-10 text-center text-slate-400 dark:text-slate-500">
                       <div className="flex items-center justify-center gap-2">
                         <RefreshCw className="w-4 h-4 animate-spin text-slate-400" />
                         <span>Loading live pickups from database...</span>
@@ -747,56 +773,51 @@ export default function AdminDashboardPage() {
                   </tr>
                 ) : filteredPickups.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-10 text-center text-slate-500">
-                      <div className="space-y-1">
-                        <p className="font-semibold text-slate-300 text-xs">
-                          No pickup requests found
-                        </p>
-                        <p className="text-[11px] text-slate-400">
-                          {pickups.length === 0
-                            ? "New requests submitted through the Sell Scrap form will appear here live."
-                            : "No bookings match the currently active filters."}
-                        </p>
-                      </div>
+                    <td colSpan={6} className="py-10 text-center text-slate-400 dark:text-slate-500">
+                      <p className="font-semibold text-slate-700 dark:text-slate-300">No pickup requests found</p>
+                      <p className="text-[11px]">
+                        Try adjusting your search query, status tab, or city filter.
+                      </p>
                     </td>
                   </tr>
                 ) : (
                   filteredPickups.map((item) => {
-                    const shortId = `#KB-${item.id.slice(-6).toUpperCase()}`;
+                    const statusConfig = STATUS_CONFIGS[item.status] || STATUS_CONFIGS.PENDING;
                     const currentStatus = (item.status || "PENDING").toUpperCase();
-                    const statusConfig =
-                      STATUS_CONFIGS[currentStatus] || STATUS_CONFIGS.PENDING;
 
                     return (
                       <tr
                         key={item.id}
-                        className="hover:bg-slate-800/25 transition-colors"
+                        className="hover:bg-slate-50 dark:hover:bg-slate-800/25 transition-colors"
                       >
-                        {/* ID & Scheduled Date */}
+                        {/* Booking ID & Date */}
                         <td className="py-3 px-4 align-top">
-                          <div className="font-mono tabular-nums font-bold text-slate-100 text-xs">
-                            {shortId}
+                          <div className="font-mono font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                            <span>#{item.id.slice(-6).toUpperCase()}</span>
+                            {item.source === "postgres" && (
+                              <span
+                                title="Stored in Neon PostgreSQL"
+                                className="w-1.5 h-1.5 rounded-full bg-emerald-400"
+                              />
+                            )}
                           </div>
-                          <div className="flex items-center gap-1 text-[11px] font-mono tabular-nums text-slate-400 mt-0.5">
-                            <Calendar className="w-3 h-3 text-slate-500 shrink-0" />
+                          <div className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1 mt-0.5">
+                            <Clock className="w-3 h-3 text-slate-400 dark:text-slate-500" />
                             <span>{formatDateDisplay(item.pickupDate)}</span>
-                          </div>
-                          <div className="text-[10px] text-slate-400 font-mono mt-0.5">
-                            Booked: {formatDateDisplay(item.createdAt)}
                           </div>
                         </td>
 
                         {/* Customer */}
                         <td className="py-3 px-4 align-top">
-                          <div className="font-semibold text-slate-100 text-xs">
-                            {item.customerName}
+                          <div className="font-semibold text-slate-900 dark:text-white">
+                            {item.customerName || "Customer"}
                           </div>
-                          <div className="mt-0.5">
+                          <div className="flex items-center gap-1.5 mt-0.5">
                             <a
                               href={`tel:+91${item.customerPhone}`}
-                              className="inline-flex items-center gap-1 font-mono tabular-nums text-xs text-emerald-400 hover:underline"
+                              className="font-mono text-[11px] text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
                             >
-                              <Phone className="w-3 h-3" />
+                              <Phone className="w-2.5 h-2.5" />
                               +91 {item.customerPhone}
                             </a>
                           </div>
@@ -805,19 +826,19 @@ export default function AdminDashboardPage() {
                         {/* Location */}
                         <td className="py-3 px-4 align-top max-w-[200px]">
                           <div className="flex items-center gap-1.5">
-                            <span className="px-1.5 py-0.2 rounded text-[10px] font-medium bg-slate-800 text-slate-300">
+                            <span className="px-1.5 py-0.2 rounded text-[10px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
                               {item.city || "Patna"}
                             </span>
-                            <span className="text-xs text-slate-200 truncate font-medium">
+                            <span className="text-xs text-slate-800 dark:text-slate-200 truncate font-medium">
                               {item.locality}
                             </span>
                           </div>
                           <div
                             onClick={() => setSelectedPickupDetails(item)}
-                            className="text-[11px] text-slate-400 truncate mt-1 cursor-pointer hover:text-slate-200 hover:underline flex items-center gap-1"
+                            className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-1 cursor-pointer hover:text-slate-800 dark:hover:text-slate-200 hover:underline flex items-center gap-1"
                             title="Click to view full address"
                           >
-                            <MapPin className="w-3 h-3 text-slate-500 shrink-0" />
+                            <MapPin className="w-3 h-3 text-slate-400 dark:text-slate-500 shrink-0" />
                             <span className="truncate">{item.address}</span>
                           </div>
                         </td>
@@ -830,13 +851,13 @@ export default function AdminDashboardPage() {
                               .map((tag, idx) => (
                                 <span
                                   key={idx}
-                                  className="px-1.5 py-0.2 rounded text-[10px] bg-slate-900 text-slate-300 border border-slate-800"
+                                  className="px-1.5 py-0.2 rounded text-[10px] bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800"
                                 >
                                   {tag.trim()}
                                 </span>
                               ))}
                           </div>
-                          <span className="px-1.5 py-0.2 rounded text-[10px] font-mono tabular-nums font-semibold bg-slate-800 text-slate-300">
+                          <span className="px-1.5 py-0.2 rounded text-[10px] font-mono tabular-nums font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
                             {item.estimatedLoad || "< 20 kg"}
                           </span>
                         </td>
@@ -849,16 +870,16 @@ export default function AdminDashboardPage() {
                             onChange={(e) => handleStatusChange(item.id, e.target.value)}
                             className={`px-2 py-0.5 rounded text-xs font-semibold border cursor-pointer focus:outline-none transition-all ${statusConfig.bg} ${statusConfig.text} ${statusConfig.border} disabled:opacity-50`}
                           >
-                            <option value="PENDING" className="bg-[#111827] text-slate-200">
+                            <option value="PENDING" className="bg-white dark:bg-[#111827] text-slate-800 dark:text-slate-200">
                               Pending
                             </option>
-                            <option value="CONFIRMED" className="bg-[#111827] text-slate-200">
+                            <option value="CONFIRMED" className="bg-white dark:bg-[#111827] text-slate-800 dark:text-slate-200">
                               Confirmed
                             </option>
-                            <option value="COMPLETED" className="bg-[#111827] text-slate-200">
+                            <option value="COMPLETED" className="bg-white dark:bg-[#111827] text-slate-800 dark:text-slate-200">
                               Completed
                             </option>
-                            <option value="CANCELLED" className="bg-[#111827] text-slate-200">
+                            <option value="CANCELLED" className="bg-white dark:bg-[#111827] text-slate-800 dark:text-slate-200">
                               Cancelled
                             </option>
                           </select>
@@ -871,7 +892,7 @@ export default function AdminDashboardPage() {
                               type="button"
                               onClick={() => setSelectedPickupDetails(item)}
                               title="Full Address"
-                              className="p-1.5 rounded text-slate-400 hover:text-white hover:bg-slate-800 cursor-pointer"
+                              className="p-1.5 rounded text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
                             >
                               <ExternalLink className="w-3.5 h-3.5" />
                             </button>
@@ -879,7 +900,7 @@ export default function AdminDashboardPage() {
                               type="button"
                               onClick={() => handleDeletePickup(item.id)}
                               title="Delete Pickup"
-                              className="p-1.5 rounded text-slate-400 hover:text-rose-400 hover:bg-rose-950/30 cursor-pointer transition"
+                              className="p-1.5 rounded text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 cursor-pointer transition"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -898,14 +919,14 @@ export default function AdminDashboardPage() {
       {/* ========================================================= */}
       {/* 3. LIVE RATE CARD MANAGER SECTION                         */}
       {/* ========================================================= */}
-      <section id="rates-manager" className="space-y-3.5 pt-4 border-t border-slate-800/80 scroll-mt-6">
+      <section id="rates-manager" className="space-y-3.5 pt-4 border-t border-slate-200 dark:border-slate-800/80 scroll-mt-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-              <Tags className="w-4 h-4 text-emerald-400" />
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <Tags className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
               Rate Card Manager
             </h2>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               Live scrap pricing engine synced directly with PostgreSQL.
             </p>
           </div>
@@ -914,7 +935,7 @@ export default function AdminDashboardPage() {
             <button
               type="button"
               onClick={() => setIsAddRateModalOpen(true)}
-              className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
+              className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer shadow-xs"
             >
               <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
               <span>Add Scrap Item</span>
@@ -923,8 +944,8 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* City Switcher Tabs */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 border-b border-slate-800/60">
-          <span className="text-xs text-slate-400 font-medium mr-1 shrink-0 flex items-center gap-1">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 border-b border-slate-200 dark:border-slate-800/60">
+          <span className="text-xs text-slate-500 dark:text-slate-400 font-medium mr-1 shrink-0 flex items-center gap-1">
             <SlidersHorizontal className="w-3 h-3" />
             City:
           </span>
@@ -937,8 +958,8 @@ export default function AdminDashboardPage() {
                 onClick={() => setSelectedRateCity(city)}
                 className={`px-2.5 py-1 rounded text-xs font-medium transition cursor-pointer shrink-0 ${
                   isSelected
-                    ? "bg-[#111827] text-emerald-400 border border-slate-700 font-bold"
-                    : "text-slate-400 hover:text-slate-200 hover:bg-[#111827]/40"
+                    ? "bg-white dark:bg-[#111827] text-emerald-600 dark:text-emerald-400 border border-emerald-500/40 dark:border-slate-700 font-bold shadow-xs"
+                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#111827]/40"
                 }`}
               >
                 {city}
@@ -959,8 +980,8 @@ export default function AdminDashboardPage() {
                   onClick={() => setSelectedCategory(cat)}
                   className={`px-2.5 py-1 rounded text-xs font-medium transition cursor-pointer ${
                     active
-                      ? "bg-[#111827] text-white border border-slate-700 font-semibold"
-                      : "text-slate-400 hover:text-slate-200 hover:bg-[#111827]/30"
+                      ? "bg-emerald-600 text-white font-semibold shadow-xs"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 bg-slate-100 dark:bg-transparent hover:bg-slate-200 dark:hover:bg-[#111827]/30 border border-slate-200 dark:border-transparent"
                   }`}
                 >
                   {cat}
@@ -970,22 +991,22 @@ export default function AdminDashboardPage() {
           </div>
 
           <div className="relative min-w-[220px]">
-            <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-2.5" />
+            <Search className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 absolute left-3 top-2.5" />
             <input
               type="text"
               placeholder="Search material or ID..."
               value={rateSearch}
               onChange={(e) => setRateSearch(e.target.value)}
-              className="w-full bg-[#111827] border border-slate-800 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-colors"
+              className="w-full bg-white dark:bg-[#111827] border border-slate-300 dark:border-slate-800 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-colors shadow-xs"
             />
           </div>
         </div>
 
         {/* Rates Table */}
-        <div className="rounded-xl border border-slate-800/80 bg-[#111827] overflow-hidden">
+        <div className="rounded-xl border border-slate-200 dark:border-slate-800/80 bg-white dark:bg-[#111827] overflow-hidden shadow-xs">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-300">
-              <thead className="bg-[#0B0F19] text-[11px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-800/80 select-none">
+            <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300">
+              <thead className="bg-slate-50 dark:bg-[#0B0F19] text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-800/80 select-none">
                 <tr>
                   <th className="py-2.5 px-4">Material Name</th>
                   <th className="py-2.5 px-4">Category</th>
@@ -995,10 +1016,10 @@ export default function AdminDashboardPage() {
                   <th className="py-2.5 px-4 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60 font-sans">
+              <tbody className="divide-y divide-slate-200 dark:divide-slate-800/60 font-sans">
                 {loadingRates ? (
                   <tr>
-                    <td colSpan={6} className="py-10 text-center text-slate-500">
+                    <td colSpan={6} className="py-10 text-center text-slate-400 dark:text-slate-500">
                       <div className="flex items-center justify-center gap-2">
                         <RefreshCw className="w-4 h-4 animate-spin text-slate-400" />
                         <span>Loading scrap rates for {selectedRateCity}...</span>
@@ -1007,9 +1028,9 @@ export default function AdminDashboardPage() {
                   </tr>
                 ) : filteredRates.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-10 text-center text-slate-500">
-                      <p className="font-semibold text-slate-300">No scrap materials found</p>
-                      <p className="text-[11px] text-slate-400">
+                    <td colSpan={6} className="py-10 text-center text-slate-400 dark:text-slate-500">
+                      <p className="font-semibold text-slate-700 dark:text-slate-300">No scrap materials found</p>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400">
                         Try clearing the search or category filter.
                       </p>
                     </td>
@@ -1029,12 +1050,12 @@ export default function AdminDashboardPage() {
                     return (
                       <tr
                         key={item.id}
-                        className="hover:bg-slate-800/25 transition-colors"
+                        className="hover:bg-slate-50 dark:hover:bg-slate-800/25 transition-colors"
                       >
                         {/* Name & Icon */}
                         <td className="py-2.5 px-4">
                           <div className="flex items-center gap-2">
-                            <div className="w-7 h-7 rounded bg-slate-900 border border-slate-800 flex items-center justify-center shrink-0 overflow-hidden relative">
+                            <div className="w-7 h-7 rounded bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center shrink-0 overflow-hidden relative">
                               {item.iconPath ? (
                                 <Image
                                   src={item.iconPath}
@@ -1051,16 +1072,16 @@ export default function AdminDashboardPage() {
                             </div>
                             <div>
                               <div className="flex items-center gap-1.5">
-                                <span className="font-semibold text-slate-100 text-xs">
+                                <span className="font-semibold text-slate-900 dark:text-slate-100 text-xs">
                                   {item.name}
                                 </span>
                                 {item.isCustom && (
-                                  <span className="px-1 py-0.2 rounded text-[9px] font-mono font-bold bg-slate-800 text-slate-300">
+                                  <span className="px-1 py-0.2 rounded text-[9px] font-mono font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
                                     Custom
                                   </span>
                                 )}
                               </div>
-                              <span className="text-[10px] text-slate-400 font-mono block">
+                              <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono block">
                                 ID: {item.id}
                               </span>
                             </div>
@@ -1069,13 +1090,13 @@ export default function AdminDashboardPage() {
 
                         {/* Category */}
                         <td className="py-2.5 px-4">
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-900 text-slate-300 border border-slate-800">
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800">
                             {item.category}
                           </span>
                         </td>
 
                         {/* Unit */}
-                        <td className="py-2.5 px-4 font-mono text-xs text-slate-400">
+                        <td className="py-2.5 px-4 font-mono text-xs text-slate-500 dark:text-slate-400">
                           /{item.unit}
                         </td>
 
@@ -1092,14 +1113,14 @@ export default function AdminDashboardPage() {
                                 min="0"
                                 value={displayPrice}
                                 onChange={(e) => handlePriceChange(item.id, e.target.value)}
-                                className={`w-full bg-[#0B0F19] border rounded pl-6 pr-2 py-1 text-xs font-mono tabular-nums text-slate-100 focus:outline-none transition-colors ${
+                                className={`w-full bg-slate-50 dark:bg-[#0B0F19] border rounded pl-6 pr-2 py-1 text-xs font-mono tabular-nums text-slate-900 dark:text-slate-100 focus:outline-none transition-colors ${
                                   isEdited
-                                    ? "border-amber-500 text-amber-200"
-                                    : "border-slate-800 focus:border-emerald-500"
+                                    ? "border-amber-500 text-amber-700 dark:text-amber-200 font-bold"
+                                    : "border-slate-300 dark:border-slate-800 focus:border-emerald-500"
                                 }`}
                               />
                             </div>
-                            <span className="text-[11px] font-mono text-slate-400">
+                            <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
                               /{item.unit}
                             </span>
                           </div>
@@ -1113,8 +1134,8 @@ export default function AdminDashboardPage() {
                             disabled={isUpdating}
                             className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase transition cursor-pointer border ${
                               item.isActive
-                                ? "bg-emerald-950/40 text-emerald-300 border-emerald-800/60"
-                                : "bg-slate-900 text-slate-400 border-slate-800"
+                                ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800/60"
+                                : "bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-800"
                             }`}
                           >
                             {item.isActive ? "Active" : "Disabled"}
@@ -1125,7 +1146,7 @@ export default function AdminDashboardPage() {
                         <td className="py-2.5 px-4 text-right">
                           <div className="flex items-center justify-end gap-1.5">
                             {isSaved && !isEdited ? (
-                              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-400 px-2 py-0.5 rounded bg-emerald-950/50 border border-emerald-800/60">
+                              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/60">
                                 <Check className="w-3 h-3 stroke-[3]" />
                                 Saved ✓
                               </span>
@@ -1136,8 +1157,8 @@ export default function AdminDashboardPage() {
                                 disabled={!isEdited || isUpdating}
                                 className={`px-2.5 py-1 rounded text-xs font-semibold transition cursor-pointer ${
                                   isEdited
-                                    ? "bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold"
-                                    : "bg-slate-900 text-slate-400 border border-slate-800/80 opacity-50 cursor-not-allowed"
+                                    ? "bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow-xs"
+                                    : "bg-slate-100 dark:bg-slate-900 text-slate-400 border border-slate-200 dark:border-slate-800/80 opacity-50 cursor-not-allowed"
                                 }`}
                               >
                                 {isUpdating ? (
@@ -1164,24 +1185,24 @@ export default function AdminDashboardPage() {
       {/* ========================================================= */}
       {selectedPickupDetails && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/80 backdrop-blur-xs"
           onClick={() => setSelectedPickupDetails(null)}
         >
           <div
-            className="w-full max-w-md bg-[#111827] border border-slate-800 rounded-xl p-5 text-slate-100 shadow-2xl space-y-4"
+            className="w-full max-w-md bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 rounded-xl p-5 text-slate-900 dark:text-slate-100 shadow-2xl space-y-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
               <div>
-                <span className="font-mono text-xs text-emerald-400 font-bold">
+                <span className="font-mono text-xs text-emerald-600 dark:text-emerald-400 font-bold">
                   #KB-{selectedPickupDetails.id.slice(-6).toUpperCase()}
                 </span>
-                <h3 className="text-sm font-bold text-white">Pickup Request Details</h3>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Pickup Request Details</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedPickupDetails(null)}
-                className="p-1 text-slate-400 hover:text-white"
+                className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-white"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -1189,50 +1210,50 @@ export default function AdminDashboardPage() {
 
             <div className="space-y-3 text-xs">
               <div>
-                <span className="text-slate-400 block text-[11px]">Customer</span>
-                <div className="font-semibold text-white text-sm">
+                <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Customer</span>
+                <div className="font-semibold text-slate-900 dark:text-white text-sm">
                   {selectedPickupDetails.customerName}
                 </div>
                 <a
                   href={`tel:+91${selectedPickupDetails.customerPhone}`}
-                  className="font-mono text-emerald-400 hover:underline inline-block mt-0.5"
+                  className="font-mono text-emerald-600 dark:text-emerald-400 hover:underline inline-block mt-0.5"
                 >
                   +91 {selectedPickupDetails.customerPhone}
                 </a>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800">
+              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
                 <div>
-                  <span className="text-slate-400 block text-[11px]">City</span>
-                  <span className="font-medium text-slate-200">
+                  <span className="text-slate-500 dark:text-slate-400 block text-[11px]">City</span>
+                  <span className="font-medium text-slate-800 dark:text-slate-200">
                     {selectedPickupDetails.city || "Patna"}
                   </span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[11px]">Locality / Sector</span>
-                  <span className="font-medium text-slate-200">
+                  <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Locality / Sector</span>
+                  <span className="font-medium text-slate-800 dark:text-slate-200">
                     {selectedPickupDetails.locality}
                   </span>
                 </div>
               </div>
 
-              <div className="pt-2 border-t border-slate-800">
-                <span className="text-slate-400 block text-[11px] mb-1">Full Address</span>
-                <div className="p-2.5 rounded bg-[#0B0F19] border border-slate-800 font-mono text-slate-200 text-xs">
+              <div className="pt-2 border-t border-slate-200 dark:border-slate-800">
+                <span className="text-slate-500 dark:text-slate-400 block text-[11px] mb-1">Full Address</span>
+                <div className="p-2.5 rounded bg-slate-50 dark:bg-[#0B0F19] border border-slate-200 dark:border-slate-800 font-mono text-slate-800 dark:text-slate-200 text-xs">
                   {selectedPickupDetails.address}
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800">
+              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
                 <div>
-                  <span className="text-slate-400 block text-[11px]">Scheduled Date</span>
-                  <span className="font-mono text-slate-200">
+                  <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Scheduled Date</span>
+                  <span className="font-mono text-slate-800 dark:text-slate-200">
                     {formatDateDisplay(selectedPickupDetails.pickupDate)}
                   </span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[11px]">Est. Load</span>
-                  <span className="font-mono font-bold text-emerald-400">
+                  <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Est. Load</span>
+                  <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
                     {selectedPickupDetails.estimatedLoad}
                   </span>
                 </div>
@@ -1242,7 +1263,7 @@ export default function AdminDashboardPage() {
             <button
               type="button"
               onClick={() => setSelectedPickupDetails(null)}
-              className="w-full py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold"
+              className="w-full py-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-semibold"
             >
               Close
             </button>
@@ -1255,24 +1276,24 @@ export default function AdminDashboardPage() {
       {/* ========================================================= */}
       {isAddRateModalOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/80 backdrop-blur-xs"
           onClick={() => setIsAddRateModalOpen(false)}
         >
           <div
-            className="w-full max-w-md bg-[#111827] border border-slate-800 rounded-xl p-5 text-slate-100 shadow-2xl space-y-4"
+            className="w-full max-w-md bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 rounded-xl p-5 text-slate-900 dark:text-slate-100 shadow-2xl space-y-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
               <div>
-                <span className="text-[10px] font-mono text-emerald-400 font-bold uppercase">
+                <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold uppercase">
                   Catalog Expansion
                 </span>
-                <h3 className="text-sm font-bold text-white">Add Scrap Material</h3>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Add Scrap Material</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setIsAddRateModalOpen(false)}
-                className="p-1 text-slate-400 hover:text-white"
+                className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-white"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -1280,7 +1301,7 @@ export default function AdminDashboardPage() {
 
             <form onSubmit={handleCreateMaterial} className="space-y-3 text-xs">
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">
+                <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                   Material Name *
                 </label>
                 <input
@@ -1289,19 +1310,19 @@ export default function AdminDashboardPage() {
                   placeholder="e.g. AC Copper Coil, Lead Batteries"
                   value={newMaterialName}
                   onChange={(e) => setNewMaterialName(e.target.value)}
-                  className="w-full bg-[#0B0F19] border border-slate-800 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-slate-50 dark:bg-[#0B0F19] border border-slate-300 dark:border-slate-800 rounded-lg px-3 py-2 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-500"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-2.5">
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                     Category *
                   </label>
                   <select
                     value={newMaterialCategory}
                     onChange={(e) => setNewMaterialCategory(e.target.value as any)}
-                    className="w-full bg-[#0B0F19] border border-slate-800 rounded-lg px-2.5 py-2 text-slate-100 focus:outline-none focus:border-emerald-500"
+                    className="w-full bg-slate-50 dark:bg-[#0B0F19] border border-slate-300 dark:border-slate-800 rounded-lg px-2.5 py-2 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-500"
                   >
                     <option value="Metal">Metal</option>
                     <option value="E-waste">E-waste</option>
@@ -1312,13 +1333,13 @@ export default function AdminDashboardPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                     Measurement Unit *
                   </label>
                   <select
                     value={newMaterialUnit}
                     onChange={(e) => setNewMaterialUnit(e.target.value as any)}
-                    className="w-full bg-[#0B0F19] border border-slate-800 rounded-lg px-2.5 py-2 text-slate-100 focus:outline-none focus:border-emerald-500"
+                    className="w-full bg-slate-50 dark:bg-[#0B0F19] border border-slate-300 dark:border-slate-800 rounded-lg px-2.5 py-2 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-500"
                   >
                     <option value="kg">Per Kilogram (/kg)</option>
                     <option value="pcs">Per Piece (/pcs)</option>
@@ -1327,7 +1348,7 @@ export default function AdminDashboardPage() {
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">
+                <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                   Rate (₹ per {newMaterialUnit}) for {selectedRateCity} *
                 </label>
                 <div className="relative">
@@ -1340,7 +1361,7 @@ export default function AdminDashboardPage() {
                     placeholder="e.g. 350"
                     value={newMaterialPrice}
                     onChange={(e) => setNewMaterialPrice(e.target.value)}
-                    className="w-full bg-[#0B0F19] border border-slate-800 rounded-lg pl-7 pr-3 py-2 text-slate-100 font-mono tabular-nums focus:outline-none focus:border-emerald-500"
+                    className="w-full bg-slate-50 dark:bg-[#0B0F19] border border-slate-300 dark:border-slate-800 rounded-lg pl-7 pr-3 py-2 text-slate-900 dark:text-slate-100 font-mono tabular-nums focus:outline-none focus:border-emerald-500"
                   />
                 </div>
               </div>
@@ -1349,7 +1370,7 @@ export default function AdminDashboardPage() {
                 <button
                   type="submit"
                   disabled={isSubmittingMaterial}
-                  className="w-full py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="w-full py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
                 >
                   {isSubmittingMaterial ? (
                     <>
@@ -1373,16 +1394,16 @@ export default function AdminDashboardPage() {
             key={toast.id}
             className={`pointer-events-auto flex items-center gap-2 px-3.5 py-2 rounded-lg border text-xs font-medium backdrop-blur-md shadow-xl ${
               toast.type === "success"
-                ? "bg-[#111827] text-emerald-300 border-emerald-800/80"
+                ? "bg-white dark:bg-[#111827] text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800/80"
                 : toast.type === "error"
-                ? "bg-[#111827] text-rose-300 border-rose-800/80"
-                : "bg-[#111827] text-slate-200 border-slate-700"
+                ? "bg-white dark:bg-[#111827] text-rose-700 dark:text-rose-300 border-rose-300 dark:border-rose-800/80"
+                : "bg-white dark:bg-[#111827] text-slate-800 dark:text-slate-200 border-slate-300 dark:border-slate-700"
             }`}
           >
             {toast.type === "success" ? (
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400 shrink-0" />
             ) : (
-              <AlertCircle className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+              <AlertCircle className="w-3.5 h-3.5 text-rose-500 dark:text-rose-400 shrink-0" />
             )}
             <span>{toast.message}</span>
           </div>
