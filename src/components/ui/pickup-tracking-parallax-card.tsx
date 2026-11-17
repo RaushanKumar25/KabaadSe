@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useState } from "react";
+import Image from "next/image";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import {
   Calendar,
@@ -248,84 +249,21 @@ export function PickupTrackingParallaxCard({
             </div>
           </div>
 
-          {/* Right: KabaadSe Pickup Truck 3D SVG Illustration */}
+          {/* Right: KabaadSe Pickup Truck Image */}
           <div className="md:col-span-5 flex items-center justify-center">
-            <div className="relative w-44 h-28 sm:w-48 sm:h-32 flex items-center justify-center">
+            <div className="relative w-40 h-28 sm:w-48 sm:h-32 flex items-center justify-center">
               {/* Radial Ground Shadow */}
-              <div className="absolute bottom-2 w-36 h-6 bg-[#65E817]/20 blur-xl rounded-full" />
-              <div className="absolute bottom-1 w-32 h-4 bg-black/60 blur-md rounded-full" />
+              <div className="absolute bottom-1 w-36 h-6 bg-[#65E817]/20 blur-xl rounded-full" />
+              <div className="absolute bottom-0 w-32 h-4 bg-black/60 blur-md rounded-full" />
 
-              {/* Crisp Custom KabaadSe Pickup Truck Vector */}
-              <svg
-                viewBox="0 0 220 140"
-                className="w-full h-full drop-shadow-2xl transition-transform duration-300 group-hover:translate-y-[-4px]"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                {/* Truck Cargo Box (Dark Emerald Slate) */}
-                <rect x="22" y="38" width="112" height="62" rx="8" fill="#0A2518" stroke="#10B981" strokeWidth="2" />
-                <rect x="26" y="42" width="104" height="10" rx="3" fill="#134E2E" />
-                
-                {/* Slats & Ribs on Cargo Body */}
-                <line x1="56" y1="52" x2="56" y2="98" stroke="#10B981" strokeWidth="1.5" strokeOpacity="0.4" />
-                <line x1="86" y1="52" x2="86" y2="98" stroke="#10B981" strokeWidth="1.5" strokeOpacity="0.4" />
-                <line x1="116" y1="52" x2="116" y2="98" stroke="#10B981" strokeWidth="1.5" strokeOpacity="0.4" />
-
-                {/* Recycling Emblem on Truck Bed */}
-                <g transform="translate(68, 62)">
-                  <circle cx="10" cy="10" r="12" fill="#064E3B" stroke="#65E817" strokeWidth="1.5" />
-                  <path
-                    d="M10 3L13 7H7L10 3Z M16.5 13.5L14 17L10.5 11L16.5 13.5Z M3.5 13.5L9.5 11L6 17L3.5 13.5Z"
-                    fill="#65E817"
-                  />
-                </g>
-                <text x="32" y="93" fill="#65E817" fontSize="8" fontWeight="bold" fontFamily="monospace">
-                  KABAADSE • ZERO CARBON
-                </text>
-
-                {/* Truck Cab (KabaadSe Vibrant Green) */}
-                <path
-                  d="M134 48H168C176 48 184 54 187 62L196 82C198 86 198 90 198 94V100H134V48Z"
-                  fill="#059669"
-                  stroke="#10B981"
-                  strokeWidth="2"
-                />
-                
-                {/* Windshield Glass with Reflection */}
-                <path
-                  d="M142 53H166C172 53 177 57 180 63L188 78H142V53Z"
-                  fill="#A7F3D0"
-                  fillOpacity="0.85"
-                />
-                <path d="M148 56L176 56L158 75L148 75V56Z" fill="#FFFFFF" fillOpacity="0.4" />
-
-                {/* Door Trim & Handle */}
-                <rect x="146" y="82" width="6" height="3" rx="1.5" fill="#111827" />
-                <line x1="134" y1="78" x2="168" y2="78" stroke="#047857" strokeWidth="1.5" />
-
-                {/* Headlight (Glowing Neon Lime) */}
-                <path d="M196 86L201 88V96H196V86Z" fill="#65E817" />
-                <circle cx="199" cy="91" r="5" fill="#65E817" fillOpacity="0.5" filter="blur(2px)" />
-
-                {/* Front Bumper & Grill */}
-                <rect x="194" y="98" width="10" height="6" rx="2" fill="#1F2937" stroke="#374151" strokeWidth="1" />
-                <rect x="134" y="98" width="60" height="4" fill="#1F2937" />
-
-                {/* Wheel 1 (Rear) */}
-                <circle cx="56" cy="106" r="16" fill="#111827" stroke="#374151" strokeWidth="3" />
-                <circle cx="56" cy="106" r="8" fill="#374151" stroke="#65E817" strokeWidth="2" />
-                <circle cx="56" cy="106" r="3" fill="#65E817" />
-
-                {/* Wheel 2 (Middle Bed) */}
-                <circle cx="106" cy="106" r="16" fill="#111827" stroke="#374151" strokeWidth="3" />
-                <circle cx="106" cy="106" r="8" fill="#374151" stroke="#65E817" strokeWidth="2" />
-                <circle cx="106" cy="106" r="3" fill="#65E817" />
-
-                {/* Wheel 3 (Front) */}
-                <circle cx="174" cy="106" r="16" fill="#111827" stroke="#374151" strokeWidth="3" />
-                <circle cx="174" cy="106" r="8" fill="#374151" stroke="#65E817" strokeWidth="2" />
-                <circle cx="174" cy="106" r="3" fill="#65E817" />
-              </svg>
+              <Image
+                src="/pickup-truck.png"
+                alt="Doorstep Pickup Truck"
+                width={180}
+                height={130}
+                priority
+                className="w-full h-full object-contain drop-shadow-2xl transition-transform duration-300 group-hover:translate-y-[-4px]"
+              />
             </div>
           </div>
         </div>

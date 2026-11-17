@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -47,6 +47,7 @@ import {
   CreditCard,
   AlertTriangle,
   Sparkles,
+  Camera,
 } from "lucide-react";
 
 interface CustomerProfile {
@@ -139,13 +140,55 @@ export default function CustomerDashboardPage() {
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [preselectedDate, setPreselectedDate] = useState("");
 
-  // Load Saved UPI from localStorage on client
+  // Customer Profile Photo State
+  const [customerPhoto, setCustomerPhoto] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Load Saved Photo and UPI from localStorage on client
   useEffect(() => {
     if (typeof window !== "undefined") {
       const savedUpi = localStorage.getItem("kabaadse_customer_upi");
       if (savedUpi) setCustomerUpiId(savedUpi);
+
+      const key = customer?.id ? `kabaadse_photo_${customer.id}` : "kabaadse_customer_photo";
+      const savedPhoto = localStorage.getItem(key) || localStorage.getItem("kabaadse_customer_photo");
+      if (savedPhoto) setCustomerPhoto(savedPhoto);
     }
-  }, []);
+  }, [customer?.id]);
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Please choose an image under 5MB.");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result as string;
+      setCustomerPhoto(dataUrl);
+      if (typeof window !== "undefined") {
+        const key = customer?.id ? `kabaadse_photo_${customer.id}` : "kabaadse_customer_photo";
+        localStorage.setItem(key, dataUrl);
+        localStorage.setItem("kabaadse_customer_photo", dataUrl);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemovePhoto = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCustomerPhoto(null);
+    if (typeof window !== "undefined") {
+      if (customer?.id) {
+        localStorage.removeItem(`kabaadse_photo_${customer.id}`);
+      }
+      localStorage.removeItem("kabaadse_customer_photo");
+    }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
 
   // Load customer profile and pickups
   const fetchData = async (showRefresh = false) => {
@@ -461,16 +504,31 @@ export default function CustomerDashboardPage() {
         {/* Bottom: Customer Profile, Logout & Copyright (Padhega-Style) */}
         <div className="border-t border-slate-200 dark:border-slate-800/80 pt-5 space-y-4">
           <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
-            <div className="w-9 h-9 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-sm font-bold text-emerald-700 dark:text-[#65E817] shrink-0">
-              {customer?.name ? customer.name.charAt(0).toUpperCase() : "C"}
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-sm font-bold text-emerald-700 dark:text-[#65E817] shrink-0 overflow-hidden cursor-pointer relative group"
+              title="Click to upload profile photo"
+            >
+              {customerPhoto ? (
+                <img src={customerPhoto} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                customer?.name ? customer.name.charAt(0).toUpperCase() : "C"
+              )}
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+                <Camera className="w-3.5 h-3.5" />
+              </div>
             </div>
-            <div className="overflow-hidden leading-tight">
+            <div className="overflow-hidden leading-tight flex-1 min-w-0">
               <span className="text-sm font-bold text-slate-900 dark:text-white block truncate">
                 {customer?.name || "Customer"}
               </span>
-              <span className="text-xs text-slate-500 dark:text-slate-400 block truncate">
-                +91 {customer?.phone}
-              </span>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="text-[11px] text-emerald-600 dark:text-[#65E817] hover:underline block truncate text-left cursor-pointer font-medium"
+              >
+                {customerPhoto ? "Change photo" : "Upload photo"}
+              </button>
             </div>
           </div>
 
@@ -574,7 +632,38 @@ export default function CustomerDashboardPage() {
                 </nav>
               </div>
 
-              <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
+              <div className="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-3">
+                <div className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
+                  <div
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      fileInputRef.current?.click();
+                    }}
+                    className="w-9 h-9 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-xs font-bold text-emerald-700 dark:text-[#65E817] shrink-0 overflow-hidden cursor-pointer"
+                  >
+                    {customerPhoto ? (
+                      <img src={customerPhoto} alt="Profile" className="w-full h-full object-cover" />
+                    ) : (
+                      customer?.name ? customer.name.charAt(0).toUpperCase() : "C"
+                    )}
+                  </div>
+                  <div className="overflow-hidden leading-tight flex-1 min-w-0">
+                    <span className="text-xs font-bold text-slate-900 dark:text-white block truncate">
+                      {customer?.name || "Customer"}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        fileInputRef.current?.click();
+                      }}
+                      className="text-[10px] text-emerald-600 dark:text-[#65E817] hover:underline block truncate text-left"
+                    >
+                      {customerPhoto ? "Change photo" : "Upload photo"}
+                    </button>
+                  </div>
+                </div>
+
                 <button
                   type="button"
                   onClick={handleLogout}
@@ -642,6 +731,23 @@ export default function CustomerDashboardPage() {
                 <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin text-emerald-600 dark:text-[#65E817]" : ""}`} />
                 <span>Refresh</span>
               </button>
+
+              {/* Header Profile Photo Avatar */}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="h-9 w-9 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-xs font-bold text-emerald-700 dark:text-[#65E817] overflow-hidden cursor-pointer shadow-xs relative group transition-transform hover:scale-105"
+                title="Click to upload profile photo"
+              >
+                {customerPhoto ? (
+                  <img src={customerPhoto} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  customer?.name ? customer.name.charAt(0).toUpperCase() : "C"
+                )}
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+                  <Camera className="w-3.5 h-3.5" />
+                </div>
+              </button>
             </div>
           </div>
         </header>
@@ -659,8 +765,17 @@ export default function CustomerDashboardPage() {
             <div className="pointer-events-none absolute -top-32 -right-32 w-96 h-96 rounded-full bg-emerald-500/10 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-32 -left-32 w-96 h-96 rounded-full bg-[#65E817]/8 blur-3xl" />
 
+            {/* Hidden file input for photo upload */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handlePhotoUpload}
+            />
+
             <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-              {/* Left: Big Bold Display Heading & CTAs */}
+              {/* Left: Big Bold Display Heading & CTAs (lg:col-span-8) */}
               <div className="lg:col-span-8 space-y-5">
                 {/* Verified Status Pill */}
                 <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-emerald-100/80 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 border border-emerald-300/60 dark:border-emerald-800/60 shadow-xs">
@@ -694,39 +809,77 @@ export default function CustomerDashboardPage() {
 
                   <Link
                     href="/rates"
-                    className="h-12 px-7 rounded-full bg-white/80 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 border border-slate-300 dark:border-white/15 hover:border-slate-400 dark:hover:border-white/30 text-slate-800 dark:text-white font-semibold text-sm flex items-center gap-2 transition-all cursor-pointer backdrop-blur-md shadow-xs hover:scale-[1.02] active:scale-[0.98]"
+                    className="h-12 px-7 rounded-full bg-white/80 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 border border-slate-300 dark:border-white/15 hover:border-slate-400 dark:border-white/30 text-slate-800 dark:text-white font-semibold text-sm flex items-center gap-2 transition-all cursor-pointer backdrop-blur-md shadow-xs hover:scale-[1.02] active:scale-[0.98]"
                   >
                     <span>Check Live Rates</span>
                   </Link>
                 </div>
               </div>
 
-              {/* Right: Floating Glass Feature Cards (Padhega Aesthetic) */}
-              <div className="lg:col-span-4 hidden lg:flex flex-col gap-3.5">
-                <div className="p-4 rounded-2xl bg-white/80 dark:bg-white/5 border border-slate-200/90 dark:border-white/10 backdrop-blur-xl shadow-md space-y-1.5 transition hover:border-emerald-500/40 dark:hover:border-[#65E817]/40">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-semibold text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
-                      <Truck className="w-4 h-4 text-emerald-600 dark:text-[#65E817]" />
-                      <span>Zero Pickup Fee</span>
-                    </span>
-                    <span className="text-[10px] text-slate-500 dark:text-zinc-400">Patna Verified</span>
-                  </div>
-                  <p className="text-xs text-slate-600 dark:text-zinc-300 leading-snug">
-                    Free doorstep scrap collection with certified ISO Bluetooth digital scales.
-                  </p>
-                </div>
+              {/* Right: Clean Profile Photo Uploader */}
+              <div className="lg:col-span-4 flex items-center justify-center lg:justify-end">
+                <div className="flex flex-col items-center text-center p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/60 border border-slate-200/90 dark:border-white/10 backdrop-blur-xl shadow-lg space-y-3 transition-all hover:border-emerald-500/40 dark:hover:border-[#65E817]/40 w-full max-w-[240px]">
+                  {/* Photo Avatar Frame */}
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="relative w-28 h-28 rounded-full cursor-pointer overflow-hidden p-1 bg-gradient-to-tr from-emerald-500 via-teal-400 to-[#65E817] shadow-xl group transition-transform hover:scale-105"
+                    title="Click to upload profile photo"
+                  >
+                    <div className="w-full h-full rounded-full overflow-hidden bg-slate-100 dark:bg-slate-900 flex items-center justify-center relative">
+                      {customerPhoto ? (
+                        <img
+                          src={customerPhoto}
+                          alt={customer?.name || "Profile"}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-emerald-500/10 text-3xl font-black text-emerald-600 dark:text-[#65E817]">
+                          {customer?.name ? customer.name.charAt(0).toUpperCase() : "C"}
+                        </div>
+                      )}
 
-                <div className="p-4 rounded-2xl bg-white/80 dark:bg-white/5 border border-slate-200/90 dark:border-white/10 backdrop-blur-xl shadow-md space-y-1.5 transition hover:border-emerald-500/40 dark:hover:border-[#65E817]/40">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-semibold text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
-                      <Zap className="w-4 h-4 text-emerald-600 dark:text-[#65E817]" />
-                      <span>Instant UPI Transfer</span>
-                    </span>
-                    <span className="text-[10px] text-slate-500 dark:text-zinc-400">0s Delay</span>
+                      {/* Hover Camera Overlay */}
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white gap-1 backdrop-blur-xs">
+                        <Camera className="w-6 h-6 stroke-[2]" />
+                        <span className="text-[10px] font-semibold">
+                          {customerPhoto ? "Change" : "Upload"}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <p className="text-xs text-slate-600 dark:text-zinc-300 leading-snug">
-                    Direct payout credited to your UPI ID right at the weighing scale.
-                  </p>
+
+                  {/* Customer Name */}
+                  <div className="leading-tight">
+                    <span className="text-sm font-bold text-slate-900 dark:text-white block truncate">
+                      {customer?.name || "Customer"}
+                    </span>
+                    <span className="text-[11px] text-slate-500 dark:text-zinc-400 font-mono mt-0.5 block">
+                      Profile Photo
+                    </span>
+                  </div>
+
+                  {/* Upload / Remove Buttons */}
+                  <div className="flex items-center gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="px-4 py-1.5 rounded-full bg-emerald-600 dark:bg-[#65E817] hover:bg-emerald-500 dark:hover:bg-[#58d012] text-white dark:text-slate-950 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer shadow-xs"
+                    >
+                      <Camera className="w-3.5 h-3.5" />
+                      <span>{customerPhoto ? "Change" : "Upload"}</span>
+                    </button>
+
+                    {customerPhoto && (
+                      <button
+                        type="button"
+                        onClick={handleRemovePhoto}
+                        title="Remove photo"
+                        className="p-1.5 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-red-50 dark:hover:bg-red-950/40 text-slate-500 hover:text-red-600 dark:hover:text-red-400 border border-slate-200 dark:border-slate-700 transition cursor-pointer"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
