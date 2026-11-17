@@ -135,7 +135,7 @@ export function VirtualPaperCalendar({
           ======================================================== */}
       <div className="flex items-center justify-between pb-3">
         <div className="flex items-center gap-2">
-          <CalendarIcon className="w-4 h-4 text-emerald-600 dark:text-[#65E817]" />
+          <CalendarIcon className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
           <span className="font-bold text-sm sm:text-base tracking-tight text-zinc-900 dark:text-white">
             {monthTitle}
           </span>
@@ -231,13 +231,13 @@ export function VirtualPaperCalendar({
                     {dayNum}
                   </span>
 
-                  {/* Glowing Green / Lime Pickup Dot */}
+                  {/* Green Pickup Dot */}
                   {hasPickups && (
                     <span
                       className={`w-1.5 h-1.5 rounded-full mt-0.5 ${
                         isSelected
-                          ? "bg-white shadow-[0_0_4px_#ffffff]"
-                          : "bg-[#65E817] shadow-[0_0_6px_#65E817]"
+                          ? "bg-white"
+                          : "bg-emerald-600 dark:bg-emerald-500"
                       }`}
                       title={`${dayPickups.length} pickup(s)`}
                     />
@@ -262,7 +262,7 @@ export function VirtualPaperCalendar({
             })}
           </span>
           {hasPickupsOnSelected && (
-            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-[#65E817] border border-emerald-500/20">
+            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
               {selectedPickups.length} Pickup Booked
             </span>
           )}
@@ -274,7 +274,7 @@ export function VirtualPaperCalendar({
               <div
                 key={p.id}
                 onClick={() => onSelectPickup && onSelectPickup(p)}
-                className="p-2.5 rounded-xl bg-zinc-100 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 flex items-center justify-between gap-2 hover:border-[#65E817]/40 transition cursor-pointer"
+                className="p-2.5 rounded-xl bg-zinc-100 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 flex items-center justify-between gap-2 hover:border-emerald-500/40 dark:hover:border-emerald-500/30 transition cursor-pointer"
               >
                 <div className="space-y-0.5 truncate">
                   <div className="flex items-center gap-1.5">
@@ -291,7 +291,7 @@ export function VirtualPaperCalendar({
                 </div>
                 <button
                   type="button"
-                  className="shrink-0 p-1 rounded-lg text-emerald-600 dark:text-[#65E817] hover:bg-emerald-500/10 transition"
+                  className="shrink-0 p-1 rounded-lg text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 transition"
                 >
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
@@ -306,7 +306,7 @@ export function VirtualPaperCalendar({
             <button
               type="button"
               onClick={() => onScheduleDate && onScheduleDate(selectedDateStr)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 dark:bg-[#65E817] dark:hover:bg-[#58d012] text-white dark:text-slate-950 font-bold text-xs transition cursor-pointer shadow-xs shrink-0"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-semibold text-xs transition cursor-pointer shadow-xs shrink-0"
             >
               <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
               <span>Schedule on {selectedDate.getDate()} {selectedDate.toLocaleDateString("en-US", { month: "short" })}</span>

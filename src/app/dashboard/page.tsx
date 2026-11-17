@@ -7,8 +7,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import BrandLogo from "@/components/BrandLogo";
 import PickupBookingModal from "@/components/PickupBookingModal";
 import { PickupTrackingParallaxCard } from "@/components/ui/pickup-tracking-parallax-card";
-import { RecyclingStreakCalendar } from "@/components/ui/recycling-streak-calendar";
+import { KnowAboutKabad } from "@/components/ui/know-about-kabad";
 import { VirtualPaperCalendar } from "@/components/ui/virtual-paper-calendar";
+import { ProfileAvatarCard } from "@/components/ui/profile-avatar-card";
 import { useTheme } from "@/context/ThemeContext";
 import {
   Truck,
@@ -48,6 +49,7 @@ import {
   AlertTriangle,
   Sparkles,
   Camera,
+  BookOpen,
 } from "lucide-react";
 
 interface CustomerProfile {
@@ -115,7 +117,7 @@ export default function CustomerDashboardPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState<"overview" | "pickups" | "address">("overview");
+  const [activeSection, setActiveSection] = useState<"overview" | "pickups" | "address" | "guide">("overview");
   const [statusFilter, setStatusFilter] = useState<"ALL" | "ACTIVE" | "COMPLETED" | "CANCELLED">("ALL");
 
   // Selected Active Pickup Index for the 3D Parallax Card
@@ -139,6 +141,7 @@ export default function CustomerDashboardPage() {
   // Universal Booking Modal States
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [preselectedDate, setPreselectedDate] = useState("");
+  const [preselectedCategory, setPreselectedCategory] = useState("");
 
   // Customer Profile Photo State
   const [customerPhoto, setCustomerPhoto] = useState<string | null>(null);
@@ -156,9 +159,7 @@ export default function CustomerDashboardPage() {
     }
   }, [customer?.id]);
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const processPhotoFile = (file: File) => {
     if (file.size > 5 * 1024 * 1024) {
       alert("Please choose an image under 5MB.");
       return;
@@ -176,8 +177,15 @@ export default function CustomerDashboardPage() {
     reader.readAsDataURL(file);
   };
 
-  const handleRemovePhoto = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      processPhotoFile(file);
+    }
+  };
+
+  const handleRemovePhoto = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
     setCustomerPhoto(null);
     if (typeof window !== "undefined") {
       if (customer?.id) {
@@ -273,11 +281,8 @@ export default function CustomerDashboardPage() {
   // Carbon Offset: ~1.8 kg CO2 saved per kg recycled scrap
   const co2Saved = Math.round(totalKg * 1.8);
 
-  // Streak Days
-  const streakDays = useMemo(() => {
-    const nonCancelled = pickups.filter((p) => p.status !== "CANCELLED");
-    return nonCancelled.length > 0 ? Math.max(1, nonCancelled.length) : 0;
-  }, [pickups]);
+  // Completed Pickups Count
+  const completedCount = completedPickupsList.length;
 
   // Current active pickup for the 3D Tracking Parallax Card
   const selectedActivePickup =
@@ -427,7 +432,7 @@ export default function CustomerDashboardPage() {
             <BrandLogo size={32} className="h-8 w-8 shrink-0" />
             <div className="flex flex-col leading-none">
               <span className="text-xl font-extrabold tracking-tight text-slate-950 dark:text-white">
-                Kabaad<span className="text-[#65E817]">Se</span>
+                Kabaad<span className="text-emerald-600 dark:text-emerald-400">Se</span>
               </span>
               <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-1">
                 Doorstep Recycling
@@ -435,7 +440,7 @@ export default function CustomerDashboardPage() {
             </div>
           </Link>
 
-          {/* Nav Items with Padhega-Style Active Vertical Indicator */}
+          {/* Nav Items with Active Vertical Indicator */}
           <nav className="space-y-1.5 pt-2">
             <button
               type="button"
@@ -445,7 +450,7 @@ export default function CustomerDashboardPage() {
               }}
               className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition cursor-pointer ${
                 activeSection === "overview"
-                  ? "bg-emerald-500/10 text-emerald-700 dark:text-[#65E817] font-semibold border-l-2 border-l-emerald-600 dark:border-l-[#65E817]"
+                  ? "bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 font-semibold border-l-2 border-l-emerald-600 dark:border-l-emerald-500"
                   : "text-slate-600 dark:text-zinc-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"
               }`}
             >
@@ -461,24 +466,40 @@ export default function CustomerDashboardPage() {
               }}
               className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition cursor-pointer ${
                 activeSection === "pickups"
-                  ? "bg-emerald-500/10 text-emerald-700 dark:text-[#65E817] font-semibold border-l-2 border-l-emerald-600 dark:border-l-[#65E817]"
+                  ? "bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 font-semibold border-l-2 border-l-emerald-600 dark:border-l-emerald-500"
                   : "text-slate-600 dark:text-zinc-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"
               }`}
             >
               <Layers className="w-4 h-4 shrink-0" />
               <span>My Pickups</span>
               {activePickupsList.length > 0 && (
-                <span className="ml-auto text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-600 dark:bg-[#65E817] text-white dark:text-slate-950">
+                <span className="ml-auto text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-600 dark:bg-emerald-500 text-white">
                   {activePickupsList.length}
                 </span>
               )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setActiveSection("guide");
+                document.getElementById("kabad-guide-section")?.scrollIntoView({ behavior: "smooth" });
+              }}
+              className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition cursor-pointer ${
+                activeSection === "guide"
+                  ? "bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 font-semibold border-l-2 border-l-emerald-600 dark:border-l-emerald-500"
+                  : "text-slate-600 dark:text-zinc-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"
+              }`}
+            >
+              <BookOpen className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+              <span>Kabad Guide</span>
             </button>
 
             <Link
               href="/rates"
               className="w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-slate-600 dark:text-zinc-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition"
             >
-              <TrendingUp className="w-4 h-4 shrink-0 text-emerald-600 dark:text-[#65E817]" />
+              <TrendingUp className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
               <span>Live Scrap Rates</span>
               <ArrowRight className="w-4 h-4 ml-auto text-slate-400 dark:text-zinc-500" />
             </Link>
@@ -491,7 +512,7 @@ export default function CustomerDashboardPage() {
               }}
               className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition cursor-pointer ${
                 activeSection === "address"
-                  ? "bg-emerald-500/10 text-emerald-700 dark:text-[#65E817] font-semibold border-l-2 border-l-emerald-600 dark:border-l-[#65E817]"
+                  ? "bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 font-semibold border-l-2 border-l-emerald-600 dark:border-l-emerald-500"
                   : "text-slate-600 dark:text-zinc-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"
               }`}
             >
@@ -501,12 +522,12 @@ export default function CustomerDashboardPage() {
           </nav>
         </div>
 
-        {/* Bottom: Customer Profile, Logout & Copyright (Padhega-Style) */}
+        {/* Bottom: Customer Profile, Logout & Copyright */}
         <div className="border-t border-slate-200 dark:border-slate-800/80 pt-5 space-y-4">
           <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
             <div
               onClick={() => fileInputRef.current?.click()}
-              className="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-sm font-bold text-emerald-700 dark:text-[#65E817] shrink-0 overflow-hidden cursor-pointer relative group"
+              className="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-sm font-bold text-emerald-700 dark:text-emerald-400 shrink-0 overflow-hidden cursor-pointer relative group"
               title="Click to upload profile photo"
             >
               {customerPhoto ? (
@@ -525,7 +546,7 @@ export default function CustomerDashboardPage() {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="text-[11px] text-emerald-600 dark:text-[#65E817] hover:underline block truncate text-left cursor-pointer font-medium"
+                className="text-[11px] text-emerald-600 dark:text-emerald-400 hover:underline block truncate text-left cursor-pointer font-medium"
               >
                 {customerPhoto ? "Change photo" : "Upload photo"}
               </button>
@@ -570,7 +591,7 @@ export default function CustomerDashboardPage() {
                   <Link href="/" className="flex items-center gap-2.5">
                     <BrandLogo size={28} className="h-7 w-7" />
                     <span className="text-lg font-bold text-slate-950 dark:text-white">
-                      Kabaad<span className="text-[#65E817]">Se</span>
+                      Kabaad<span className="text-emerald-600 dark:text-emerald-400">Se</span>
                     </span>
                   </Link>
                   <button
@@ -592,7 +613,7 @@ export default function CustomerDashboardPage() {
                     }}
                     className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/5 text-left"
                   >
-                    <LayoutDashboard className="w-4 h-4 text-emerald-600 dark:text-[#65E817]" />
+                    <LayoutDashboard className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                     <span>Overview</span>
                   </button>
 
@@ -605,15 +626,28 @@ export default function CustomerDashboardPage() {
                     }}
                     className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/5 text-left"
                   >
-                    <Layers className="w-4 h-4 text-emerald-600 dark:text-[#65E817]" />
+                    <Layers className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                     <span>My Pickups</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveSection("guide");
+                      setMobileMenuOpen(false);
+                      document.getElementById("kabad-guide-section")?.scrollIntoView({ behavior: "smooth" });
+                    }}
+                    className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/5 text-left"
+                  >
+                    <BookOpen className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                    <span>Kabad Guide</span>
                   </button>
 
                   <Link
                     href="/rates"
                     className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/5"
                   >
-                    <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-[#65E817]" />
+                    <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                     <span>Live Scrap Rates</span>
                   </Link>
 
@@ -626,7 +660,7 @@ export default function CustomerDashboardPage() {
                     }}
                     className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/5 text-left"
                   >
-                    <CreditCard className="w-4 h-4 text-emerald-600 dark:text-[#65E817]" />
+                    <CreditCard className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                     <span>Address & UPI</span>
                   </button>
                 </nav>
@@ -639,7 +673,7 @@ export default function CustomerDashboardPage() {
                       setMobileMenuOpen(false);
                       fileInputRef.current?.click();
                     }}
-                    className="w-9 h-9 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-xs font-bold text-emerald-700 dark:text-[#65E817] shrink-0 overflow-hidden cursor-pointer"
+                    className="w-9 h-9 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-xs font-bold text-emerald-700 dark:text-emerald-400 shrink-0 overflow-hidden cursor-pointer"
                   >
                     {customerPhoto ? (
                       <img src={customerPhoto} alt="Profile" className="w-full h-full object-cover" />
@@ -657,7 +691,7 @@ export default function CustomerDashboardPage() {
                         setMobileMenuOpen(false);
                         fileInputRef.current?.click();
                       }}
-                      className="text-[10px] text-emerald-600 dark:text-[#65E817] hover:underline block truncate text-left"
+                      className="text-[10px] text-emerald-600 dark:text-emerald-400 hover:underline block truncate text-left"
                     >
                       {customerPhoto ? "Change photo" : "Upload photo"}
                     </button>
@@ -728,7 +762,7 @@ export default function CustomerDashboardPage() {
                 className="h-9 px-3.5 rounded-full bg-white dark:bg-slate-900/80 border border-slate-300 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white text-xs font-medium flex items-center justify-center gap-1.5 transition cursor-pointer shadow-xs"
                 title="Refresh bookings"
               >
-                <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin text-emerald-600 dark:text-[#65E817]" : ""}`} />
+                <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin text-emerald-600 dark:text-emerald-400" : ""}`} />
                 <span>Refresh</span>
               </button>
 
@@ -736,7 +770,7 @@ export default function CustomerDashboardPage() {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="h-9 w-9 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-xs font-bold text-emerald-700 dark:text-[#65E817] overflow-hidden cursor-pointer shadow-xs relative group transition-transform hover:scale-105"
+                className="h-9 w-9 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-xs font-bold text-emerald-700 dark:text-emerald-400 overflow-hidden cursor-pointer shadow-xs relative group transition-transform hover:scale-105"
                 title="Click to upload profile photo"
               >
                 {customerPhoto ? (
@@ -758,12 +792,11 @@ export default function CustomerDashboardPage() {
         <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 space-y-8">
           {/* =====================================================
               HERO SECTION: BIG DISPLAY HEADING (PADHEGA STYLE)
-              "Learn. Grow. Together." -> "Welcome back, {customer.name}."
               ===================================================== */}
           <div className="relative rounded-3xl bg-gradient-to-br from-emerald-50/70 via-slate-50 to-white dark:from-[#0c1017] dark:via-[#091310] dark:to-[#070b09] border border-emerald-100/80 dark:border-white/10 p-8 sm:p-10 lg:p-12 overflow-hidden shadow-2xl backdrop-blur-2xl transition-colors duration-200">
             {/* Ambient soft glow */}
             <div className="pointer-events-none absolute -top-32 -right-32 w-96 h-96 rounded-full bg-emerald-500/10 blur-3xl" />
-            <div className="pointer-events-none absolute -bottom-32 -left-32 w-96 h-96 rounded-full bg-[#65E817]/8 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-32 -left-32 w-96 h-96 rounded-full bg-emerald-500/5 blur-3xl" />
 
             {/* Hidden file input for photo upload */}
             <input
@@ -779,18 +812,18 @@ export default function CustomerDashboardPage() {
               <div className="lg:col-span-8 space-y-5">
                 {/* Verified Status Pill */}
                 <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-emerald-100/80 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 border border-emerald-300/60 dark:border-emerald-800/60 shadow-xs">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-[#65E817] animate-pulse" />
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
                   <span>Verified Household Recycling Account</span>
                 </div>
 
-                {/* Big Display Heading (Not AI generated, clean and impactful like Padhega) */}
+                {/* Big Display Heading */}
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-950 dark:text-white leading-[1.08]">
                   Welcome back, <br />
-                  <span className="text-emerald-600 dark:text-[#65E817]">{customer?.name || "Customer"}.</span>
+                  <span className="text-[#15803D] dark:text-emerald-400">{customer?.name || "Customer"}.</span>
                 </h1>
 
                 <p className="text-base sm:text-lg text-slate-600 dark:text-zinc-300 max-w-xl font-normal leading-relaxed">
-                  Track your active doorstep pickups, monitor verified digital scale payouts, and build your daily green recycling streak.
+                  Track your active doorstep pickups, monitor verified digital scale payouts, and explore live recycling categories.
                 </p>
 
                 {/* Clean Rounded Action Buttons */}
@@ -799,9 +832,10 @@ export default function CustomerDashboardPage() {
                     type="button"
                     onClick={() => {
                       setPreselectedDate("");
+                      setPreselectedCategory("");
                       setIsBookingModalOpen(true);
                     }}
-                    className="h-12 px-7 rounded-full bg-emerald-600 dark:bg-[#65E817] hover:bg-emerald-500 dark:hover:bg-[#58d012] text-white dark:text-slate-950 font-bold text-sm flex items-center gap-2.5 transition-all shadow-lg hover:shadow-emerald-500/20 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                    className="h-12 px-7 rounded-full bg-[#15803D] hover:bg-[#166534] dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-bold text-sm flex items-center gap-2.5 transition-all shadow-md hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                   >
                     <span>+ Book Scrap Pickup</span>
                     <ArrowRight className="w-4 h-4 stroke-[2.5]" />
@@ -816,71 +850,16 @@ export default function CustomerDashboardPage() {
                 </div>
               </div>
 
-              {/* Right: Clean Profile Photo Uploader */}
+              {/* Right: Clean Profile Avatar Card */}
               <div className="lg:col-span-4 flex items-center justify-center lg:justify-end">
-                <div className="flex flex-col items-center text-center p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/60 border border-slate-200/90 dark:border-white/10 backdrop-blur-xl shadow-lg space-y-3 transition-all hover:border-emerald-500/40 dark:hover:border-[#65E817]/40 w-full max-w-[240px]">
-                  {/* Photo Avatar Frame */}
-                  <div
-                    onClick={() => fileInputRef.current?.click()}
-                    className="relative w-28 h-28 rounded-full cursor-pointer overflow-hidden p-1 bg-gradient-to-tr from-emerald-500 via-teal-400 to-[#65E817] shadow-xl group transition-transform hover:scale-105"
-                    title="Click to upload profile photo"
-                  >
-                    <div className="w-full h-full rounded-full overflow-hidden bg-slate-100 dark:bg-slate-900 flex items-center justify-center relative">
-                      {customerPhoto ? (
-                        <img
-                          src={customerPhoto}
-                          alt={customer?.name || "Profile"}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-emerald-500/10 text-3xl font-black text-emerald-600 dark:text-[#65E817]">
-                          {customer?.name ? customer.name.charAt(0).toUpperCase() : "C"}
-                        </div>
-                      )}
-
-                      {/* Hover Camera Overlay */}
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white gap-1 backdrop-blur-xs">
-                        <Camera className="w-6 h-6 stroke-[2]" />
-                        <span className="text-[10px] font-semibold">
-                          {customerPhoto ? "Change" : "Upload"}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Customer Name */}
-                  <div className="leading-tight">
-                    <span className="text-sm font-bold text-slate-900 dark:text-white block truncate">
-                      {customer?.name || "Customer"}
-                    </span>
-                    <span className="text-[11px] text-slate-500 dark:text-zinc-400 font-mono mt-0.5 block">
-                      Profile Photo
-                    </span>
-                  </div>
-
-                  {/* Upload / Remove Buttons */}
-                  <div className="flex items-center gap-2 pt-1">
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="px-4 py-1.5 rounded-full bg-emerald-600 dark:bg-[#65E817] hover:bg-emerald-500 dark:hover:bg-[#58d012] text-white dark:text-slate-950 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer shadow-xs"
-                    >
-                      <Camera className="w-3.5 h-3.5" />
-                      <span>{customerPhoto ? "Change" : "Upload"}</span>
-                    </button>
-
-                    {customerPhoto && (
-                      <button
-                        type="button"
-                        onClick={handleRemovePhoto}
-                        title="Remove photo"
-                        className="p-1.5 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-red-50 dark:hover:bg-red-950/40 text-slate-500 hover:text-red-600 dark:hover:text-red-400 border border-slate-200 dark:border-slate-700 transition cursor-pointer"
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    )}
-                  </div>
-                </div>
+                <ProfileAvatarCard
+                  name={customer?.name || "Customer"}
+                  subCaption="Personal Account"
+                  photoUrl={customerPhoto}
+                  onPhotoUpload={processPhotoFile}
+                  onPhotoRemove={() => handleRemovePhoto()}
+                  className="w-full max-w-[260px]"
+                />
               </div>
             </div>
           </div>
@@ -890,37 +869,22 @@ export default function CustomerDashboardPage() {
               ===================================================== */}
           <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
             {/* Card 1: Total Earnings */}
-            <div className="p-5 rounded-2xl h-full flex items-center gap-4 bg-white dark:bg-zinc-900/80 border border-slate-200 dark:border-white/10 shadow-lg backdrop-blur-xl">
-              <div className="w-11 h-11 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-[#65E817] shrink-0">
+            <div className="p-5 rounded-2xl h-full flex items-center gap-4 bg-white dark:bg-zinc-900/80 border border-slate-200 dark:border-white/10 shadow-sm backdrop-blur-xl">
+              <div className="w-11 h-11 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-700 dark:text-emerald-400 shrink-0">
                 <IndianRupee className="w-5 h-5" />
               </div>
               <div className="space-y-0.5 min-w-0">
                 <span className="text-xs font-medium text-slate-500 dark:text-zinc-400 block">
                   Total earnings
                 </span>
-                <div className="text-xl sm:text-2xl font-extrabold text-slate-950 dark:text-white tabular-nums truncate">
+                <div className="text-xl sm:text-2xl font-bold text-slate-950 dark:text-white tabular-nums truncate">
                   ₹{totalEarnings.toLocaleString("en-IN")}
                 </div>
               </div>
             </div>
 
-            {/* Card 2: Current Streak */}
-            <div className="p-5 rounded-2xl h-full flex items-center gap-4 bg-white dark:bg-zinc-900/80 border border-slate-200 dark:border-white/10 shadow-lg backdrop-blur-xl">
-              <div className="w-11 h-11 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-500 dark:text-amber-400 shrink-0">
-                <Flame className="w-5 h-5 fill-amber-500 dark:fill-amber-400" />
-              </div>
-              <div className="space-y-0.5 min-w-0">
-                <span className="text-xs font-medium text-slate-500 dark:text-zinc-400 block">
-                  Current streak
-                </span>
-                <div className="text-xl sm:text-2xl font-extrabold text-emerald-600 dark:text-[#65E817] tabular-nums truncate">
-                  {streakDays} <span className="text-xs font-normal text-slate-500 dark:text-zinc-400">days</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Card 3: Scrap Recycled */}
-            <div className="p-5 rounded-2xl h-full flex items-center gap-4 bg-white dark:bg-zinc-900/80 border border-slate-200 dark:border-white/10 shadow-lg backdrop-blur-xl">
+            {/* Card 2: Scrap Recycled */}
+            <div className="p-5 rounded-2xl h-full flex items-center gap-4 bg-white dark:bg-zinc-900/80 border border-slate-200 dark:border-white/10 shadow-sm backdrop-blur-xl">
               <div className="w-11 h-11 rounded-2xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-600 dark:text-sky-400 shrink-0">
                 <Scale className="w-5 h-5" />
               </div>
@@ -928,14 +892,14 @@ export default function CustomerDashboardPage() {
                 <span className="text-xs font-medium text-slate-500 dark:text-zinc-400 block">
                   Scrap recycled
                 </span>
-                <div className="text-xl sm:text-2xl font-extrabold text-slate-950 dark:text-white tabular-nums truncate">
+                <div className="text-xl sm:text-2xl font-bold text-slate-950 dark:text-white tabular-nums truncate">
                   {totalKg} <span className="text-xs font-normal text-slate-500 dark:text-zinc-400">kg</span>
                 </div>
               </div>
             </div>
 
-            {/* Card 4: CO2 Saved */}
-            <div className="p-5 rounded-2xl h-full flex items-center gap-4 bg-white dark:bg-zinc-900/80 border border-slate-200 dark:border-white/10 shadow-lg backdrop-blur-xl">
+            {/* Card 3: CO2 Saved */}
+            <div className="p-5 rounded-2xl h-full flex items-center gap-4 bg-white dark:bg-zinc-900/80 border border-slate-200 dark:border-white/10 shadow-sm backdrop-blur-xl">
               <div className="w-11 h-11 rounded-2xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-600 dark:text-teal-400 shrink-0">
                 <Leaf className="w-5 h-5" />
               </div>
@@ -943,8 +907,23 @@ export default function CustomerDashboardPage() {
                 <span className="text-xs font-medium text-slate-500 dark:text-zinc-400 block">
                   CO₂ saved
                 </span>
-                <div className="text-xl sm:text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 tabular-nums truncate">
+                <div className="text-xl sm:text-2xl font-bold text-[#15803D] dark:text-emerald-400 tabular-nums truncate">
                   {co2Saved} <span className="text-xs font-normal text-slate-500 dark:text-zinc-400">kg</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Card 4: Completed Pickups */}
+            <div className="p-5 rounded-2xl h-full flex items-center gap-4 bg-white dark:bg-zinc-900/80 border border-slate-200 dark:border-white/10 shadow-sm backdrop-blur-xl">
+              <div className="w-11 h-11 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-700 dark:text-emerald-400 shrink-0">
+                <CheckCircle2 className="w-5 h-5" />
+              </div>
+              <div className="space-y-0.5 min-w-0">
+                <span className="text-xs font-medium text-slate-500 dark:text-zinc-400 block">
+                  Completed pickups
+                </span>
+                <div className="text-xl sm:text-2xl font-bold text-slate-950 dark:text-white tabular-nums truncate">
+                  {completedCount} <span className="text-xs font-normal text-slate-500 dark:text-zinc-400">trips</span>
                 </div>
               </div>
             </div>
@@ -968,7 +947,7 @@ export default function CustomerDashboardPage() {
                       onClick={() => setActivePickupTabIdx(idx)}
                       className={`px-3 py-1 rounded-full text-xs font-semibold transition cursor-pointer whitespace-nowrap ${
                         activePickupTabIdx === idx
-                          ? "bg-emerald-600 dark:bg-[#65E817] text-white dark:text-slate-950 shadow-sm"
+                          ? "bg-[#15803D] dark:bg-emerald-600 text-white shadow-xs"
                           : "bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white"
                       }`}
                     >
@@ -997,7 +976,7 @@ export default function CustomerDashboardPage() {
                 </div>
               ) : (
                 <div className="rounded-3xl border border-slate-200 dark:border-white/10 bg-white dark:bg-zinc-900/80 p-8 text-center space-y-4 shadow-xl backdrop-blur-xl h-full flex flex-col items-center justify-center">
-                  <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-[#65E817]">
+                  <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-700 dark:text-emerald-400">
                     <Truck className="w-7 h-7" />
                   </div>
                   <div className="space-y-1">
@@ -1010,9 +989,10 @@ export default function CustomerDashboardPage() {
                     type="button"
                     onClick={() => {
                       setPreselectedDate("");
+                      setPreselectedCategory("");
                       setIsBookingModalOpen(true);
                     }}
-                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-emerald-600 dark:bg-[#65E817] hover:bg-emerald-500 dark:hover:bg-[#58d012] text-white dark:text-slate-950 font-bold text-xs transition cursor-pointer shadow-md"
+                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#15803D] hover:bg-[#166534] dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-bold text-xs transition cursor-pointer shadow-md"
                   >
                     <Plus className="w-4 h-4 stroke-[3]" />
                     <span>Book Scrap Pickup</span>
@@ -1029,7 +1009,7 @@ export default function CustomerDashboardPage() {
               <div>
                 <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-3 mb-3">
                   <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-[#65E817]">
+                    <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-700 dark:text-emerald-400">
                       <MapPin className="w-3.5 h-3.5" />
                     </div>
                     <span className="text-xs font-bold text-slate-900 dark:text-white tracking-wide">
@@ -1041,7 +1021,7 @@ export default function CustomerDashboardPage() {
                     <button
                       type="button"
                       onClick={() => setIsEditingAddress(true)}
-                      className="text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-[#65E817] font-semibold flex items-center gap-1 cursor-pointer transition"
+                      className="text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-semibold flex items-center gap-1 cursor-pointer transition"
                     >
                       <Edit3 className="w-3.5 h-3.5" />
                       <span>Edit</span>
@@ -1051,7 +1031,7 @@ export default function CustomerDashboardPage() {
 
                 {profileSuccessMsg && (
                   <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-700 text-emerald-800 dark:text-emerald-300 text-xs flex items-center gap-2 mb-3">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-[#65E817] shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                     <span>{profileSuccessMsg}</span>
                   </div>
                 )}
@@ -1067,7 +1047,7 @@ export default function CustomerDashboardPage() {
                         onChange={(e) => setEditAddressText(e.target.value)}
                         rows={2}
                         placeholder="e.g. Flat 402, Shivam Enclave, Main Road, Patna"
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:outline-none focus:border-emerald-500 dark:focus:border-[#65E817] resize-none"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 resize-none"
                       />
                     </div>
 
@@ -1080,7 +1060,7 @@ export default function CustomerDashboardPage() {
                         value={customerUpiId}
                         onChange={(e) => setCustomerUpiId(e.target.value)}
                         placeholder="e.g. mobile@upi or name@okaxis"
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:outline-none focus:border-emerald-500 dark:focus:border-[#65E817]"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500"
                       />
                     </div>
 
@@ -1088,7 +1068,7 @@ export default function CustomerDashboardPage() {
                       <button
                         type="submit"
                         disabled={isSavingProfile}
-                        className="flex-1 py-2.5 px-3 rounded-xl bg-emerald-600 dark:bg-[#65E817] hover:bg-emerald-500 dark:hover:bg-[#58d012] text-white dark:text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer disabled:opacity-60"
+                        className="flex-1 py-2.5 px-3 rounded-xl bg-[#15803D] hover:bg-[#166534] dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer disabled:opacity-60"
                       >
                         <Save className="w-3.5 h-3.5" />
                         <span>{isSavingProfile ? "Saving..." : "Save Changes"}</span>
@@ -1126,7 +1106,7 @@ export default function CustomerDashboardPage() {
                           Instant Payout Mode
                         </span>
                         <span className="text-emerald-700 dark:text-emerald-300 font-semibold text-xs flex items-center gap-1 mt-0.5">
-                          <Zap className="w-3.5 h-3.5 text-emerald-600 dark:text-[#65E817]" />
+                          <Zap className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                           <span>{customerUpiId || `${customer?.phone}@upi`}</span>
                         </span>
                       </div>
@@ -1143,9 +1123,9 @@ export default function CustomerDashboardPage() {
                 <button
                   type="button"
                   onClick={handleRepeatLastPickup}
-                  className="w-full py-2.5 px-4 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-white/5 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white font-semibold text-xs flex items-center justify-center gap-2 transition cursor-pointer hover:border-emerald-500/40 dark:hover:border-[#65E817]/40 shadow-2xs"
+                  className="w-full py-2.5 px-4 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-white/5 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white font-semibold text-xs flex items-center justify-center gap-2 transition cursor-pointer hover:border-emerald-500/40 dark:hover:border-emerald-500/30 shadow-2xs"
                 >
-                  <RotateCcw className="w-3.5 h-3.5 text-emerald-600 dark:text-[#65E817]" />
+                  <RotateCcw className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                   <span>Repeat Last Pickup</span>
                 </button>
               )}
@@ -1153,12 +1133,18 @@ export default function CustomerDashboardPage() {
           </section>
 
           {/* =====================================================
-              ROW 3 — PADHEGA STREAK GRID + VIRTUAL PAPER CALENDAR (grid-cols-12)
+              ROW 3 — KABAD EDITORIAL GUIDE + VIRTUAL PAPER CALENDAR (grid-cols-12)
               ===================================================== */}
           <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-            {/* Left (col-span-7): Padhega-Style Green Dot Streak Grid */}
+            {/* Left (col-span-7): Editorial Category Guide with Auto-Sliding Showcase & Drawers */}
             <div className="lg:col-span-7 flex flex-col">
-              <RecyclingStreakCalendar pickups={pickups} />
+              <KnowAboutKabad
+                onSellScrap={(catName) => {
+                  setPreselectedCategory(catName);
+                  setPreselectedDate("");
+                  setIsBookingModalOpen(true);
+                }}
+              />
             </div>
 
             {/* Right (col-span-5): Virtual Paper Desk Calendar */}
@@ -1232,9 +1218,10 @@ export default function CustomerDashboardPage() {
                   type="button"
                   onClick={() => {
                     setPreselectedDate("");
+                    setPreselectedCategory("");
                     setIsBookingModalOpen(true);
                   }}
-                  className="mt-2 inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-emerald-600 dark:bg-[#65E817] hover:bg-emerald-500 dark:hover:bg-[#58d012] text-white dark:text-slate-950 font-bold text-xs transition cursor-pointer shadow-sm"
+                  className="mt-2 inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-[#15803D] hover:bg-[#166534] dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-bold text-xs transition cursor-pointer shadow-sm"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Schedule First Pickup</span>
@@ -1250,11 +1237,11 @@ export default function CustomerDashboardPage() {
                     <div
                       key={pickup.id}
                       onClick={() => setDrawerPickup(pickup)}
-                      className="p-4 sm:p-5 rounded-2xl bg-slate-50/80 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 hover:border-emerald-500/50 dark:hover:border-[#65E817]/40 hover:bg-slate-100/90 dark:hover:bg-slate-900/60 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer group shadow-xs"
+                      className="p-4 sm:p-5 rounded-2xl bg-slate-50/80 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 hover:border-emerald-500/50 dark:hover:border-emerald-500/30 hover:bg-slate-100/90 dark:hover:bg-slate-900/60 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer group shadow-xs"
                     >
                       <div className="space-y-2">
                         <div className="flex flex-wrap items-center gap-2.5">
-                          <span className="font-mono font-bold text-xs text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-[#65E817] transition-colors">
+                          <span className="font-mono font-bold text-xs text-slate-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
                             {shortId}
                           </span>
                           <span
@@ -1292,7 +1279,7 @@ export default function CustomerDashboardPage() {
                               <span className="text-xs text-slate-500 dark:text-zinc-400 font-medium block">
                                 Verified payout
                               </span>
-                              <span className="text-base sm:text-lg font-bold text-emerald-600 dark:text-[#65E817] tabular-nums">
+                              <span className="text-base sm:text-lg font-bold text-[#15803D] dark:text-emerald-400 tabular-nums">
                                 ₹{pickup.finalPayoutInr.toLocaleString("en-IN")}
                               </span>
                             </>
@@ -1314,7 +1301,7 @@ export default function CustomerDashboardPage() {
                             e.stopPropagation();
                             setDrawerPickup(pickup);
                           }}
-                          className="px-4 py-2 rounded-xl bg-white dark:bg-slate-900 group-hover:bg-emerald-50 dark:group-hover:bg-[#65E817]/10 border border-slate-300 dark:border-slate-700 group-hover:border-emerald-400 dark:group-hover:border-[#65E817]/40 text-xs font-semibold text-slate-700 dark:text-slate-200 group-hover:text-emerald-700 dark:group-hover:text-[#65E817] flex items-center gap-1.5 transition cursor-pointer shadow-xs"
+                          className="px-4 py-2 rounded-xl bg-white dark:bg-slate-900 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-950/20 border border-slate-300 dark:border-slate-700 group-hover:border-emerald-400 dark:group-hover:border-emerald-500/30 text-xs font-semibold text-slate-700 dark:text-slate-200 group-hover:text-emerald-800 dark:group-hover:text-emerald-300 flex items-center gap-1.5 transition cursor-pointer shadow-xs"
                         >
                           <FileText className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                           <span>Details & Receipt</span>
@@ -1355,7 +1342,7 @@ export default function CustomerDashboardPage() {
               {/* Drawer Header */}
               <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-[#0F172A]/80">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-[#65E817]">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-700 dark:text-emerald-400">
                     <Truck className="w-4 h-4" />
                   </div>
                   <div>
@@ -1394,7 +1381,7 @@ export default function CustomerDashboardPage() {
                 {/* Feedback notifications */}
                 {actionSuccess && (
                   <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-600 text-emerald-800 dark:text-emerald-200 text-xs flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-[#65E817] shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                     <span>{actionSuccess}</span>
                   </div>
                 )}
@@ -1487,7 +1474,7 @@ export default function CustomerDashboardPage() {
                       <span
                         className={`absolute -left-6 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${
                           drawerPickup.status === "COMPLETED"
-                            ? "bg-emerald-600 dark:bg-[#65E817] text-white dark:text-slate-950"
+                            ? "bg-[#15803D] dark:bg-emerald-600 text-white"
                             : "bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-300 dark:border-slate-700"
                         }`}
                       >
@@ -1497,7 +1484,7 @@ export default function CustomerDashboardPage() {
                         <div className="flex items-center justify-between">
                           <span className="text-xs font-bold text-slate-950 dark:text-white">Instant UPI Settlement</span>
                           {drawerPickup.finalPayoutInr && (
-                            <span className="text-xs font-bold text-emerald-600 dark:text-[#65E817] tabular-nums">
+                            <span className="text-xs font-bold text-[#15803D] dark:text-emerald-400 tabular-nums">
                               ₹{drawerPickup.finalPayoutInr.toLocaleString("en-IN")}
                             </span>
                           )}
@@ -1544,7 +1531,7 @@ export default function CustomerDashboardPage() {
 
                   <div className="border-t border-slate-200 dark:border-slate-800 pt-2">
                     <span className="text-xs text-slate-500 block">Scrap Items</span>
-                    <span className="text-emerald-700 dark:text-[#65E817] font-semibold">{drawerPickup.scrapTypes}</span>
+                    <span className="text-emerald-700 dark:text-emerald-400 font-semibold">{drawerPickup.scrapTypes}</span>
                   </div>
                 </div>
 
@@ -1553,7 +1540,7 @@ export default function CustomerDashboardPage() {
                   <div className="rounded-2xl bg-white dark:bg-slate-900 border border-emerald-500/40 p-5 space-y-3 shadow-md">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-slate-950 dark:text-white flex items-center gap-1.5">
-                        <Calendar className="w-4 h-4 text-emerald-600 dark:text-[#65E817]" />
+                        <Calendar className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                         <span>Select New Pickup Date</span>
                       </span>
                       <button
@@ -1571,7 +1558,7 @@ export default function CustomerDashboardPage() {
                         min={new Date().toISOString().split("T")[0]}
                         value={newRescheduleDate}
                         onChange={(e) => setNewRescheduleDate(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-emerald-500 dark:focus:border-[#65E817]"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500"
                       />
 
                       <div className="flex items-center gap-2 text-xs">
@@ -1604,7 +1591,7 @@ export default function CustomerDashboardPage() {
                       type="button"
                       disabled={isSubmittingAction || !newRescheduleDate}
                       onClick={() => handleReschedulePickup(drawerPickup.id)}
-                      className="w-full py-2.5 rounded-xl bg-emerald-600 dark:bg-[#65E817] hover:bg-emerald-500 dark:hover:bg-[#58d012] text-white dark:text-slate-950 font-bold text-xs transition cursor-pointer disabled:opacity-50"
+                      className="w-full py-2.5 rounded-xl bg-[#15803D] hover:bg-[#166534] dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-bold text-xs transition cursor-pointer disabled:opacity-50"
                     >
                       {isSubmittingAction ? "Updating Slot..." : "Confirm New Slot"}
                     </button>
@@ -1641,7 +1628,7 @@ export default function CustomerDashboardPage() {
                   <button
                     type="button"
                     onClick={() => window.print()}
-                    className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 dark:bg-[#65E817] hover:bg-emerald-500 dark:hover:bg-[#58d012] text-white dark:text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer shadow-md"
+                    className="w-full py-2.5 px-4 rounded-xl bg-[#15803D] hover:bg-[#166534] dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer shadow-md"
                   >
                     <Printer className="w-4 h-4 stroke-[2.5]" />
                     <span>Print Certified Digital Receipt</span>
@@ -1654,9 +1641,10 @@ export default function CustomerDashboardPage() {
                     onClick={() => {
                       setDrawerPickup(null);
                       setPreselectedDate("");
+                      setPreselectedCategory("");
                       setIsBookingModalOpen(true);
                     }}
-                    className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 dark:bg-[#65E817] hover:bg-emerald-500 dark:hover:bg-[#58d012] text-white dark:text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                    className="w-full py-2.5 px-4 rounded-xl bg-[#15803D] hover:bg-[#166534] dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
                   >
                     <Plus className="w-4 h-4" />
                     <span>Book New Pickup</span>
@@ -1674,10 +1662,12 @@ export default function CustomerDashboardPage() {
         onClose={() => {
           setIsBookingModalOpen(false);
           setPreselectedDate("");
+          setPreselectedCategory("");
           fetchData();
         }}
         defaultCity={customer?.defaultAddress ? undefined : "Patna"}
         defaultPickupDate={preselectedDate}
+        defaultCategory={preselectedCategory}
       />
     </div>
   );

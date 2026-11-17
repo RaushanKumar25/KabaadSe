@@ -125,19 +125,19 @@ export function PickupTrackingParallaxCard({
         }}
         whileHover={{ scale: 1.015 }}
         whileTap={{ scale: 0.985 }}
-        className="group relative w-full rounded-3xl bg-gradient-to-b from-white via-slate-50 to-white dark:from-zinc-900/95 dark:via-zinc-900/90 dark:to-zinc-950/95 border border-slate-200 dark:border-white/10 hover:border-emerald-500/50 dark:hover:border-[#65E817]/40 shadow-2xl p-6 sm:p-7 backdrop-blur-xl transition-colors cursor-pointer select-none overflow-hidden"
+        className="group relative w-full rounded-3xl bg-gradient-to-b from-white via-slate-50 to-white dark:from-zinc-900/95 dark:via-zinc-900/90 dark:to-zinc-950/95 border border-slate-200 dark:border-white/10 hover:border-emerald-500/50 dark:hover:border-emerald-500/30 shadow-2xl p-6 sm:p-7 backdrop-blur-xl transition-colors cursor-pointer select-none overflow-hidden"
       >
         {/* Dynamic Cursor Spotlight Effect */}
         <div
           className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-3xl"
           style={{
-            background: `radial-gradient(600px circle at ${spotlightPos.x}% ${spotlightPos.y}%, rgba(101, 232, 23, 0.08), transparent 45%)`,
+            background: `radial-gradient(600px circle at ${spotlightPos.x}% ${spotlightPos.y}%, rgba(22, 163, 74, 0.08), transparent 45%)`,
           }}
         />
 
         {/* Ambient Top Glow */}
         <div className="pointer-events-none absolute -top-24 -right-24 w-72 h-72 rounded-full bg-emerald-500/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-24 -left-24 w-72 h-72 rounded-full bg-[#65E817]/5 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 -left-24 w-72 h-72 rounded-full bg-emerald-500/5 blur-3xl" />
 
         {/* ========================================================
             DEPTH LAYER 1: Header & Status Pill (translateZ: 30px)
@@ -147,7 +147,7 @@ export function PickupTrackingParallaxCard({
           className="relative z-10 flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-200 dark:border-white/10"
         >
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-[#65E817]">
+            <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
               <Truck className="w-4 h-4" />
             </div>
             <div>
@@ -173,7 +173,7 @@ export function PickupTrackingParallaxCard({
                   ? "bg-red-950/40 text-red-300 border-red-800/60"
                   : activeStep === 4
                   ? "bg-emerald-950/60 text-emerald-300 border-emerald-700/60"
-                  : "bg-[#65E817]/10 text-[#65E817] border-[#65E817]/30"
+                  : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30"
               }`}
             >
               <span
@@ -182,7 +182,7 @@ export function PickupTrackingParallaxCard({
                     ? "bg-red-400"
                     : activeStep === 4
                     ? "bg-emerald-400"
-                    : "bg-[#65E817] animate-pulse"
+                    : "bg-emerald-500 animate-pulse"
                 }`}
               />
               <span>
@@ -198,7 +198,7 @@ export function PickupTrackingParallaxCard({
               </span>
             </div>
 
-            <div className="w-7 h-7 rounded-full bg-white/5 group-hover:bg-[#65E817]/20 border border-white/10 group-hover:border-[#65E817]/40 flex items-center justify-center text-slate-400 group-hover:text-[#65E817] transition-all">
+            <div className="w-7 h-7 rounded-full bg-white/5 group-hover:bg-emerald-500/15 border border-white/10 group-hover:border-emerald-500/30 flex items-center justify-center text-slate-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-all">
               <ArrowUpRight className="w-3.5 h-3.5" />
             </div>
           </div>
@@ -217,7 +217,7 @@ export function PickupTrackingParallaxCard({
               <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
                 Scrap Items Included
               </span>
-              <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight mt-0.5 line-clamp-1 group-hover:text-emerald-600 dark:group-hover:text-[#65E817] transition-colors">
+              <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight mt-0.5 line-clamp-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                 {scrapSummary || "Mixed Recyclables"}
               </h3>
             </div>
@@ -225,7 +225,7 @@ export function PickupTrackingParallaxCard({
             <div className="grid grid-cols-2 gap-2 text-xs">
               <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 flex flex-col justify-between">
                 <span className="text-[10px] text-slate-500 dark:text-slate-400 flex items-center gap-1 font-mono">
-                  <Calendar className="w-3 h-3 text-emerald-600 dark:text-[#65E817]" />
+                  <Calendar className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
                   Slot Time
                 </span>
                 <span className="font-semibold text-slate-800 dark:text-white mt-1 truncate">
@@ -235,7 +235,7 @@ export function PickupTrackingParallaxCard({
 
               <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 flex flex-col justify-between">
                 <span className="text-[10px] text-slate-500 dark:text-slate-400 flex items-center gap-1 font-mono">
-                  <Scale className="w-3 h-3 text-emerald-600 dark:text-[#65E817]" />
+                  <Scale className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
                   {finalPayoutInr ? "Verified Payout" : "Estimated Load"}
                 </span>
                 <span className="font-bold text-emerald-700 dark:text-emerald-300 mt-1 truncate font-mono">
@@ -253,8 +253,8 @@ export function PickupTrackingParallaxCard({
           <div className="md:col-span-5 flex items-center justify-center">
             <div className="relative w-40 h-28 sm:w-48 sm:h-32 flex items-center justify-center">
               {/* Radial Ground Shadow */}
-              <div className="absolute bottom-1 w-36 h-6 bg-[#65E817]/20 blur-xl rounded-full" />
-              <div className="absolute bottom-0 w-32 h-4 bg-black/60 blur-md rounded-full" />
+              <div className="absolute bottom-1 w-36 h-6 bg-emerald-500/15 blur-xl rounded-full" />
+              <div className="absolute bottom-0 w-32 h-4 bg-black/50 blur-md rounded-full" />
 
               <Image
                 src="/pickup-truck.png"
@@ -291,9 +291,9 @@ export function PickupTrackingParallaxCard({
                       transition={{ duration: 0.6, ease: "easeInOut" }}
                       className={`h-full ${
                         isCurrent
-                          ? "bg-emerald-500 dark:bg-[#65E817] shadow-[0_0_10px_#65E817]"
-                          : isPassed
                           ? "bg-emerald-600 dark:bg-emerald-500"
+                          : isPassed
+                          ? "bg-emerald-700/80 dark:bg-emerald-600/80"
                           : "bg-transparent"
                       }`}
                     />
@@ -303,7 +303,7 @@ export function PickupTrackingParallaxCard({
                     <span
                       className={`text-[10px] sm:text-[11px] font-bold truncate ${
                         isCurrent
-                          ? "text-emerald-700 dark:text-[#65E817]"
+                          ? "text-emerald-700 dark:text-emerald-400"
                           : isPassed
                           ? "text-slate-800 dark:text-slate-200"
                           : "text-slate-400 dark:text-slate-500"
@@ -326,7 +326,7 @@ export function PickupTrackingParallaxCard({
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
               <span>Accurate ISO digital scale at your doorstep</span>
             </span>
-            <span className="text-emerald-700 dark:text-[#65E817] font-semibold flex items-center gap-1 group-hover:underline">
+            <span className="text-emerald-700 dark:text-emerald-400 font-semibold flex items-center gap-1 group-hover:underline">
               <span>View Timeline & Actions</span>
               <ArrowUpRight className="w-3 h-3" />
             </span>

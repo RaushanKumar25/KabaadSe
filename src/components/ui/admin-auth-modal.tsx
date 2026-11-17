@@ -747,11 +747,11 @@ export default function AdminAuthModal({
         type="button"
         onClick={() => setIsOpen(true)}
         className={cn(
-          "h-10 rounded-full border border-white/15 bg-white/5 backdrop-blur-md px-5 py-2 text-sm font-medium text-white transition-all hover:border-[#65E817]/60 hover:bg-white/10 flex items-center gap-2 cursor-pointer shadow-xs hover:scale-[1.02] active:scale-[0.98]",
+          "h-10 rounded-full border border-white/15 bg-white/5 backdrop-blur-md px-5 py-2 text-sm font-medium text-white transition-all hover:border-emerald-500/50 hover:bg-white/10 flex items-center gap-2 cursor-pointer shadow-xs hover:scale-[1.02] active:scale-[0.98]",
           triggerClassName
         )}
       >
-        <LogIn className="w-4 h-4 text-[#65E817] shrink-0" />
+        <LogIn className="w-4 h-4 text-emerald-400 shrink-0" />
         <span>{triggerText}</span>
       </button>
 

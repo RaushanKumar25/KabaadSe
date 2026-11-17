@@ -24,6 +24,7 @@ interface PickupBookingModalProps {
   defaultCity?: string;
   defaultLocality?: string;
   defaultPickupDate?: string;
+  defaultCategory?: string;
 }
 
 const WEIGHT_OPTIONS = [
@@ -41,6 +42,7 @@ export default function PickupBookingModal({
   defaultCity = "Patna",
   defaultLocality = "",
   defaultPickupDate = "",
+  defaultCategory = "",
 }: PickupBookingModalProps) {
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
@@ -101,6 +103,17 @@ export default function PickupBookingModal({
     if (isOpen) {
       if (defaultPickupDate) {
         setPickupDate(defaultPickupDate);
+      }
+      if (defaultCategory) {
+        const formatted =
+          defaultCategory.charAt(0).toUpperCase() +
+          defaultCategory.slice(1).toLowerCase();
+        setSelectedCategoryFilter(formatted);
+        if (formatted.toLowerCase().includes("paper")) setSelectedScrapTypes(["Newspaper", "Cardboard"]);
+        else if (formatted.toLowerCase().includes("plastic")) setSelectedScrapTypes(["Plastic Bottles", "Plastic Bags"]);
+        else if (formatted.toLowerCase().includes("metal")) setSelectedScrapTypes(["Iron & Steel", "Copper"]);
+        else if (formatted.toLowerCase().includes("waste")) setSelectedScrapTypes(["E-Waste", "Laptops"]);
+        else setSelectedScrapTypes(["Mixed Scrap"]);
       }
       loadCustomerProfile();
     }
