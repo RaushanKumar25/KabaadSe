@@ -107,7 +107,7 @@ export function VirtualPaperCalendar({
 
   return (
     <div
-      className={`relative rounded-2xl h-full flex flex-col justify-between p-6 overflow-hidden transition-all select-none shadow-xl border bg-[#FCFBF7] text-zinc-900 border-zinc-200/90 dark:bg-zinc-900/90 dark:text-zinc-100 dark:border-white/10 ${className}`}
+      className={`relative rounded-none h-full flex flex-col justify-between p-6 overflow-hidden transition-all select-none shadow-xl border bg-[#FCFBF7] text-zinc-900 border-zinc-200/90 dark:bg-zinc-900/90 dark:text-zinc-100 dark:border-white/10 ${className}`}
     >
       {/* ========================================================
           1. PHYSICAL DESK CALENDAR BINDER RINGS & PERFORATION
@@ -145,7 +145,7 @@ export function VirtualPaperCalendar({
           <button
             type="button"
             onClick={handlePrevMonth}
-            className="p-1.5 rounded-lg hover:bg-zinc-200/70 dark:hover:bg-white/10 text-zinc-600 dark:text-zinc-300 transition cursor-pointer"
+            className="p-1.5 rounded-none hover:bg-zinc-200/70 dark:hover:bg-white/10 text-zinc-600 dark:text-zinc-300 transition cursor-pointer"
             aria-label="Previous month"
           >
             <ChevronLeft className="w-4 h-4" />
@@ -153,7 +153,7 @@ export function VirtualPaperCalendar({
           <button
             type="button"
             onClick={handleNextMonth}
-            className="p-1.5 rounded-lg hover:bg-zinc-200/70 dark:hover:bg-white/10 text-zinc-600 dark:text-zinc-300 transition cursor-pointer"
+            className="p-1.5 rounded-none hover:bg-zinc-200/70 dark:hover:bg-white/10 text-zinc-600 dark:text-zinc-300 transition cursor-pointer"
             aria-label="Next month"
           >
             <ChevronRight className="w-4 h-4" />
@@ -219,7 +219,7 @@ export function VirtualPaperCalendar({
                   key={dateKey}
                   type="button"
                   onClick={() => setSelectedDate(dateObj)}
-                  className={`relative h-8 sm:h-9 rounded-xl flex flex-col items-center justify-center transition-all cursor-pointer ${
+                  className={`relative h-8 sm:h-9 rounded-none flex flex-col items-center justify-center transition-all cursor-pointer ${
                     isSelected
                       ? "bg-emerald-600 text-white font-bold shadow-md scale-105"
                       : isToday
@@ -262,7 +262,7 @@ export function VirtualPaperCalendar({
             })}
           </span>
           {hasPickupsOnSelected && (
-            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-none bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
               {selectedPickups.length} Pickup Booked
             </span>
           )}
@@ -274,7 +274,7 @@ export function VirtualPaperCalendar({
               <div
                 key={p.id}
                 onClick={() => onSelectPickup && onSelectPickup(p)}
-                className="p-2.5 rounded-xl bg-zinc-100 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 flex items-center justify-between gap-2 hover:border-emerald-500/40 dark:hover:border-emerald-500/30 transition cursor-pointer"
+                className="p-2.5 rounded-none bg-zinc-100 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 flex items-center justify-between gap-2 hover:border-emerald-500/40 dark:hover:border-emerald-500/30 transition cursor-pointer"
               >
                 <div className="space-y-0.5 truncate">
                   <div className="flex items-center gap-1.5">
@@ -291,7 +291,7 @@ export function VirtualPaperCalendar({
                 </div>
                 <button
                   type="button"
-                  className="shrink-0 p-1 rounded-lg text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 transition"
+                  className="shrink-0 p-1 rounded-none text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 transition"
                 >
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
@@ -306,7 +306,7 @@ export function VirtualPaperCalendar({
             <button
               type="button"
               onClick={() => onScheduleDate && onScheduleDate(selectedDateStr)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-semibold text-xs transition cursor-pointer shadow-xs shrink-0"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-semibold text-xs transition cursor-pointer shadow-xs shrink-0"
             >
               <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
               <span>Schedule on {selectedDate.getDate()} {selectedDate.toLocaleDateString("en-US", { month: "short" })}</span>

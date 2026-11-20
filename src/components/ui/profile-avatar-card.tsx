@@ -59,7 +59,7 @@ export function ProfileAvatarCard({
       onDragLeave={handleDrag}
       onDragOver={handleDrag}
       onDrop={handleDrop}
-      className={`rounded-2xl border border-zinc-200 dark:border-white/10 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md shadow-sm p-6 sm:p-7 flex flex-col items-center text-center transition-all ${
+      className={`rounded-none border border-zinc-200 dark:border-white/10 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md shadow-sm p-6 sm:p-7 flex flex-col items-center text-center transition-all ${
         dragActive ? "border-emerald-500 ring-2 ring-emerald-500/20" : ""
       } ${className}`}
     >
@@ -126,12 +126,12 @@ export function ProfileAvatarCard({
         JPG, PNG or GIF. Max 5MB.
       </span>
 
-      {/* Standard Actions Row: Minimal, clean, natural */}
+      {/* Standard Actions Row: Minimal, clean, natural square buttons */}
       <div className="flex items-center gap-2">
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="px-3.5 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-800/90 hover:bg-zinc-50 dark:hover:bg-zinc-700/80 text-xs font-medium text-zinc-700 dark:text-zinc-200 shadow-xs flex items-center gap-1.5 transition cursor-pointer"
+          className="px-3.5 py-1.5 rounded-none border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-800/90 hover:bg-zinc-50 dark:hover:bg-zinc-700/80 text-xs font-medium text-zinc-700 dark:text-zinc-200 shadow-xs flex items-center gap-1.5 transition cursor-pointer"
         >
           <Upload className="w-3.5 h-3.5 text-zinc-500 dark:text-zinc-400" />
           <span>{photoUrl ? "Change Photo" : "Upload Photo"}</span>
@@ -141,7 +141,7 @@ export function ProfileAvatarCard({
           <button
             type="button"
             onClick={onPhotoRemove}
-            className="px-2.5 py-1.5 rounded-lg text-xs font-medium text-zinc-500 dark:text-zinc-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition cursor-pointer flex items-center gap-1"
+            className="px-2.5 py-1.5 rounded-none text-xs font-medium text-zinc-500 dark:text-zinc-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition cursor-pointer flex items-center gap-1"
             title="Remove photo"
           >
             <Trash2 className="w-3 h-3" />

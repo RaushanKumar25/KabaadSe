@@ -125,11 +125,11 @@ export function PickupTrackingParallaxCard({
         }}
         whileHover={{ scale: 1.015 }}
         whileTap={{ scale: 0.985 }}
-        className="group relative w-full rounded-3xl bg-gradient-to-b from-white via-slate-50 to-white dark:from-zinc-900/95 dark:via-zinc-900/90 dark:to-zinc-950/95 border border-slate-200 dark:border-white/10 hover:border-emerald-500/50 dark:hover:border-emerald-500/30 shadow-2xl p-6 sm:p-7 backdrop-blur-xl transition-colors cursor-pointer select-none overflow-hidden"
+        className="group relative w-full rounded-none bg-gradient-to-b from-white via-slate-50 to-white dark:from-zinc-900/95 dark:via-zinc-900/90 dark:to-zinc-950/95 border border-slate-200 dark:border-white/10 hover:border-emerald-500/50 dark:hover:border-emerald-500/30 shadow-2xl p-6 sm:p-7 backdrop-blur-xl transition-colors cursor-pointer select-none overflow-hidden"
       >
         {/* Dynamic Cursor Spotlight Effect */}
         <div
-          className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-3xl"
+          className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-none"
           style={{
             background: `radial-gradient(600px circle at ${spotlightPos.x}% ${spotlightPos.y}%, rgba(22, 163, 74, 0.08), transparent 45%)`,
           }}
@@ -147,7 +147,7 @@ export function PickupTrackingParallaxCard({
           className="relative z-10 flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-200 dark:border-white/10"
         >
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+            <div className="w-8 h-8 rounded-none bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
               <Truck className="w-4 h-4" />
             </div>
             <div>
@@ -156,7 +156,7 @@ export function PickupTrackingParallaxCard({
                   {displayId}
                 </span>
                 {badgeLabel && (
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/15">
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-none bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/15">
                     {badgeLabel}
                   </span>
                 )}
@@ -168,7 +168,7 @@ export function PickupTrackingParallaxCard({
           {/* Status Badge */}
           <div className="flex items-center gap-2">
             <div
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-none text-xs font-semibold border ${
                 isCancelled
                   ? "bg-red-950/40 text-red-300 border-red-800/60"
                   : activeStep === 4
@@ -198,7 +198,7 @@ export function PickupTrackingParallaxCard({
               </span>
             </div>
 
-            <div className="w-7 h-7 rounded-full bg-white/5 group-hover:bg-emerald-500/15 border border-white/10 group-hover:border-emerald-500/30 flex items-center justify-center text-slate-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-all">
+            <div className="w-7 h-7 rounded-none bg-white/5 group-hover:bg-emerald-500/15 border border-white/10 group-hover:border-emerald-500/30 flex items-center justify-center text-slate-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-all">
               <ArrowUpRight className="w-3.5 h-3.5" />
             </div>
           </div>
@@ -223,7 +223,7 @@ export function PickupTrackingParallaxCard({
             </div>
 
             <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 flex flex-col justify-between">
+              <div className="p-2.5 rounded-none bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 flex flex-col justify-between">
                 <span className="text-[10px] text-slate-500 dark:text-slate-400 flex items-center gap-1 font-mono">
                   <Calendar className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
                   Slot Time
@@ -233,7 +233,7 @@ export function PickupTrackingParallaxCard({
                 </span>
               </div>
 
-              <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 flex flex-col justify-between">
+              <div className="p-2.5 rounded-none bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 flex flex-col justify-between">
                 <span className="text-[10px] text-slate-500 dark:text-slate-400 flex items-center gap-1 font-mono">
                   <Scale className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
                   {finalPayoutInr ? "Verified Payout" : "Estimated Load"}
@@ -284,7 +284,7 @@ export function PickupTrackingParallaxCard({
 
               return (
                 <div key={stage.key} className="space-y-1.5">
-                  <div className="relative h-1.5 w-full rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden">
+                  <div className="relative h-1.5 w-full rounded-none bg-slate-200 dark:bg-white/10 overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: isPassed ? "100%" : "0%" }}

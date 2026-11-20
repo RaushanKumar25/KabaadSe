@@ -664,7 +664,7 @@ export function KnowAboutKabad({ onSellScrap, className = "" }: KnowAboutKabadPr
   return (
     <div
       id="kabad-guide-section"
-      className={`rounded-2xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-zinc-900 p-5 sm:p-6 shadow-sm transition-all ${className}`}
+      className={`rounded-none border border-zinc-200 dark:border-white/10 bg-white dark:bg-zinc-900 p-5 sm:p-6 shadow-sm transition-all ${className}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -688,7 +688,7 @@ export function KnowAboutKabad({ onSellScrap, className = "" }: KnowAboutKabadPr
             type="button"
             onClick={() => setIsAutoPlay((prev) => !prev)}
             title={isAutoPlay ? "Pause auto-slide" : "Start auto-slide"}
-            className="p-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition text-xs flex items-center gap-1"
+            className="p-1.5 rounded-none border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition text-xs flex items-center gap-1"
           >
             {isAutoPlay ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
             <span className="text-[11px] font-medium hidden md:inline">
@@ -699,7 +699,7 @@ export function KnowAboutKabad({ onSellScrap, className = "" }: KnowAboutKabadPr
           <button
             type="button"
             onClick={handlePrev}
-            className="p-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
+            className="p-1.5 rounded-none border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
             aria-label="Previous category"
           >
             <ChevronLeft className="w-4 h-4" />
@@ -708,7 +708,7 @@ export function KnowAboutKabad({ onSellScrap, className = "" }: KnowAboutKabadPr
           <button
             type="button"
             onClick={handleNext}
-            className="p-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
+            className="p-1.5 rounded-none border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
             aria-label="Next category"
           >
             <ChevronRight className="w-4 h-4" />
@@ -773,57 +773,6 @@ export function KnowAboutKabad({ onSellScrap, className = "" }: KnowAboutKabadPr
                   </p>
                 </div>
 
-                {/* Quick Impact Metrics */}
-                <div className="flex flex-wrap items-center gap-4 pt-1">
-                  <div className="bg-white/70 dark:bg-black/30 backdrop-blur-xs rounded-xl px-3 py-2 border border-black/5 dark:border-white/5">
-                    <span className="text-[10px] uppercase font-semibold text-zinc-400 dark:text-zinc-500 block">
-                      Annual Generation
-                    </span>
-                    <span className="text-sm font-bold text-[#15803D] dark:text-emerald-400 tabular-nums">
-                      {activeCategory.annualStat} tons
-                    </span>
-                  </div>
-
-                  <div className="bg-white/70 dark:bg-black/30 backdrop-blur-xs rounded-xl px-3 py-2 border border-black/5 dark:border-white/5 flex items-center gap-2">
-                    {/* Tiny gauge */}
-                    <div className="w-8 h-8 relative flex items-center justify-center">
-                      <svg className="w-8 h-8 -rotate-90" viewBox="0 0 36 36">
-                        <circle
-                          cx="18"
-                          cy="18"
-                          r="14"
-                          fill="none"
-                          stroke="currentColor"
-                          className="text-zinc-200 dark:text-zinc-700"
-                          strokeWidth="3.5"
-                        />
-                        <circle
-                          cx="18"
-                          cy="18"
-                          r="14"
-                          fill="none"
-                          stroke="#15803D"
-                          strokeWidth="3.5"
-                          strokeDasharray={88}
-                          strokeDashoffset={88 - (88 * activeCategory.recycleRate) / 100}
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                      <span className="absolute text-[9px] font-bold text-zinc-800 dark:text-zinc-100 tabular-nums">
-                        {activeCategory.recycleRate}%
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-[10px] uppercase font-semibold text-zinc-400 dark:text-zinc-500 block">
-                        Recycle Rate
-                      </span>
-                      <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">
-                        National Avg
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
                 {/* View Details Prompt */}
                 <div className="pt-1 flex items-center gap-2 text-xs font-semibold text-[#15803D] dark:text-emerald-400 group-hover:translate-x-1 transition-transform">
                   <span>View types, items & details</span>
@@ -856,7 +805,7 @@ export function KnowAboutKabad({ onSellScrap, className = "" }: KnowAboutKabadPr
                 setActiveIdx(idx);
                 setDrawerCategory(cat);
               }}
-              className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between h-40 relative group overflow-hidden ${cat.pastelBg} ${cat.darkBg} ${
+              className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between h-40 relative group overflow-hidden ${cat.pastelBg} ${cat.darkBg} ${
                 isCurrent
                   ? "ring-2 ring-[#15803D] border-[#15803D]"
                   : `${cat.borderTint} hover:shadow-sm`
@@ -916,7 +865,7 @@ export function KnowAboutKabad({ onSellScrap, className = "" }: KnowAboutKabadPr
                   <button
                     type="button"
                     onClick={() => setDrawerCategory(null)}
-                    className="p-1.5 -ml-1.5 rounded-lg text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition flex items-center gap-1 cursor-pointer"
+                    className="p-1.5 -ml-1.5 rounded-none text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition flex items-center gap-1 cursor-pointer"
                   >
                     <ChevronLeft className="w-5 h-5 stroke-[2.5]" />
                     <span className="text-xs font-semibold hidden sm:inline">Back</span>
@@ -929,7 +878,7 @@ export function KnowAboutKabad({ onSellScrap, className = "" }: KnowAboutKabadPr
                   <button
                     type="button"
                     onClick={() => setDrawerCategory(null)}
-                    className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
+                    className="p-1.5 rounded-none text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -1040,7 +989,7 @@ export function KnowAboutKabad({ onSellScrap, className = "" }: KnowAboutKabadPr
                   </div>
 
                   {/* Soft Warm Amber Reference Note Banner */}
-                  <div className="rounded-xl p-3.5 bg-[#FDE68A]/60 dark:bg-amber-950/40 border border-amber-300/60 dark:border-amber-800/40 text-zinc-800 dark:text-amber-100 text-xs leading-relaxed space-y-0.5">
+                  <div className="rounded-none p-3.5 bg-[#FDE68A]/60 dark:bg-amber-950/40 border border-amber-300/60 dark:border-amber-800/40 text-zinc-800 dark:text-amber-100 text-xs leading-relaxed space-y-0.5">
                     <span className="font-bold">Note: </span>
                     <span>
                       The prices shown are for reference only. Actual rates may vary based on digital scale weighment.
@@ -1080,7 +1029,7 @@ export function KnowAboutKabad({ onSellScrap, className = "" }: KnowAboutKabadPr
                       setDrawerCategory(null);
                       onSellScrap?.(catName);
                     }}
-                    className="w-full py-3.5 px-6 rounded-xl bg-[#15803D] hover:bg-[#166534] active:bg-[#14532D] text-white font-bold text-sm flex items-center justify-center gap-2 shadow-sm transition cursor-pointer"
+                    className="w-full py-3.5 px-6 rounded-none bg-[#15803D] hover:bg-[#166534] active:bg-[#14532D] text-white font-bold text-sm flex items-center justify-center gap-2 shadow-sm transition cursor-pointer"
                   >
                     <CheckCircle2 className="w-4 h-4" />
                     <span>Sell {drawerCategory.title}</span>

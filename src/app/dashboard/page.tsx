@@ -793,7 +793,7 @@ export default function CustomerDashboardPage() {
           {/* =====================================================
               HERO SECTION: BIG DISPLAY HEADING (PADHEGA STYLE)
               ===================================================== */}
-          <div className="relative rounded-3xl bg-gradient-to-br from-emerald-50/70 via-slate-50 to-white dark:from-[#0c1017] dark:via-[#091310] dark:to-[#070b09] border border-emerald-100/80 dark:border-white/10 p-8 sm:p-10 lg:p-12 overflow-hidden shadow-2xl backdrop-blur-2xl transition-colors duration-200">
+          <div className="relative rounded-none bg-gradient-to-br from-emerald-50/70 via-slate-50 to-white dark:from-[#0c1017] dark:via-[#091310] dark:to-[#070b09] border border-emerald-100/80 dark:border-white/10 p-8 sm:p-10 lg:p-12 overflow-hidden shadow-2xl backdrop-blur-2xl transition-colors duration-200">
             {/* Ambient soft glow */}
             <div className="pointer-events-none absolute -top-32 -right-32 w-96 h-96 rounded-full bg-emerald-500/10 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-32 -left-32 w-96 h-96 rounded-full bg-emerald-500/5 blur-3xl" />
@@ -811,7 +811,7 @@ export default function CustomerDashboardPage() {
               {/* Left: Big Bold Display Heading & CTAs (lg:col-span-8) */}
               <div className="lg:col-span-8 space-y-5">
                 {/* Verified Status Pill */}
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-emerald-100/80 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 border border-emerald-300/60 dark:border-emerald-800/60 shadow-xs">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-none text-xs font-semibold bg-emerald-100/80 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 border border-emerald-300/60 dark:border-emerald-800/60 shadow-xs">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
                   <span>Verified Household Recycling Account</span>
                 </div>
@@ -835,7 +835,7 @@ export default function CustomerDashboardPage() {
                       setPreselectedCategory("");
                       setIsBookingModalOpen(true);
                     }}
-                    className="h-12 px-7 rounded-full bg-[#15803D] hover:bg-[#166534] dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-bold text-sm flex items-center gap-2.5 transition-all shadow-md hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                    className="h-12 px-7 rounded-none bg-[#15803D] hover:bg-[#166534] dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-bold text-sm flex items-center gap-2.5 transition-all shadow-md hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                   >
                     <span>+ Book Scrap Pickup</span>
                     <ArrowRight className="w-4 h-4 stroke-[2.5]" />
@@ -843,7 +843,7 @@ export default function CustomerDashboardPage() {
 
                   <Link
                     href="/rates"
-                    className="h-12 px-7 rounded-full bg-white/80 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 border border-slate-300 dark:border-white/15 hover:border-slate-400 dark:border-white/30 text-slate-800 dark:text-white font-semibold text-sm flex items-center gap-2 transition-all cursor-pointer backdrop-blur-md shadow-xs hover:scale-[1.02] active:scale-[0.98]"
+                    className="h-12 px-7 rounded-none bg-white/80 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 border border-slate-300 dark:border-white/15 hover:border-slate-400 dark:border-white/30 text-slate-800 dark:text-white font-semibold text-sm flex items-center gap-2 transition-all cursor-pointer backdrop-blur-md shadow-xs hover:scale-[1.02] active:scale-[0.98]"
                   >
                     <span>Check Live Rates</span>
                   </Link>
@@ -869,8 +869,8 @@ export default function CustomerDashboardPage() {
               ===================================================== */}
           <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
             {/* Card 1: Total Earnings */}
-            <div className="p-5 rounded-2xl h-full flex items-center gap-4 bg-white dark:bg-zinc-900/80 border border-slate-200 dark:border-white/10 shadow-sm backdrop-blur-xl">
-              <div className="w-11 h-11 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-700 dark:text-emerald-400 shrink-0">
+            <div className="p-5 rounded-none h-full flex items-center gap-4 bg-white dark:bg-zinc-900/80 border border-slate-200 dark:border-white/10 shadow-sm backdrop-blur-xl">
+              <div className="w-11 h-11 rounded-none bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-700 dark:text-emerald-400 shrink-0">
                 <IndianRupee className="w-5 h-5" />
               </div>
               <div className="space-y-0.5 min-w-0">
@@ -884,8 +884,8 @@ export default function CustomerDashboardPage() {
             </div>
 
             {/* Card 2: Scrap Recycled */}
-            <div className="p-5 rounded-2xl h-full flex items-center gap-4 bg-white dark:bg-zinc-900/80 border border-slate-200 dark:border-white/10 shadow-sm backdrop-blur-xl">
-              <div className="w-11 h-11 rounded-2xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-600 dark:text-sky-400 shrink-0">
+            <div className="p-5 rounded-none h-full flex items-center gap-4 bg-white dark:bg-zinc-900/80 border border-slate-200 dark:border-white/10 shadow-sm backdrop-blur-xl">
+              <div className="w-11 h-11 rounded-none bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-600 dark:text-sky-400 shrink-0">
                 <Scale className="w-5 h-5" />
               </div>
               <div className="space-y-0.5 min-w-0">
@@ -899,8 +899,8 @@ export default function CustomerDashboardPage() {
             </div>
 
             {/* Card 3: CO2 Saved */}
-            <div className="p-5 rounded-2xl h-full flex items-center gap-4 bg-white dark:bg-zinc-900/80 border border-slate-200 dark:border-white/10 shadow-sm backdrop-blur-xl">
-              <div className="w-11 h-11 rounded-2xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-600 dark:text-teal-400 shrink-0">
+            <div className="p-5 rounded-none h-full flex items-center gap-4 bg-white dark:bg-zinc-900/80 border border-slate-200 dark:border-white/10 shadow-sm backdrop-blur-xl">
+              <div className="w-11 h-11 rounded-none bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-600 dark:text-teal-400 shrink-0">
                 <Leaf className="w-5 h-5" />
               </div>
               <div className="space-y-0.5 min-w-0">
@@ -914,8 +914,8 @@ export default function CustomerDashboardPage() {
             </div>
 
             {/* Card 4: Completed Pickups */}
-            <div className="p-5 rounded-2xl h-full flex items-center gap-4 bg-white dark:bg-zinc-900/80 border border-slate-200 dark:border-white/10 shadow-sm backdrop-blur-xl">
-              <div className="w-11 h-11 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-700 dark:text-emerald-400 shrink-0">
+            <div className="p-5 rounded-none h-full flex items-center gap-4 bg-white dark:bg-zinc-900/80 border border-slate-200 dark:border-white/10 shadow-sm backdrop-blur-xl">
+              <div className="w-11 h-11 rounded-none bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-700 dark:text-emerald-400 shrink-0">
                 <CheckCircle2 className="w-5 h-5" />
               </div>
               <div className="space-y-0.5 min-w-0">
@@ -945,7 +945,7 @@ export default function CustomerDashboardPage() {
                       key={p.id}
                       type="button"
                       onClick={() => setActivePickupTabIdx(idx)}
-                      className={`px-3 py-1 rounded-full text-xs font-semibold transition cursor-pointer whitespace-nowrap ${
+                      className={`px-3 py-1 rounded-none text-xs font-semibold transition cursor-pointer whitespace-nowrap ${
                         activePickupTabIdx === idx
                           ? "bg-[#15803D] dark:bg-emerald-600 text-white shadow-xs"
                           : "bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white"
@@ -975,8 +975,8 @@ export default function CustomerDashboardPage() {
                   />
                 </div>
               ) : (
-                <div className="rounded-3xl border border-slate-200 dark:border-white/10 bg-white dark:bg-zinc-900/80 p-8 text-center space-y-4 shadow-xl backdrop-blur-xl h-full flex flex-col items-center justify-center">
-                  <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-700 dark:text-emerald-400">
+                <div className="rounded-none border border-slate-200 dark:border-white/10 bg-white dark:bg-zinc-900/80 p-8 text-center space-y-4 shadow-xl backdrop-blur-xl h-full flex flex-col items-center justify-center">
+                  <div className="w-14 h-14 rounded-none bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-700 dark:text-emerald-400">
                     <Truck className="w-7 h-7" />
                   </div>
                   <div className="space-y-1">
@@ -992,7 +992,7 @@ export default function CustomerDashboardPage() {
                       setPreselectedCategory("");
                       setIsBookingModalOpen(true);
                     }}
-                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#15803D] hover:bg-[#166534] dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-bold text-xs transition cursor-pointer shadow-md"
+                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-none bg-[#15803D] hover:bg-[#166534] dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-bold text-xs transition cursor-pointer shadow-md"
                   >
                     <Plus className="w-4 h-4 stroke-[3]" />
                     <span>Book Scrap Pickup</span>
@@ -1004,12 +1004,12 @@ export default function CustomerDashboardPage() {
             {/* Right (col-span-5): Saved Pickup Address & UPI Card */}
             <div
               id="address-card"
-              className="lg:col-span-5 rounded-3xl border border-slate-200 dark:border-white/10 bg-white dark:bg-zinc-900/80 p-6 shadow-xl backdrop-blur-xl flex flex-col justify-between space-y-4"
+              className="lg:col-span-5 rounded-none border border-slate-200 dark:border-white/10 bg-white dark:bg-zinc-900/80 p-6 shadow-xl backdrop-blur-xl flex flex-col justify-between space-y-4"
             >
               <div>
                 <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-3 mb-3">
                   <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-700 dark:text-emerald-400">
+                    <div className="w-7 h-7 rounded-none bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-700 dark:text-emerald-400">
                       <MapPin className="w-3.5 h-3.5" />
                     </div>
                     <span className="text-xs font-bold text-slate-900 dark:text-white tracking-wide">
@@ -1030,7 +1030,7 @@ export default function CustomerDashboardPage() {
                 </div>
 
                 {profileSuccessMsg && (
-                  <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-700 text-emerald-800 dark:text-emerald-300 text-xs flex items-center gap-2 mb-3">
+                  <div className="p-2.5 rounded-none bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-700 text-emerald-800 dark:text-emerald-300 text-xs flex items-center gap-2 mb-3">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                     <span>{profileSuccessMsg}</span>
                   </div>
@@ -1047,7 +1047,7 @@ export default function CustomerDashboardPage() {
                         onChange={(e) => setEditAddressText(e.target.value)}
                         rows={2}
                         placeholder="e.g. Flat 402, Shivam Enclave, Main Road, Patna"
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 resize-none"
+                        className="w-full px-3.5 py-2.5 rounded-none bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500 resize-none"
                       />
                     </div>
 
@@ -1060,7 +1060,7 @@ export default function CustomerDashboardPage() {
                         value={customerUpiId}
                         onChange={(e) => setCustomerUpiId(e.target.value)}
                         placeholder="e.g. mobile@upi or name@okaxis"
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500"
+                        className="w-full px-3.5 py-2.5 rounded-none bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500"
                       />
                     </div>
 
@@ -1068,7 +1068,7 @@ export default function CustomerDashboardPage() {
                       <button
                         type="submit"
                         disabled={isSavingProfile}
-                        className="flex-1 py-2.5 px-3 rounded-xl bg-[#15803D] hover:bg-[#166534] dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer disabled:opacity-60"
+                        className="flex-1 py-2.5 px-3 rounded-none bg-[#15803D] hover:bg-[#166534] dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer disabled:opacity-60"
                       >
                         <Save className="w-3.5 h-3.5" />
                         <span>{isSavingProfile ? "Saving..." : "Save Changes"}</span>
@@ -1079,7 +1079,7 @@ export default function CustomerDashboardPage() {
                           setIsEditingAddress(false);
                           setEditAddressText(customer?.defaultAddress || "");
                         }}
-                        className="py-2.5 px-3 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs transition cursor-pointer"
+                        className="py-2.5 px-3 rounded-none bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs transition cursor-pointer"
                       >
                         Cancel
                       </button>
@@ -1087,7 +1087,7 @@ export default function CustomerDashboardPage() {
                   </form>
                 ) : (
                   <div className="space-y-3 text-xs">
-                    <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/80">
+                    <div className="p-3.5 rounded-none bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/80">
                       <span className="text-[11px] font-medium text-slate-500 dark:text-zinc-400 block mb-1">
                         Saved Location
                       </span>
@@ -1100,7 +1100,7 @@ export default function CustomerDashboardPage() {
                       </p>
                     </div>
 
-                    <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/80 flex items-center justify-between">
+                    <div className="p-3.5 rounded-none bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/80 flex items-center justify-between">
                       <div>
                         <span className="text-[11px] font-medium text-slate-500 dark:text-zinc-400 block">
                           Instant Payout Mode
@@ -1110,7 +1110,7 @@ export default function CustomerDashboardPage() {
                           <span>{customerUpiId || `${customer?.phone}@upi`}</span>
                         </span>
                       </div>
-                      <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+                      <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-none border border-emerald-500/20">
                         Verified
                       </span>
                     </div>
@@ -1123,7 +1123,7 @@ export default function CustomerDashboardPage() {
                 <button
                   type="button"
                   onClick={handleRepeatLastPickup}
-                  className="w-full py-2.5 px-4 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-white/5 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white font-semibold text-xs flex items-center justify-center gap-2 transition cursor-pointer hover:border-emerald-500/40 dark:hover:border-emerald-500/30 shadow-2xs"
+                  className="w-full py-2.5 px-4 rounded-none bg-slate-50 hover:bg-slate-100 dark:bg-white/5 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white font-semibold text-xs flex items-center justify-center gap-2 transition cursor-pointer hover:border-emerald-500/40 dark:hover:border-emerald-500/30 shadow-2xs"
                 >
                   <RotateCcw className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                   <span>Repeat Last Pickup</span>
@@ -1165,7 +1165,7 @@ export default function CustomerDashboardPage() {
               ===================================================== */}
           <section
             id="pickups-section"
-            className="rounded-3xl border border-slate-200 dark:border-white/10 bg-white dark:bg-zinc-900/80 p-6 sm:p-7 shadow-xl backdrop-blur-xl space-y-5"
+            className="rounded-none border border-slate-200 dark:border-white/10 bg-white dark:bg-zinc-900/80 p-6 sm:p-7 shadow-xl backdrop-blur-xl space-y-5"
           >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-white/10 pb-4">
               <div>
@@ -1178,13 +1178,13 @@ export default function CustomerDashboardPage() {
               </div>
 
               {/* Filter Tabs */}
-              <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-semibold overflow-x-auto scrollbar-none">
+              <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-900 rounded-none border border-slate-200 dark:border-slate-800 text-xs font-semibold overflow-x-auto scrollbar-none">
                 {(["ALL", "ACTIVE", "COMPLETED", "CANCELLED"] as const).map((tab) => (
                   <button
                     key={tab}
                     type="button"
                     onClick={() => setStatusFilter(tab)}
-                    className={`px-3 py-1.5 rounded-lg transition cursor-pointer whitespace-nowrap ${
+                    className={`px-3 py-1.5 rounded-none transition cursor-pointer whitespace-nowrap ${
                       statusFilter === tab
                         ? "bg-white dark:bg-slate-800 text-slate-950 dark:text-white font-bold shadow-xs"
                         : "text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white"
@@ -1221,7 +1221,7 @@ export default function CustomerDashboardPage() {
                     setPreselectedCategory("");
                     setIsBookingModalOpen(true);
                   }}
-                  className="mt-2 inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-[#15803D] hover:bg-[#166534] dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-bold text-xs transition cursor-pointer shadow-sm"
+                  className="mt-2 inline-flex items-center gap-1.5 px-5 py-2.5 rounded-none bg-[#15803D] hover:bg-[#166534] dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-bold text-xs transition cursor-pointer shadow-sm"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Schedule First Pickup</span>
@@ -1237,7 +1237,7 @@ export default function CustomerDashboardPage() {
                     <div
                       key={pickup.id}
                       onClick={() => setDrawerPickup(pickup)}
-                      className="p-4 sm:p-5 rounded-2xl bg-slate-50/80 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 hover:border-emerald-500/50 dark:hover:border-emerald-500/30 hover:bg-slate-100/90 dark:hover:bg-slate-900/60 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer group shadow-xs"
+                      className="p-4 sm:p-5 rounded-none bg-slate-50/80 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 hover:border-emerald-500/50 dark:hover:border-emerald-500/30 hover:bg-slate-100/90 dark:hover:bg-slate-900/60 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer group shadow-xs"
                     >
                       <div className="space-y-2">
                         <div className="flex flex-wrap items-center gap-2.5">
@@ -1245,7 +1245,7 @@ export default function CustomerDashboardPage() {
                             {shortId}
                           </span>
                           <span
-                            className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${statusConfig.bg} ${statusConfig.text} ${statusConfig.border}`}
+                            className={`px-2.5 py-0.5 rounded-none text-xs font-semibold border ${statusConfig.bg} ${statusConfig.text} ${statusConfig.border}`}
                           >
                             {statusConfig.label}
                           </span>
@@ -1301,7 +1301,7 @@ export default function CustomerDashboardPage() {
                             e.stopPropagation();
                             setDrawerPickup(pickup);
                           }}
-                          className="px-4 py-2 rounded-xl bg-white dark:bg-slate-900 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-950/20 border border-slate-300 dark:border-slate-700 group-hover:border-emerald-400 dark:group-hover:border-emerald-500/30 text-xs font-semibold text-slate-700 dark:text-slate-200 group-hover:text-emerald-800 dark:group-hover:text-emerald-300 flex items-center gap-1.5 transition cursor-pointer shadow-xs"
+                          className="px-4 py-2 rounded-none bg-white dark:bg-slate-900 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-950/20 border border-slate-300 dark:border-slate-700 group-hover:border-emerald-400 dark:group-hover:border-emerald-500/30 text-xs font-semibold text-slate-700 dark:text-slate-200 group-hover:text-emerald-800 dark:group-hover:text-emerald-300 flex items-center gap-1.5 transition cursor-pointer shadow-xs"
                         >
                           <FileText className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                           <span>Details & Receipt</span>
@@ -1342,7 +1342,7 @@ export default function CustomerDashboardPage() {
               {/* Drawer Header */}
               <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-[#0F172A]/80">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-700 dark:text-emerald-400">
+                  <div className="w-8 h-8 rounded-none bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-700 dark:text-emerald-400">
                     <Truck className="w-4 h-4" />
                   </div>
                   <div>
@@ -1351,7 +1351,7 @@ export default function CustomerDashboardPage() {
                         #KB-{drawerPickup.id.slice(-6).toUpperCase()}
                       </span>
                       <span
-                        className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
+                        className={`px-2.5 py-0.5 rounded-none text-xs font-semibold border ${
                           STATUS_CONFIGS[drawerPickup.status]?.bg || "bg-slate-100 dark:bg-slate-900"
                         } ${STATUS_CONFIGS[drawerPickup.status]?.text || "text-slate-700 dark:text-slate-300"} ${
                           STATUS_CONFIGS[drawerPickup.status]?.border || "border-slate-200 dark:border-slate-800"
@@ -1370,7 +1370,7 @@ export default function CustomerDashboardPage() {
                     setDrawerPickup(null);
                     setIsRescheduling(false);
                   }}
-                  className="p-1.5 rounded-full text-slate-500 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 transition cursor-pointer shadow-xs"
+                  className="p-1.5 rounded-none text-slate-500 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 transition cursor-pointer shadow-xs"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -1380,20 +1380,20 @@ export default function CustomerDashboardPage() {
               <div className="flex-1 overflow-y-auto p-6 space-y-6">
                 {/* Feedback notifications */}
                 {actionSuccess && (
-                  <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-600 text-emerald-800 dark:text-emerald-200 text-xs flex items-center gap-2">
+                  <div className="p-3 rounded-none bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-600 text-emerald-800 dark:text-emerald-200 text-xs flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                     <span>{actionSuccess}</span>
                   </div>
                 )}
                 {actionError && (
-                  <div className="p-3 rounded-2xl bg-red-50 dark:bg-red-950/80 border border-red-200 dark:border-red-700 text-red-800 dark:text-red-200 text-xs flex items-center gap-2">
+                  <div className="p-3 rounded-none bg-red-50 dark:bg-red-950/80 border border-red-200 dark:border-red-700 text-red-800 dark:text-red-200 text-xs flex items-center gap-2">
                     <AlertTriangle className="w-4 h-4 text-red-500 dark:text-red-400 shrink-0" />
                     <span>{actionError}</span>
                   </div>
                 )}
 
                 {/* 4-Step Interactive Timeline */}
-                <div className="rounded-2xl bg-slate-50 dark:bg-[#0F172A]/80 border border-slate-200 dark:border-slate-800 p-5 space-y-4">
+                <div className="rounded-none bg-slate-50 dark:bg-[#0F172A]/80 border border-slate-200 dark:border-slate-800 p-5 space-y-4">
                   <span className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider block border-b border-slate-200 dark:border-slate-800 pb-2">
                     Pickup Progress Timeline
                   </span>
@@ -1500,7 +1500,7 @@ export default function CustomerDashboardPage() {
                 </div>
 
                 {/* Pickup Details Card */}
-                <div className="rounded-2xl bg-slate-50 dark:bg-[#0F172A]/80 border border-slate-200 dark:border-slate-800 p-5 space-y-3 text-xs">
+                <div className="rounded-none bg-slate-50 dark:bg-[#0F172A]/80 border border-slate-200 dark:border-slate-800 p-5 space-y-3 text-xs">
                   <span className="text-xs font-bold text-slate-950 dark:text-white uppercase tracking-wider block border-b border-slate-200 dark:border-slate-800 pb-2">
                     Doorstep Pickup Information
                   </span>
@@ -1537,7 +1537,7 @@ export default function CustomerDashboardPage() {
 
                 {/* Reschedule Slot Inline Card */}
                 {isRescheduling && (
-                  <div className="rounded-2xl bg-white dark:bg-slate-900 border border-emerald-500/40 p-5 space-y-3 shadow-md">
+                  <div className="rounded-none bg-white dark:bg-slate-900 border border-emerald-500/40 p-5 space-y-3 shadow-md">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-slate-950 dark:text-white flex items-center gap-1.5">
                         <Calendar className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
@@ -1558,7 +1558,7 @@ export default function CustomerDashboardPage() {
                         min={new Date().toISOString().split("T")[0]}
                         value={newRescheduleDate}
                         onChange={(e) => setNewRescheduleDate(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500"
+                        className="w-full px-3.5 py-2.5 rounded-none bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500"
                       />
 
                       <div className="flex items-center gap-2 text-xs">
@@ -1569,7 +1569,7 @@ export default function CustomerDashboardPage() {
                             d.setDate(d.getDate() + 1);
                             setNewRescheduleDate(d.toISOString().split("T")[0]);
                           }}
-                          className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 cursor-pointer"
+                          className="px-3 py-1.5 rounded-none bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 cursor-pointer"
                         >
                           Tomorrow
                         </button>
@@ -1580,7 +1580,7 @@ export default function CustomerDashboardPage() {
                             d.setDate(d.getDate() + 2);
                             setNewRescheduleDate(d.toISOString().split("T")[0]);
                           }}
-                          className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 cursor-pointer"
+                          className="px-3 py-1.5 rounded-none bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 cursor-pointer"
                         >
                           In 2 Days
                         </button>
@@ -1591,7 +1591,7 @@ export default function CustomerDashboardPage() {
                       type="button"
                       disabled={isSubmittingAction || !newRescheduleDate}
                       onClick={() => handleReschedulePickup(drawerPickup.id)}
-                      className="w-full py-2.5 rounded-xl bg-[#15803D] hover:bg-[#166534] dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-bold text-xs transition cursor-pointer disabled:opacity-50"
+                      className="w-full py-2.5 rounded-none bg-[#15803D] hover:bg-[#166534] dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-bold text-xs transition cursor-pointer disabled:opacity-50"
                     >
                       {isSubmittingAction ? "Updating Slot..." : "Confirm New Slot"}
                     </button>
@@ -1606,7 +1606,7 @@ export default function CustomerDashboardPage() {
                     <button
                       type="button"
                       onClick={() => setIsRescheduling(!isRescheduling)}
-                      className="flex-1 py-2.5 px-4 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer shadow-xs"
+                      className="flex-1 py-2.5 px-4 rounded-none bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer shadow-xs"
                     >
                       <Calendar className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                       <span>Reschedule Slot</span>
@@ -1616,7 +1616,7 @@ export default function CustomerDashboardPage() {
                       type="button"
                       disabled={isSubmittingAction}
                       onClick={() => handleCancelPickup(drawerPickup.id)}
-                      className="py-2.5 px-4 rounded-xl bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/60 border border-red-200 dark:border-red-800/60 text-red-600 dark:text-red-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer disabled:opacity-50"
+                      className="py-2.5 px-4 rounded-none bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/60 border border-red-200 dark:border-red-800/60 text-red-600 dark:text-red-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer disabled:opacity-50"
                     >
                       <X className="w-3.5 h-3.5" />
                       <span>Cancel</span>
@@ -1628,7 +1628,7 @@ export default function CustomerDashboardPage() {
                   <button
                     type="button"
                     onClick={() => window.print()}
-                    className="w-full py-2.5 px-4 rounded-xl bg-[#15803D] hover:bg-[#166534] dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer shadow-md"
+                    className="w-full py-2.5 px-4 rounded-none bg-[#15803D] hover:bg-[#166534] dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer shadow-md"
                   >
                     <Printer className="w-4 h-4 stroke-[2.5]" />
                     <span>Print Certified Digital Receipt</span>
@@ -1644,7 +1644,7 @@ export default function CustomerDashboardPage() {
                       setPreselectedCategory("");
                       setIsBookingModalOpen(true);
                     }}
-                    className="w-full py-2.5 px-4 rounded-xl bg-[#15803D] hover:bg-[#166534] dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                    className="w-full py-2.5 px-4 rounded-none bg-[#15803D] hover:bg-[#166534] dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
                   >
                     <Plus className="w-4 h-4" />
                     <span>Book New Pickup</span>
