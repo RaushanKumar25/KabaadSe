@@ -8,7 +8,7 @@ export interface CustomerSessionPayload {
   id: string;
   name: string;
   email: string;
-  phone: string;
+  phone?: string | null;
 }
 
 function getSecretKey(): string {
@@ -156,7 +156,7 @@ export async function signCustomerSessionToken(
     cId: customer.id,
     name: customer.name,
     email: customer.email,
-    phone: customer.phone,
+    phone: customer.phone || null,
     role: "customer",
     iat: now,
     exp: now + maxAgeSeconds,
@@ -222,7 +222,7 @@ export async function verifyCustomerSessionToken(
         id: payload.cId,
         name: payload.name,
         email: payload.email,
-        phone: payload.phone,
+        phone: payload.phone || null,
       },
     };
   } catch {

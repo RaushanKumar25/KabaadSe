@@ -155,7 +155,18 @@ export default function CustomerDashboardPage() {
 
       const key = customer?.id ? `kabaadse_photo_${customer.id}` : "kabaadse_customer_photo";
       const savedPhoto = localStorage.getItem(key) || localStorage.getItem("kabaadse_customer_photo");
-      if (savedPhoto) setCustomerPhoto(savedPhoto);
+      if (savedPhoto) {
+        setCustomerPhoto(savedPhoto);
+      } else {
+        // Auto-populate avatar if supplied by Google OAuth
+        const match = document.cookie.match(/kabaadse_google_avatar=([^;]+)/);
+        if (match && match[1]) {
+          const avatarUrl = decodeURIComponent(match[1]);
+          setCustomerPhoto(avatarUrl);
+          localStorage.setItem(key, avatarUrl);
+          document.cookie = "kabaadse_google_avatar=; path=/; max-age=0";
+        }
+      }
     }
   }, [customer?.id]);
 
@@ -543,13 +554,6 @@ export default function CustomerDashboardPage() {
               <span className="text-sm font-bold text-slate-900 dark:text-white block truncate">
                 {customer?.name || "Customer"}
               </span>
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="text-[11px] text-emerald-600 dark:text-emerald-400 hover:underline block truncate text-left cursor-pointer font-medium"
-              >
-                {customerPhoto ? "Change photo" : "Upload photo"}
-              </button>
             </div>
           </div>
 
@@ -685,16 +689,6 @@ export default function CustomerDashboardPage() {
                     <span className="text-xs font-bold text-slate-900 dark:text-white block truncate">
                       {customer?.name || "Customer"}
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setMobileMenuOpen(false);
-                        fileInputRef.current?.click();
-                      }}
-                      className="text-[10px] text-emerald-600 dark:text-emerald-400 hover:underline block truncate text-left"
-                    >
-                      {customerPhoto ? "Change photo" : "Upload photo"}
-                    </button>
                   </div>
                 </div>
 
@@ -807,27 +801,16 @@ export default function CustomerDashboardPage() {
               onChange={handlePhotoUpload}
             />
 
-            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-              {/* Left: Big Bold Display Heading & CTAs (lg:col-span-8) */}
-              <div className="lg:col-span-8 space-y-5">
-                {/* Verified Status Pill */}
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-none text-xs font-semibold bg-emerald-100/80 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 border border-emerald-300/60 dark:border-emerald-800/60 shadow-xs">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
-                  <span>Verified Household Recycling Account</span>
-                </div>
-
-                {/* Big Display Heading */}
+            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+              {/* Left: Big Bold Display Heading & CTAs */}
+              <div className="space-y-5">
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-950 dark:text-white leading-[1.08]">
                   Welcome back, <br />
                   <span className="text-[#15803D] dark:text-emerald-400">{customer?.name || "Customer"}.</span>
                 </h1>
 
-                <p className="text-base sm:text-lg text-slate-600 dark:text-zinc-300 max-w-xl font-normal leading-relaxed">
-                  Track your active doorstep pickups, monitor verified digital scale payouts, and explore live recycling categories.
-                </p>
-
-                {/* Clean Rounded Action Buttons */}
-                <div className="flex flex-wrap items-center gap-3.5 pt-2">
+                {/* Clean Action Buttons */}
+                <div className="flex flex-wrap items-center gap-3.5 pt-1">
                   <button
                     type="button"
                     onClick={() => {
@@ -850,15 +833,13 @@ export default function CustomerDashboardPage() {
                 </div>
               </div>
 
-              {/* Right: Clean Profile Avatar Card */}
-              <div className="lg:col-span-4 flex items-center justify-center lg:justify-end">
+              {/* Right: Normal Circle Profile Avatar */}
+              <div className="flex items-center justify-center md:justify-end shrink-0 md:pr-4">
                 <ProfileAvatarCard
                   name={customer?.name || "Customer"}
-                  subCaption="Personal Account"
                   photoUrl={customerPhoto}
                   onPhotoUpload={processPhotoFile}
                   onPhotoRemove={() => handleRemovePhoto()}
-                  className="w-full max-w-[260px]"
                 />
               </div>
             </div>

@@ -43,8 +43,8 @@ model Customer {
   id             String          @id @default(uuid())
   name           String
   email          String          @unique
-  phone          String          @unique
-  passwordHash   String
+  phone          String?         @unique
+  passwordHash   String?
   defaultAddress String?
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt

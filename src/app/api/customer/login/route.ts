@@ -53,6 +53,16 @@ export async function POST(request: NextRequest) {
     }
 
     // 2. Validate password
+    if (!customer.passwordHash) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "This account was created with Google. Please use 'Continue with Google' to sign in.",
+        },
+        { status: 400 }
+      );
+    }
+
     const isPasswordValid = await comparePassword(cleanPassword, customer.passwordHash);
     if (!isPasswordValid) {
       return NextResponse.json(
@@ -62,21 +72,23 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. Best-effort: link any new unlinked guest pickups for this phone number
-    try {
-      await withDbTimeout(
-        prisma.pickupRequest.updateMany({
-          where: {
-            customerPhone: customer.phone,
-            customerId: null,
-          },
-          data: {
-            customerId: customer.id,
-          },
-        }),
-        5000
-      );
-    } catch {
-      // Ignore background link errors
+    if (customer.phone) {
+      try {
+        await withDbTimeout(
+          prisma.pickupRequest.updateMany({
+            where: {
+              customerPhone: customer.phone,
+              customerId: null,
+            },
+            data: {
+              customerId: customer.id,
+            },
+          }),
+          5000
+        );
+      } catch {
+        // Ignore background link errors
+      }
     }
 
     // 4. Sign customer session token

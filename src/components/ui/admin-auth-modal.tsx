@@ -24,6 +24,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { GoogleGIcon } from "@/components/icons/google-icon";
 
 interface AdminAuthModalProps {
   defaultOpen?: boolean;
@@ -383,6 +384,28 @@ export default function AdminAuthModal({
             >
               {customerMode === "login" ? "Create Account" : "I have an account"}
             </button>
+          </div>
+
+          {/* Continue with Google */}
+          <button
+            type="button"
+            onClick={() => {
+              window.location.href = "/api/auth/google";
+            }}
+            className="w-full h-11 rounded-full bg-white hover:bg-slate-50 border border-slate-300 text-slate-800 font-semibold text-xs sm:text-sm flex items-center justify-center gap-2.5 transition cursor-pointer shadow-xs active:scale-[0.99]"
+          >
+            <GoogleGIcon className="w-4 h-4 shrink-0" />
+            <span>Continue with Google</span>
+          </button>
+
+          {/* Divider */}
+          <div className="relative flex items-center justify-center my-1">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-slate-200" />
+            </div>
+            <span className="relative px-3 bg-white text-[11px] text-slate-400 font-medium uppercase tracking-wider">
+              {customerMode === "login" ? "or log in with mobile/email" : "or sign up with email"}
+            </span>
           </div>
 
           {/* SUB-VIEW A: CUSTOMER LOG IN */}
